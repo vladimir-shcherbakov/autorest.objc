@@ -1,0 +1,55 @@
+{
+  "name": "@microsoft.azure/autorest.objc",
+  "version": "2.0.0",
+  "description": "The Azure Resource Schema extension for classic generators in AutoRest.",
+  "scripts": {
+    "autorest": "autorest",
+    "start": "dotnet src/bin/netcoreapp2.0/autorest.objc.dll --server",
+    "test": "gulp test",
+    "testci": "gulp testci",
+    "build": "gulp build",
+    "prepare": "gulp install_common && gulp build",
+    "publish-preview": "gulp publish-preview",
+    "regenerate": "gulp regenerate",
+    "clean": "gulp clean",
+    "nuke": "git clean -xdf"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Azure/autorest.objc"
+  },
+  "readme": "https://github.com/Azure/autorest.objc/readme.md",
+  "keywords": [
+    "autorest",
+    "classic-generators",
+    "objc"
+  ],
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Azure/autorest/issues"
+  },
+  "homepage": "https://github.com/Azure/autorest.objc/blob/master/README.md",
+  "devDependencies": {
+    "@microsoft.azure/autorest.modeler": "2.3.45",
+    "autorest": "^2.0.4203",
+    "coffee-script": "^1.11.1",
+    "dotnet-sdk-2.0.0": "^1.4.4",
+    "gulp": "^3.9.1",
+    "gulp-filter": "^5.0.0",
+    "gulp-line-ending-corrector": "^1.0.1",
+    "iced-coffee-script": "^108.0.11",
+    "marked": "^0.3.6",
+    "marked-terminal": "^2.0.0",
+    "moment": "^2.17.1",
+    "run-sequence": "*",
+    "shx": "^0.2.2",
+    "tv4": "1.3.0",
+    "through2-parallel": "^0.1.3",
+    "yargs": "^8.0.2",
+    "yarn": "^1.0.2"
+  },
+  "dependencies": {
+    "dotnet-2.0.0": "^1.4.4"
+  }
+}
