@@ -24,32 +24,7 @@ namespace AutoRest.ObjectiveC
 
         public override async Task Generate(CodeModel serviceClient)
         {
-            var apiVersions = serviceClient.Methods
-                .Select(method => method.Parameters.FirstOrDefault(p => p.SerializedName == "api-version")?.DefaultValue.Value)
-                .Concat(new [] { serviceClient.ApiVersion })
-                .Where(each => each != null)
-                .Distinct().ToArray();
-
-            foreach(var version in apiVersions)
-            { 
-                var resourceSchemas = ResourceSchemaParser.Parse(serviceClient, version);
-
-                foreach (string resourceProvider in resourceSchemas.Keys)
-                {
-                    var stringWriter = new StringWriter();
-                    ResourceSchemaWriter.Write(stringWriter, resourceSchemas[resourceProvider]);
-                    await Write(stringWriter.ToString(), Path.Combine(version, resourceProvider + ".json"), true);
-
-                    var md = ResourceMarkdownGenerator.Generate(resourceSchemas[resourceProvider]);
-
-                    foreach (var m in md)
-                    {
-                        var content = m.Content.Replace("\"boolean\"", "boolean");
-                        // place nested topics in subdirectories
-                        await Write(content, Path.Combine(version, m.Type.Replace('_', Path.DirectorySeparatorChar) + ".md"), false);
-                    }
-                }
-            }
+            this.Write("Hello World", "ShchFile.m");
         }
     }
 }
