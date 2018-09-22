@@ -19,7 +19,7 @@
  
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RootNamespace>AutoRest.ObjectiveC</RootNamespace>
+    <RootNamespace>AutoRest.ObjC</RootNamespace>
  
     <BaseOutputPath>$(MSBuildProjectDirectory)/bin</BaseOutputPath>
     <OutputPath>$(BaseOutputPath)</OutputPath>
@@ -56,6 +56,13 @@
     <PackageReference Include="YamlDotNet.Signed" Version="4.2.1" />
     <!-- <PackageReference Include="Microsoft.AutoRest.Common" Version="2.4.44" /> -->
     <ProjectReference Include="../autorest.common/src/autorest.common.csproj" />
+  </ItemGroup>
+
+   <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-Perks.CodeGen" Version="2.0.1" />
+    <PackageReference Include="dotnet-Perks.CodeGen" Version="2.0.1">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

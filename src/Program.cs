@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoRest.Core;
-using AutoRest.Core.Extensibility;
 using AutoRest.Core.Model;
 using AutoRest.Core.Parsing;
-using AutoRest.Core.Utilities;
 using Microsoft.Perks.JsonRPC;
 
 using IAnyPlugin = AutoRest.Core.Extensibility.IPlugin<AutoRest.Core.Extensibility.IGeneratorSettings, AutoRest.Core.IModelSerializer<AutoRest.Core.Model.CodeModel>, AutoRest.Core.ITransformer<AutoRest.Core.Model.CodeModel>, AutoRest.Core.CodeGenerator, AutoRest.Core.CodeNamer, AutoRest.Core.Model.CodeModel>;
 
-namespace AutoRest.ObjectiveC
+namespace AutoRest.ObjC
 {
     public static class ExtensionsLoader
     {
