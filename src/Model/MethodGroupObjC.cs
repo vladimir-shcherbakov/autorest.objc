@@ -1,89 +1,143 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using AutoRest.Core.Model;
 using AutoRest.Core.Utilities;
-using AutoRest.ObjC;
-using AutoRest.Extensions;
+using AutoRest.Core.Model;
+using Newtonsoft.Json;
 
 namespace AutoRest.ObjC.Model
 {
     public class MethodGroupObjC : MethodGroup
     {
-        private string variableName;
-        public string ClientName { get; private set; }
-        public string Documentation { get; private set; }
-        public string PackageName { get; private set; }
-        public string BaseClient { get; private set; }
-
-        public bool IsCustomBaseUri
-            => CodeModel.Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
-
-        public List<PropertyObjC> GlobalParameters;
-        public IEnumerable<string> Imports { get; private set; }
-
-        public MethodGroupObjC(string name) : base(name)
-        {
-        }
-
         public MethodGroupObjC()
         {
+            Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
         }
-
-        internal void Transform(CodeModelObjC cmg)
+        public MethodGroupObjC(string name) : base(name)
         {
-            var originalName = Name.Value;
-            Name = Name.Value.TrimPackageName(cmg.Namespace);
-            if (Name != originalName)
-            {
-                // fix up the method group names
-                cmg.Methods.Where(m => m.Group.Value == originalName)
-                    .ForEach(m =>
-                    {
-                        m.Group = Name;
-                    });
-            }
-
-            ClientName = string.IsNullOrEmpty(Name)
-                            ? cmg.BaseClient
-                            : TypeName.Value.IsNamePlural(cmg.Namespace)
-                                             ? Name.Value
-                                             : (Name.Value).TrimPackageName(cmg.Namespace);
-
-            Documentation = string.Format("{0} is the {1} ", ClientName,
-                                    string.IsNullOrEmpty(cmg.Documentation)
-                                        ? string.Format("client for the {0} methods of the {1} service.", TypeName, cmg.ServiceName)
-                                        : cmg.Documentation.ToSentence());
-
-            PackageName = cmg.Namespace;
-            BaseClient = cmg.BaseClient;
-            GlobalParameters = cmg.GlobalParameters;
-            
-            //Imports
-            var imports = new HashSet<string>();
-            imports.UnionWith(CodeNamerObjC.Instance.AutorestImports);
+            Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
         }
 
-        internal string VariableName
+        [JsonIgnore]
+        public string MethodGroupFullType
         {
             get
             {
-                //ok if race causes more than one call to pass.  Will be set to same value.
-                if (string.IsNullOrWhiteSpace(this.variableName))
-                {
-                    this.variableName = ObjCNameHelper.ConvertToVariableName(this.Name);
-                }
-
-                return this.variableName;
+                return (CodeModel.Namespace.ToLowerInvariant()) + "." + TypeName;
             }
         }
 
-        public string VariableDeclartionSyntax()
+        [JsonIgnore]
+        public virtual string MethodGroupDeclarationType
         {
-            return $"var {this.VariableName}: {this.Name}";
+            get
+            {
+                return TypeName;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodGroupImplType
+        {
+            get
+            {
+                return TypeName + ImplClassSuffix;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ImplClassSuffix
+        {
+            get
+            {
+                return "Impl";
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ParentDeclaration
+        {
+            get
+            {
+                return " implements " + MethodGroupTypeString;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ImplPackage
+        {
+            get
+            {
+                return "implementation";
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodGroupTypeString
+        {
+            get
+            {
+                if (this.Methods
+                    .OfType<MethodObjC>()
+                    .SelectMany(m => m.ImplImports)
+                    .Any(i => i.Split('.').LastOrDefault() == TypeName))
+                {
+                    return MethodGroupFullType;
+                }
+                return TypeName;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodGroupServiceType
+        {
+            get
+            {
+                return CodeNamerObjC.GetServiceName(Name.ToPascalCase());
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ServiceClientType
+        {
+            get
+            {
+                return CodeModel.Name + "Impl";
+            }
+        }
+
+        [JsonIgnore]
+        public virtual IEnumerable<string> ImplImports
+        {
+            get
+            {
+                var imports = new List<string>();
+                imports.Add("retrofit2.Retrofit");
+                if (MethodGroupTypeString == TypeName)
+                {
+                    imports.Add(MethodGroupFullType);
+                }
+                imports.AddRange(this.Methods
+                    .OfType<MethodObjC>()
+                    .SelectMany(m => m.ImplImports)
+                    .OrderBy(i => i).Distinct());
+                return imports;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual IEnumerable<string> InterfaceImports
+        {
+            get
+            {
+                return this.Methods
+                    .OfType<MethodObjC>()
+                    .SelectMany(m => m.InterfaceImports)
+                    .OrderBy(i => i).Distinct();
+            }
         }
     }
 }

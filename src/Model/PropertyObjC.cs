@@ -1,57 +1,113 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
-
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
+using AutoRest.Extensions;
+using Newtonsoft.Json;
 
 namespace AutoRest.ObjC.Model
 {
-    public class PropertyObjC : Property, IVariableType
+    public class PropertyObjC : Property
     {
         public PropertyObjC()
         {
-            Name.OnGet += value =>
-            {
-                return value;
-            };
         }
 
-        public string VariableName
+        public override string SerializedName
+        {
+            get => Extensions.ContainsKey(SwaggerExtensions.FlattenOriginalTypeName) ? base.SerializedName : base.SerializedName?.Replace(".", "\\\\.")?.Replace("\\\\\\\\", "\\\\");
+            set => base.SerializedName = value;
+        }
+
+
+        [JsonIgnore]
+        public bool WantNullable => IsXNullable ?? !IsRequired;
+
+        public override IModelType ModelType
         {
             get
             {
-                return ObjCNameHelper.ConvertToVariableName(this.Name);
+                if (base.ModelType == null)
+                {
+                    return null;
+                }
+                return WantNullable 
+                    ? base.ModelType 
+                    : (base.ModelType as IModelTypeObjC)?.NonNullableVariant;
+            }
+            set => base.ModelType = value;
+        }
+
+        [JsonIgnore]
+        public string ClientForm
+        {
+            get
+            {
+                if (ModelType.IsPrimaryType(KnownPrimaryType.Base64Url))
+                {
+                    return string.Format("this.{0}.decodedBytes()", Name, CultureInfo.InvariantCulture);
+                }
+                else if (ModelType.IsPrimaryType(KnownPrimaryType.UnixTime))
+                {
+                    return "new DateTime(this." + Name + " * 1000L, DateTimeZone.UTC)";
+                }
+                else if (ModelType.Name != ((IModelTypeObjC)ModelType).ResponseVariant.Name)
+                {
+                    return string.Format("this.{0}.{1}()", Name, ((IModelTypeObjC)ModelType).ResponseVariant.Name.ToCamelCase(), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    return Name;
+                }
             }
         }
 
-        public string VariableTypeDeclaration(bool isRequired)
+        [JsonIgnore]
+        public string FromClientForm
         {
-            if (this.ModelType is IVariableType)
+            get
             {
-                return ((IVariableType)this.ModelType).VariableTypeDeclaration(isRequired);
+                if (ModelType.IsPrimaryType(KnownPrimaryType.Base64Url))
+                {
+                    return string.Format("Base64Url.encode({0})", Name, CultureInfo.InvariantCulture);
+                }
+                else if (ModelType.IsPrimaryType(KnownPrimaryType.UnixTime))
+                {
+                    return string.Format("{0}.toDateTime(DateTimeZone.UTC).getMillis() / 1000", Name, CultureInfo.InvariantCulture);
+                }
+                else if (ModelType.Name != ((IModelTypeObjC)ModelType).ResponseVariant.Name)
+                {
+                    return string.Format("new {0}({1})", ModelType.Name, Name, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    return Name;
+                }
             }
-
-            return ObjCNameHelper.GetTypeName(this.ModelType.Name, isRequired);
         }
 
-        public string DecodeTypeDeclaration(bool isRequired)
+        [JsonIgnore]
+        public virtual IEnumerable<string> Imports
         {
-            if (this.ModelType is IVariableType)
+            get
             {
-                return ((IVariableType)this.ModelType).VariableTypeDeclaration(isRequired);
+                var imports = new List<string>(ModelType.ImportSafe()
+                        .Where(c => !c.StartsWith(
+                            string.Join(
+                                ".",
+                                Parent?.CodeModel?.Namespace.ToLowerInvariant(),
+                                "models"),
+                            StringComparison.OrdinalIgnoreCase)));
+                if (ModelType.IsPrimaryType(KnownPrimaryType.DateTimeRfc1123)
+                    || ModelType.IsPrimaryType(KnownPrimaryType.Base64Url))
+                {
+                    imports.AddRange(ModelType.ImportSafe());
+                    imports.AddRange(((IModelTypeObjC)ModelType).ResponseVariant.ImportSafe());
+                }
+                return imports;
             }
-
-            return ObjCNameHelper.GetTypeName(this.ModelType.Name, isRequired);
-        }
-
-        public string EncodeTypeDeclaration(bool isRequired)
-        {
-            if (this.ModelType is IVariableType)
-            {
-                return ((IVariableType)this.ModelType).EncodeTypeDeclaration(isRequired);
-            }
-
-            return ObjCNameHelper.GetTypeName(this.ModelType.Name, isRequired);
         }
     }
 }

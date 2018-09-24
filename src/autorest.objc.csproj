@@ -65,4 +65,12 @@
     </PackageReference>
   </ItemGroup>
 
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\InterfaceModelTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <Folder Include="Writer\" />
+   </ItemGroup>
+
 </Project>

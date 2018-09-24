@@ -1,618 +1,774 @@
-// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-//using AutoRest.ObjC.Properties;
-using AutoRest.Core.Utilities;
-using AutoRest.Core.Model;
-using AutoRest.Extensions;
-using AutoRest.Extensions.Azure;
-using AutoRest.Extensions.Azure.Model;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
+using AutoRest.Core;
+using AutoRest.Core.Utilities;
+using AutoRest.Extensions;
+using AutoRest.Core.Model;
+using Newtonsoft.Json;
+using AutoRest.Core.Utilities.Collections;
 
 namespace AutoRest.ObjC.Model
 {
     public class MethodObjC : Method
     {
-        public string Owner { get; private set; }
-
-        public string PackageName { get; private set; }
-
-        public string APIVersion { get; private set; }
-
-        private readonly string lroDescription = " This method may poll for completion. Polling can be canceled by passing the cancel channel argument. " +
-                                                 "The channel will be used to cancel polling and any outstanding HTTP requests.";
-
-        public bool NextAlreadyDefined { get; private set; }
-
-        public bool IsCustomBaseUri
-            => CodeModel.Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
-
-        public MethodObjC()
-        {
-            NextAlreadyDefined = true;
-        }
-
-        public string CommandModelName
-        {
-            get { return  this.Name + "Command";  }
-        }
-
-        public string CommandProtocolName
-        {
-            get { return  this.MethodGroup.Name + this.Name;  }
-        }
-
-        public string GroupName 
-        {
-            get { return this.MethodGroup.Name; }
-        }
-
-        internal void Transform(CodeModelObjC cmg)
-        {
-            
-            Owner = (MethodGroup as MethodGroupObjC).ClientName;
-            PackageName = cmg.Namespace;
-            NextAlreadyDefined = NextMethodExists(cmg.Methods.Cast<MethodObjC>());
-
-            var apiVersionParam =
-              from p in Parameters
-              let name = p.SerializedName
-              where name != null && name.IsApiVersion()
-              select p.DefaultValue.Value?.Trim(new[] { '"' });
-
-            // When APIVersion is blank, it means that it was unavailable at the method level
-            // and we should default back to whatever is present at the client level. However,
-            // we will continue embedding that in each method to have broader support.
-            APIVersion = apiVersionParam.SingleOrDefault();
-            if (APIVersion == default(string))
-            {
-                APIVersion = cmg.ApiVersion;
-            }
-
-            var parameter = Parameters.ToList().Find(p => p.ModelType.PrimaryType(KnownPrimaryType.Stream)
-                                                && !(p.Location == ParameterLocation.Body || p.Location == ParameterLocation.FormData));
-
-            if (parameter != null)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
-                    "Go accepts streaming parameters in the Body. The parameter '{0}' streams and is not in the the body.", parameter.Name));
-            }
-            if (string.IsNullOrEmpty(Description))
-            {
-                Description = string.Format("sends the {0} request.", Name.ToString().ToPhrase());
-            }
-
-            if (IsLongRunningOperation())
-            {
-                Description += lroDescription;
-            }
-        }
-
-        public string MethodSignature => $"{Name}({MethodParametersSignature})";
-        
-        public string ParametersDocumentation
+        [JsonIgnore]
+        public virtual IEnumerable<ParameterObjC> RetrofitParameters
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
-                return sb.ToString();
+                var parameters = LogicalParameters.OfType<ParameterObjC>().Where(p => p.Location != ParameterLocation.None)
+                    .Where(p => !p.Extensions.ContainsKey("hostParameter")).ToList();
+                if (IsParameterizedHost)
+                {
+                    parameters.Add(new ParameterObjC
+                    {
+                        Name = "parameterizedHost",
+                        SerializedName = "x-ms-parameterized-host",
+                        Location = ParameterLocation.Header,
+                        IsRequired = true,
+                        ModelType = new PrimaryTypeObjC(KnownPrimaryType.String)
+                    });
+                }
+                return parameters;
             }
         }
 
-        public PropertyObjC ListElement
+        [JsonIgnore]
+        public IEnumerable<ParameterObjC> OrderedRetrofitParameters
         {
             get
             {
-                var body = ReturnType.Body as CompositeTypeObjC;
-                return body.Properties.Where(p => p.ModelType is ArrayTypeObjC).FirstOrDefault() as PropertyObjC;
+                return RetrofitParameters.Where(p => p.Location == ParameterLocation.Path)
+                    .Union(RetrofitParameters.Where(p => p.Location != ParameterLocation.Path));
             }
         }
 
         /// <summary>
-        /// Generate the method parameter declaration.
+        /// Generate the method parameter declarations for a method
         /// </summary>
-        public string MethodParametersSignature
+        [JsonIgnore]
+        public virtual string MethodParameterApiDeclaration
         {
             get
             {
                 List<string> declarations = new List<string>();
-                return string.Join(", ", declarations);
-            }
-        }
+                foreach (ParameterObjC parameter in OrderedRetrofitParameters)
+                {
+                    bool alreadyEncoded = parameter.Extensions.ContainsKey(SwaggerExtensions.SkipUrlEncodingExtension) &&
+                        (bool) parameter.Extensions[SwaggerExtensions.SkipUrlEncodingExtension] == true;
 
-        /// <summary>
-        /// Returns true if this method should return its results via channels.
-        /// </summary>
-        public bool ReturnViaChannel
-        {
-            get
-            {
-                // pageable operations will be handled separately
-                return IsLongRunningOperation() && !IsPageable;
-            }
-        }
+                    StringBuilder declarationBuilder = new StringBuilder();
+                    if (Url.Contains("{" + parameter.Name + "}"))
+                    {
+                        parameter.Location = ParameterLocation.Path;
+                    }
 
-        /// <summary>
-        /// Gets the return type name for this method.
-        /// </summary>
-        public string MethodReturnType
-        {
-            get
-            {
-                return HasReturnValue() ?
-                    ((ReturnValue().Body is IVariableType) ? 
-                        ((IVariableType)ReturnValue().Body).VariableTypeDeclaration(false)
-                            : ObjCNameHelper.GetTypeName(ReturnValue().Body.Name.ToString(), false))
-                        : "Void";
-            }
-        }
-
-        /// <summary>
-        /// Gets the return type name for this method.
-        /// </summary>
-        public string MethodReturnTypeDecodable
-        {
-            get
-            {
-                return HasReturnValue() ?
-                    ((ReturnValue().Body is IVariableType) ? 
-                        ((IVariableType)ReturnValue().Body).DecodeTypeDeclaration(false) 
-                            : ObjCNameHelper.GetTypeName(ReturnValue().Body.Name.ToString(), false))
-                        : "Void";
-            }
-        }
-
-        /// <summary>
-        /// Returns the method return signature for this method (e.g. "foo, bar").
-        /// </summary>
-        /// <param name="helper">Indicates if this method is a helper method (i.e. preparer/sender/responder).</param>
-        /// <returns>The method signature for this method.</returns>
-        public string MethodReturnSignature(bool helper)
-        {
-            var retValType = MethodReturnType;
-            return $"{retValType}";
-        }
-
-        public IReadOnlyList<ParameterObjC> URLParameters
-        {
-            get
-            {
-                return Parameters.Where(x => { return x.Location == ParameterLocation.Path; })
-                    .Select(x => { return (ParameterObjC)x; }).ToList();
-            }
-        }
-
-        public IReadOnlyList<ParameterObjC> QueryParameters
-        {
-            get
-            {
-                return Parameters.Where(x => { return x.Location == ParameterLocation.Query; })
-                    .Select(x => { return (ParameterObjC)x; }).ToList();
-            }
-        }
-
-        public IReadOnlyList<ParameterObjC> HeaderParameters
-        {
-            get
-            {
-                return Parameters.Where(x => { return x.Location == ParameterLocation.Header; })
-                    .Select(x => { return (ParameterObjC)x; }).ToList();
-            }
-        }
-
-        public ParameterObjC BodyParameter
-        {
-            get
-            {
-                return Parameters.Where(x => { return x.Location == ParameterLocation.Body; })
-                    .Select(x => { return (ParameterObjC)x; }).FirstOrDefault();
-            }
-        }
-
-        public IReadOnlyList<ParameterObjC> AllParameters
-        {
-            get
-            {
-                List<ParameterObjC> allParameters = new List<ParameterObjC>();
-                allParameters.AddRange(this.URLParameters);
-                allParameters.AddRange(this.QueryParameters);
-                allParameters.AddRange(this.HeaderParameters);
-                if(this.BodyParameter != null) {
-                    allParameters.Add(this.BodyParameter);
+                    if ((parameter.Location == ParameterLocation.Path || parameter.Location == ParameterLocation.Query) && alreadyEncoded)
+                    {
+                        declarationBuilder.Append(string.Format(CultureInfo.InvariantCulture,
+                            "@{0}(value = \"{1}\", encoded = true) ",
+                            parameter.Location.ToString(),
+                            parameter.SerializedName));
+                    }
+                    else if (parameter.Location == ParameterLocation.Path ||
+                        parameter.Location == ParameterLocation.Query ||
+                        parameter.Location == ParameterLocation.Header)
+                    {
+                        declarationBuilder.Append(string.Format(CultureInfo.InvariantCulture,
+                            "@{0}(\"{1}\") ",
+                            parameter.Location.ToString(),
+                            parameter.SerializedName));
+                    }
+                    else if (parameter.Location == ParameterLocation.Body)
+                    {
+                        declarationBuilder.Append(string.Format(CultureInfo.InvariantCulture,
+                            "@{0} ",
+                            parameter.Location.ToString()));
+                    }
+                    else if (parameter.Location == ParameterLocation.FormData)
+                    {
+                        declarationBuilder.Append(string.Format(CultureInfo.InvariantCulture,
+                            "@Part(\"{0}\") ",
+                            parameter.SerializedName));
+                    }
+                    var declarativeName = parameter.ClientProperty != null ? parameter.ClientProperty.Name : parameter.Name;
+                    declarationBuilder.Append(parameter.WireType.Name);
+                    declarationBuilder.Append(" " + declarativeName);
+                    declarations.Add(declarationBuilder.ToString());
                 }
 
-                return allParameters;
+                var declaration = string.Join(", ", declarations);
+                return declaration;
             }
         }
 
-        public string ServiceModelName
+        [JsonIgnore]
+        public virtual string MethodParameterDeclaration
         {
             get
             {
-                return ((CodeModelObjC)this.CodeModel).ServiceName;
-            }
-        }
-
-        /// <summary>
-        /// Check if method has a return response.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasReturnValue()
-        {
-            return ReturnValue()?.Body != null;
-        }
-
-        /// <summary>
-        /// Return response object for the method.
-        /// </summary>
-        /// <returns></returns>
-        public Response ReturnValue()
-        {
-            return ReturnType ?? DefaultResponse;
-        }
-
-        public bool IsBodyParameterTypeAnEnum() {
-            if(this.BodyParameter == null) {
-                return false;
-            }
-
-            return this.BodyParameter.ModelType is EnumType;
-        }
-
-        public bool IsBodyParameterTypeNSData() {
-            if(this.BodyParameter == null) {
-                return false;
-            }
-
-            return this.BodyParameter.ModelType is PrimaryTypeObjC &&
-                (this.BodyParameter.ModelType as PrimaryTypeObjC).KnownPrimaryType == 
-                KnownPrimaryType.Stream;
-        }
-
-        public bool IsReturnTypeAnEnum() {
-            if(!this.HasReturnValue()) {
-                return false;
-            }
-
-            return this.ReturnType.Body is EnumType;
-        }
-
-        public bool IsReturnTypeData() {
-            if(!this.HasReturnValue()) {
-                return false;
-            }
-
-            return this.ReturnType.Body is PrimaryTypeObjC &&
-                (this.ReturnType.Body as PrimaryTypeObjC).KnownPrimaryType == 
-                KnownPrimaryType.Stream;
-        }
-
-        /// <summary>
-        /// Return response object for the method.
-        /// </summary>
-        /// <returns></returns>
-        public string ReturnTypeDeclaration()
-        {
-            if (this.HasReturnValue())
-            {
-                if(this.ReturnType.Body is IVariableType)
+                List<string> declarations = new List<string>();
+                foreach (var parameter in LocalParameters.Where(p => !p.IsConstant))
                 {
-                    return ((IVariableType)this.ReturnType.Body).VariableTypeDeclaration(false);
-                }else
-                {
-                    return this.ReturnType.Body.Name;
+                    declarations.Add(parameter.ClientType.ParameterVariant.Name + " " + parameter.Name);
                 }
+
+                var declaration = string.Join(", ", declarations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string MethodRequiredParameterDeclaration
+        {
+            get
+            {
+                List<string> declarations = new List<string>();
+                foreach (var parameter in LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
+                {
+                    declarations.Add(parameter.ClientType.ParameterVariant.Name + " " + parameter.Name);
+                }
+
+                var declaration = string.Join(", ", declarations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodParameterInvocation
+        {
+            get
+            {
+                List<string> invocations = new List<string>();
+                foreach (var parameter in LocalParameters.Where(p => !p.IsConstant))
+                {
+                    invocations.Add(parameter.Name);
+                }
+
+                var declaration = string.Join(", ", invocations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodDefaultParameterInvocation
+        {
+            get
+            {
+                List<string> invocations = new List<string>();
+                foreach (var parameter in LocalParameters)
+                {
+                    if (parameter.IsRequired)
+                    {
+                        invocations.Add(parameter.Name);
+                    }
+                    else
+                    {
+                        invocations.Add("null");
+                    }
+                }
+
+                var declaration = string.Join(", ", invocations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodRequiredParameterInvocation
+        {
+            get
+            {
+                List<string> invocations = new List<string>();
+                foreach (var parameter in LocalParameters)
+                {
+                    if (parameter.IsRequired && !parameter.IsConstant)
+                    {
+                        invocations.Add(parameter.Name);
+                    }
+                }
+
+                var declaration = string.Join(", ", invocations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodParameterApiInvocation
+        {
+            get
+            {
+                List<string> invocations = new List<string>();
+                foreach (var parameter in OrderedRetrofitParameters)
+                {
+                    invocations.Add(parameter.WireName);
+                }
+
+                var declaration = string.Join(", ", invocations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public string MethodRequiredParameterApiInvocation
+        {
+            get
+            {
+                List<string> invocations = new List<string>();
+                foreach (var parameter in OrderedRetrofitParameters)
+                {
+                    invocations.Add(parameter.WireName);
+                }
+
+                var declaration = string.Join(", ", invocations);
+                return declaration;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual bool IsParameterizedHost => CodeModel.Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
+
+        /// <summary>
+        /// Generate a reference to the ServiceClient
+        /// </summary>
+        [JsonIgnore]
+        public string ClientReference => Group.IsNullOrEmpty() ? "this" : "this.client";
+
+        [JsonIgnore]
+        public string ParameterConversion
+        {
+            get
+            {
+                IndentedStringBuilder builder = new IndentedStringBuilder();
+                foreach (var p in RetrofitParameters)
+                {
+                    if (p.NeedsConversion)
+                    {
+                        builder.Append(p.ConvertToWireType(p.Name, ClientReference));
+                    }
+                }
+                return builder.ToString();
+            }
+        }
+
+        [JsonIgnore]
+        public string RequiredParameterConversion
+        {
+            get
+            {
+                IndentedStringBuilder builder = new IndentedStringBuilder();
+                foreach (var p in RetrofitParameters.Where(p => p.IsRequired))
+                {
+                    if (p.NeedsConversion)
+                    {
+                        builder.Append(p.ConvertToWireType(p.Name, ClientReference));
+                    }
+                }
+                return builder.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Generates input mapping code block.
+        /// </summary>
+        /// <returns></returns>
+        public virtual string BuildInputMappings(bool filterRequired = false)
+        {
+            var builder = new IndentedStringBuilder();
+            foreach (var transformation in InputParameterTransformation)
+            {
+                var outParamName = transformation.OutputParameter.Name;
+                while (Parameters.Any(p => p.Name == outParamName))
+                {
+                    outParamName += "1";
+                }
+                transformation.OutputParameter.Name = outParamName;
+                var nullCheck = BuildNullCheckExpression(transformation);
+                bool conditionalAssignment = !string.IsNullOrEmpty(nullCheck) && !transformation.OutputParameter.IsRequired && !filterRequired;
+                if (conditionalAssignment)
+                {
+                    builder.AppendLine("{0} {1} = null;",
+                            ((ParameterObjC) transformation.OutputParameter).ClientType.ParameterVariant.Name,
+                            outParamName);
+                    builder.AppendLine("if ({0}) {{", nullCheck).Indent();
+                }
+
+                if (transformation.ParameterMappings.Any(m => !string.IsNullOrEmpty(m.OutputParameterProperty)) &&
+                    transformation.OutputParameter.ModelType is CompositeType)
+                {
+                    builder.AppendLine("{0}{1} = new {2}();",
+                        !conditionalAssignment ? ((ParameterObjC)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
+                        outParamName,
+                        transformation.OutputParameter.ModelType.Name);
+                }
+
+                foreach (var mapping in transformation.ParameterMappings)
+                {
+                    builder.AppendLine("{0}{1}{2};",
+                        !conditionalAssignment && !(transformation.OutputParameter.ModelType is CompositeType) ?
+                            ((ParameterObjC)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
+                        outParamName,
+                        GetMapping(mapping, filterRequired));
+                }
+
+                if (conditionalAssignment)
+                {
+                    builder.Outdent()
+                       .AppendLine("}");
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private static string GetMapping(ParameterMapping mapping, bool filterRequired = false)
+        {
+            string inputPath = mapping.InputParameter.Name;
+            if (mapping.InputParameterProperty != null)
+            {
+                inputPath += "." + CodeNamer.Instance.CamelCase(mapping.InputParameterProperty) + "()";
+            }
+            if (filterRequired && !mapping.InputParameter.IsRequired)
+            {
+                inputPath = "null";
+            }
+
+            string outputPath = "";
+            if (mapping.OutputParameterProperty != null)
+            {
+                outputPath += ".with" + CodeNamer.Instance.PascalCase(mapping.OutputParameterProperty);
+                return string.Format(CultureInfo.InvariantCulture, "{0}({1})", outputPath, inputPath);
             }
             else
             {
-                return "Void";
+                return string.Format(CultureInfo.InvariantCulture, "{0} = {1}", outputPath, inputPath);
+            }
+        }
+
+        private static string BuildNullCheckExpression(ParameterTransformation transformation)
+        {
+            if (transformation == null)
+            {
+                throw new ArgumentNullException("transformation");
+            }
+
+            return string.Join(" || ",
+                transformation.ParameterMappings
+                    .Where(m => !m.InputParameter.IsRequired)
+                    .Select(m => m.InputParameter.Name + " != null"));
+        }
+
+        [JsonIgnore]
+        public IEnumerable<ParameterObjC> RequiredNullableParameters
+        {
+            get
+            {
+                foreach (ParameterObjC param in Parameters)
+                {
+                    if (!param.ModelType.IsPrimaryType(KnownPrimaryType.Int) &&
+                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Double) &&
+                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Boolean) &&
+                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Long) &&
+                        !param.ModelType.IsPrimaryType(KnownPrimaryType.UnixTime) &&
+                        !param.IsConstant && param.IsRequired)
+                    {
+                        yield return param;
+                    }
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public IEnumerable<ParameterObjC> ParametersToValidate
+        {
+            get
+            {
+                foreach (ParameterObjC param in Parameters)
+                {
+                    if (param.ModelType is PrimaryType ||
+                        param.ModelType is EnumType ||
+                        param.IsConstant)
+                    {
+                        continue;
+                    }
+                    yield return param;
+                }
             }
         }
 
         /// <summary>
-        /// Return initial response type.
+        /// Gets the expression for response body initialization
         /// </summary>
-        /// <returns></returns>
-        public string ResponseContentType()
+        [JsonIgnore]
+        public virtual string InitializeResponseBody
         {
-            if (this.ResponseContentTypes.Length == 0)
+            get
             {
-                return this.RequestContentType;
+                return string.Empty;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string MethodParameterDeclarationWithCallback
+        {
+            get
+            {
+                var parameters = MethodParameterDeclaration;
+                if (!parameters.IsNullOrEmpty())
+                {
+                    parameters += ", ";
+                }
+                parameters += string.Format(CultureInfo.InvariantCulture, "final ServiceCallback<{0}> serviceCallback",
+                    ReturnTypeObjC.GenericBodyClientTypeString);
+                return parameters;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string MethodRequiredParameterDeclarationWithCallback
+        {
+            get
+            {
+                var parameters = MethodRequiredParameterDeclaration;
+                if (!parameters.IsNullOrEmpty())
+                {
+                    parameters += ", ";
+                }
+                parameters += string.Format(CultureInfo.InvariantCulture, "final ServiceCallback<{0}> serviceCallback",
+                    ReturnTypeObjC.GenericBodyClientTypeString);
+                return parameters;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string MethodParameterInvocationWithCallback
+        {
+            get
+            {
+                var parameters = MethodParameterInvocation;
+                if (!parameters.IsNullOrEmpty())
+                {
+                    parameters += ", ";
+                }
+                parameters += "serviceCallback";
+                return parameters;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string MethodRequiredParameterInvocationWithCallback
+        {
+            get
+            {
+                var parameters = MethodDefaultParameterInvocation;
+                if (!parameters.IsNullOrEmpty())
+                {
+                    parameters += ", ";
+                }
+                parameters += "serviceCallback";
+                return parameters;
+            }
+        }
+
+        /// <summary>
+        /// Get the parameters that are actually method parameters in the order they appear in the method signature
+        /// exclude global parameters
+        /// </summary>
+        [JsonIgnore]
+        public IEnumerable<ParameterObjC> LocalParameters
+        {
+            get
+            {
+                //Omit parameter-group properties for now since Java doesn't support them yet
+                var par = Parameters
+                    .OfType<ParameterObjC>()
+                    .Where(p => p != null && !p.IsClientProperty && !string.IsNullOrWhiteSpace(p.Name))
+                    .OrderBy(item => !item.IsRequired)
+                    .ToList();
+                return par;
+            }
+        }
+
+        [JsonIgnore]
+        public string HostParameterReplacementArgs
+        {
+            get
+            {
+                var args = new List<string>();
+                foreach (var param in Parameters.Where(p => p.Extensions.ContainsKey("hostParameter")))
+                {
+                    args.Add("\"{" + param.SerializedName + "}\", " + param.Name);
+                }
+                return string.Join(", ", args);
+            }
+        }
+
+        /// <summary>
+        /// Get the type for operation exception
+        /// </summary>
+        [JsonIgnore]
+        public virtual string OperationExceptionTypeString
+        {
+            get
+            {
+                if (this.DefaultResponse.Body is CompositeType)
+                {
+                    var type = this.DefaultResponse.Body as CompositeTypeObjC;
+                    return type.ExceptionTypeDefinitionName;
+                }
+                else
+                {
+                    return "RestException";
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public virtual IEnumerable<string> Exceptions
+        {
+            get
+            {
+                yield return OperationExceptionTypeString;
+                yield return "IOException";
+                if (RequiredNullableParameters.Any())
+                {
+                    yield return "IllegalArgumentException";
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ExceptionString
+        {
+            get
+            {
+                return string.Join(", ", Exceptions);
+            }
+        }
+
+        [JsonIgnore]
+        public virtual List<string> ExceptionStatements
+        {
+            get
+            {
+                List<string> exceptions = new List<string>();
+                exceptions.Add(OperationExceptionTypeString + " exception thrown from REST call");
+                exceptions.Add("IOException exception thrown from serialization/deserialization");
+                if (RequiredNullableParameters.Any())
+                {
+                    exceptions.Add("IllegalArgumentException exception thrown from invalid parameters");
+                }
+                return exceptions;
+            }
+        }
+
+        [JsonIgnore]
+        public string CallType
+        {
+            get
+            {
+                if (this.HttpMethod == HttpMethod.Head)
+                {
+                    return "Void";
+                }
+                else
+                {
+                    return "ResponseBody";
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ResponseBuilder
+        {
+            get
+            {
+                return "ServiceResponseBuilder";
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string RuntimeBasePackage
+        {
+            get
+            {
+                return "com.microsoft.rest";
+            }
+        }
+
+        [JsonIgnore]
+        public ResponseObjC ReturnTypeObjC => ReturnType as ResponseObjC;
+
+        [JsonIgnore]
+        public virtual string ReturnTypeResponseName => ReturnTypeObjC?.BodyClientType?.ServiceResponseVariant()?.Name;
+
+        public virtual string ResponseGeneration(bool filterRequired = false)
+        {
+            if (ReturnTypeObjC.NeedsConversion)
+            {
+                IndentedStringBuilder builder= new IndentedStringBuilder();
+                builder.AppendLine("ServiceResponse<{0}> response = {1}Delegate(call.execute());",
+                    ReturnTypeObjC.GenericBodyWireTypeString, this.Name.ToCamelCase());
+                builder.AppendLine("{0} body = null;", ReturnTypeObjC.BodyClientType.Name)
+                    .AppendLine("if (response.body() != null) {")
+                    .Indent().AppendLine("{0}", ReturnTypeObjC.ConvertBodyToClientType("response.body()", "body"))
+                    .Outdent().AppendLine("}");
+                return builder.ToString();
+            }
+            return "";
+        }
+
+        [JsonIgnore]
+        public virtual string ReturnValue
+        {
+            get
+            {
+                if (ReturnTypeObjC.NeedsConversion)
+                {
+                    return "new ServiceResponse<" + ReturnTypeObjC.GenericBodyClientTypeString + ">(body, response.response())";
+                }
+                return this.Name + "Delegate(call.execute())";
+            }
+        }
+
+        public virtual string ClientResponse(bool filterRequired = false)
+        {
+            IndentedStringBuilder builder = new IndentedStringBuilder();
+            if (ReturnTypeObjC.NeedsConversion)
+            {
+                builder.AppendLine("ServiceResponse<{0}> result = {1}Delegate(response);", ReturnTypeObjC.GenericBodyWireTypeString, this.Name);
+                builder.AppendLine("{0} body = null;", ReturnTypeObjC.BodyClientType.Name)
+                    .AppendLine("if (result.body() != null) {")
+                    .Indent().AppendLine("{0}", ReturnTypeObjC.ConvertBodyToClientType("result.body()", "body"))
+                    .Outdent().AppendLine("}");
+                builder.AppendLine("ServiceResponse<{0}> clientResponse = new ServiceResponse<{0}>(body, result.response());",
+                    ReturnTypeObjC.GenericBodyClientTypeString);
             }
             else
             {
-                return this.ResponseContentTypes[0];
+                builder.AppendLine("{0} clientResponse = {1}Delegate(response);", ReturnTypeObjC.WireResponseTypeString, this.Name);
             }
+            return builder.ToString();
         }
 
-        /// <summary>
-        /// Checks if method has pageable extension (x-ms-pageable) enabled.  
-        /// </summary>
-        /// <returns></returns>
-
-        public bool IsPageable => HasNextLink;
-
-        public bool IsNextMethod => Name.Value.EqualsIgnoreCase(NextOperationName);
-
-        /// <summary>
-        /// Checks if method for next page of results on paged methods is already present in the method list.
-        /// </summary>
-        /// <param name="methods"></param>
-        /// <returns></returns>
-        public bool NextMethodExists(IEnumerable<MethodObjC> methods)
-        {
-            string next = NextOperationName;
-            if (string.IsNullOrEmpty(next))
-            {
-                return false; 
-            }
-            return methods.Any(m => m.Name.Value.EqualsIgnoreCase(next));
-        }
-
-        public MethodObjC NextMethod
+        [JsonIgnore]
+        public virtual string ServiceFutureFactoryMethod
         {
             get
             {
-                if (Extensions.ContainsKey(AzureExtensions.PageableExtension))
+                string factoryMethod = "fromResponse";
+                if (ReturnType.Headers != null)
                 {
-                    var pageableExtension = JsonConvert.DeserializeObject<PageableExtension>(Extensions[AzureExtensions.PageableExtension].ToString());
-                    if (pageableExtension != null && !string.IsNullOrWhiteSpace(pageableExtension.OperationName))
+                    factoryMethod = "fromHeaderResponse";
+                }
+                return factoryMethod;
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string CallbackDocumentation
+        {
+            get
+            {
+                return " * @param serviceCallback the async ServiceCallback to handle successful and failed responses.";
+            }
+        }
+
+        [JsonIgnore]
+        public virtual List<string> InterfaceImports
+        {
+            get
+            {
+                HashSet<string> imports = new HashSet<string>();
+                // static imports
+                imports.Add("rx.Observable");
+                imports.Add("com.microsoft.rest.ServiceFuture");
+                imports.Add("com.microsoft.rest." + ReturnTypeObjC.ClientResponseType);
+                imports.Add("com.microsoft.rest.ServiceCallback");
+                // parameter types
+                this.Parameters.OfType<ParameterObjC>().ForEach(p => imports.AddRange(p.InterfaceImports));
+                // return type
+                imports.AddRange(this.ReturnTypeObjC.InterfaceImports);
+                // exceptions
+                this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+                    .ForEach(ex =>
                     {
-                        return (CodeModel.Methods.First(m => m.SerializedName.EqualsIgnoreCase(pageableExtension.OperationName)) as MethodObjC);
-                    }
-                }
-                return null;
+                        string exceptionImport = CodeNamerObjC.GetJavaException(ex, CodeModel);
+                        if (exceptionImport != null) imports.Add(CodeNamerObjC.GetJavaException(ex, CodeModel));
+                    });                return imports.ToList();
             }
         }
 
-        public string NextOperationName
+        [JsonIgnore]
+        public virtual List<string> ImplImports
         {
             get
             {
-                return NextMethod?.Name.Value;
-            }
-        }
-
-        public Method NextOperation
-        {
-            get
-            {
-                if (Extensions.ContainsKey(AzureExtensions.PageableExtension))
+                HashSet<string> imports = new HashSet<string>();
+                // static imports
+                imports.Add("rx.Observable");
+                imports.Add("rx.functions.Func1");
+                if (RequestContentType == "multipart/form-data" || RequestContentType == "application/x-www-form-urlencoded")
                 {
-                    var pageableExtension = JsonConvert.DeserializeObject<PageableExtension>(Extensions[AzureExtensions.PageableExtension].ToString());
-                    if (pageableExtension != null && !string.IsNullOrWhiteSpace(pageableExtension.OperationName))
+                    imports.Add("retrofit2.http.Multipart");
+                }
+                else
+                {
+                    imports.Add("retrofit2.http.Headers");
+                }
+                imports.Add("retrofit2.Response");
+                if (this.HttpMethod != HttpMethod.Head)
+                {
+                    imports.Add("okhttp3.ResponseBody");
+                }
+                imports.Add("com.microsoft.rest.ServiceFuture");
+                imports.Add("com.microsoft.rest." + ReturnTypeObjC.ClientResponseType);
+                imports.Add("com.microsoft.rest.ServiceCallback");
+                this.RetrofitParameters.ForEach(p => imports.AddRange(p.RetrofitImports));
+                // Http verb annotations
+                imports.Add(this.HttpMethod.ImportFrom());
+                // response type conversion
+                if (this.Responses.Any())
+                {
+                    imports.Add("com.google.common.reflect.TypeToken");
+                }
+                // validation
+                if (!ParametersToValidate.IsNullOrEmpty())
+                {
+                    imports.Add("com.microsoft.rest.Validator");
+                }
+                // parameters
+                this.LocalParameters.Concat(this.LogicalParameters.OfType<ParameterObjC>())
+                    .ForEach(p => imports.AddRange(p.ClientImplImports));
+                this.RetrofitParameters.ForEach(p => imports.AddRange(p.WireImplImports));
+                // return type
+                imports.AddRange(this.ReturnTypeObjC.ImplImports);
+                if (ReturnType.Body.IsPrimaryType(KnownPrimaryType.Stream))
+                {
+                    imports.Add("retrofit2.http.Streaming");
+                }
+                // response type (can be different from return type)
+                this.Responses.ForEach(r => imports.AddRange((r.Value as ResponseObjC).ImplImports));
+                // exceptions
+                this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+                    .ForEach(ex =>
                     {
-                        return CodeModel.Methods.First(m => m.SerializedName.EqualsIgnoreCase(pageableExtension.OperationName));
-                    }
-                }
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Check if method has long running extension (x-ms-long-running-operation) enabled. 
-        /// </summary>
-        /// <returns></returns>
-        public bool IsLongRunningOperation()
-        {
-            try
-            {
-                return Extensions.ContainsKey(AzureExtensions.LongRunningExtension) && (bool)Extensions[AzureExtensions.LongRunningExtension];
-            }
-            catch (InvalidCastException e)
-            {
-                var message = $@"{
-                    e.Message
-                    } The value \'{
-                    Extensions[AzureExtensions.LongRunningExtension]
-                    }\' for extension {
-                    AzureExtensions.LongRunningExtension
-                    } for method {
-                    Group
-                    }. {
-                    Name
-                    } is invalid in Swagger. It should be boolean.";
-
-                throw new InvalidOperationException(message);
-            }
-        }
-
-        public bool HasNextLink
-        {
-            get
-            {
-                // Note:
-                // Methods can be paged, even if "nextLinkName" is null
-                // Paged method just means a method returns an array
-                if (Extensions.ContainsKey(AzureExtensions.PageableExtension))
+                        string exceptionImport = CodeNamerObjC.GetJavaException(ex, CodeModel);
+                        if (exceptionImport != null) imports.Add(CodeNamerObjC.GetJavaException(ex, CodeModel));
+                    });
+                // parameterized host
+                if (IsParameterizedHost)
                 {
-                    var pageableExtension = Extensions[AzureExtensions.PageableExtension] as Newtonsoft.Json.Linq.JContainer;
-                    if (pageableExtension != null)
-                    {
-                        return true;
-                    }
+                    imports.Add("com.google.common.base.Joiner");
                 }
-
-                return false;
+                return imports.ToList();
             }
-        }
-
-        /// <summary>
-        /// Add NextLink attribute for pageable extension for the method.
-        /// </summary>
-        /// <returns></returns>
-        public string NextLink
-        {
-            get
-            {
-                // Note:
-                // Methods can be paged, even if "nextLinkName" is null
-                // Paged method just means a method returns an array
-                if (Extensions.ContainsKey(AzureExtensions.PageableExtension))
-                {
-                    var pageableExtension = Extensions[AzureExtensions.PageableExtension] as Newtonsoft.Json.Linq.JContainer;
-                    if (pageableExtension != null)
-                    {
-                        var nextLink = (string)pageableExtension["nextLinkName"];
-                        if (!string.IsNullOrEmpty(nextLink))
-                        {
-                            return CodeNamerObjC.Instance.GetPropertyName(nextLink);
-                        }
-                    }
-                }
-                return null;
-            }
-        }
-
-        public string ApiVersion 
-        {
-            get 
-            {
-                return this.CodeModel.ApiVersion ?? "";
-            }
-        }
-
-        /// <summary>
-        /// Gets the execute command name.
-        /// </summary>
-        /// <returns>The execute command name</returns>
-        public string GetExecuteCommandName()
-        {
-            return this.IsLongRunningOperation() ? "executeAsyncLRO" : "executeAsync";
-        }
-
-        public string EncodeMimeType 
-        {
-            get 
-            {
-                if(this.BodyParameter != null &&
-                    (this.MethodReturnTypeDecodable == "Data" ||
-                    this.MethodReturnTypeDecodable == "Data?")) {
-                        return "application/octet-stream";
-                }
-                var mimeType = this.RequestContentType;   
-                return mimeType.IndexOf(';') > 0 ? 
-                    mimeType.Substring(0, mimeType.IndexOf(';')) : mimeType;
-            }
-        }
-
-        public string DecodeMimeType 
-        {
-            get 
-            {
-                if( HasReturnValue() &&
-                    (this.MethodReturnTypeDecodable == "Data" ||
-                    this.MethodReturnTypeDecodable == "Data?")) {
-                    return "application/octet-stream";
-                }
-
-                var mimeType = this.ResponseContentType();   
-                return mimeType.IndexOf(';') > 0 ? 
-                    mimeType.Substring(0, mimeType.IndexOf(';')) : mimeType;
-            }
-        }
-
-        public bool IsReturnTypeOptional {
-            get {
-                return this.MethodReturnType.EndsWith("?");
-            }
-        }
-
-        public string RequiredPropertiesForInitParameters(bool forMethodCall = false)
-        {
-            var indented = new IndentedStringBuilder("    ");
-            var properties = this.URLParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>().ToList();
-            properties.AddRange(this.QueryParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>());
-            properties.AddRange(this.HeaderParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>());
-            if(this.BodyParameter != null) {
-                properties.Add(this.BodyParameter);
-            }
-            
-            var seperator = "";
-
-            // Emit each property, except for named Enumerated types, as a pointer to the type
-            foreach (var property in properties)
-            {
-                var modelType = property.ModelType;
-                var modelDeclaration = modelType.Name;
-                if (modelType is IVariableType)
-                {
-                    modelDeclaration = ((IVariableType)modelType).VariableTypeDeclaration(property.IsRequired);
-                }
-
-
-                var output = string.Empty;
-                var propName = property.VariableName;
-
-                if (property.IsRequired &&
-                    (!propName.Equals("apiVersion") ||
-                    property.Location != ParameterLocation.Query))
-                {
-                    if(forMethodCall) {
-                        indented.Append($"{seperator}{propName}: {propName}");
-                    }else {
-                        indented.Append($"{seperator}{propName}: {modelDeclaration}");
-                    }
-
-                    seperator = ", ";
-                }
-            }
-
-            return indented.ToString();
-        }
-
-        public bool HasRequiredPropertiesForInitParameters()
-        {
-            var properties = this.URLParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>().ToList();
-            properties.AddRange(this.QueryParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>());
-            properties.AddRange(this.HeaderParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>());
-            if(this.BodyParameter != null) {
-                properties.Add(this.BodyParameter);
-            }
-            
-            foreach (var property in properties)
-            {
-                var propName = property.VariableName;
-                if (property.IsRequired &&
-                    (!propName.Equals("apiVersion") ||
-                    property.Location != ParameterLocation.Query))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public string RequiredPropertiesSettersForInitParameters()
-        {
-            var indented = new IndentedStringBuilder("    ");
-            var properties = this.URLParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>().ToList();
-            properties.AddRange(this.QueryParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>());
-            properties.AddRange(this.HeaderParameters.Cast<AutoRest.ObjC.Model.ParameterObjC>());
-            if(this.BodyParameter != null) {
-                properties.Add(this.BodyParameter);
-            }
-
-            foreach (var property in properties)
-            {
-                var propName = property.VariableName;
-                var modelType = property.ModelType;
-                if (property.IsRequired &&
-                    (!propName.Equals("apiVersion") ||
-                    property.Location != ParameterLocation.Query))
-                {
-                    indented.Append($"self.{propName} = {propName}\r\n");
-                }
-            }
-
-            return indented.ToString();
         }
     }
 }

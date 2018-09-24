@@ -10,13 +10,14 @@ namespace AutoRest.ObjC {
     using Core.Extensibility;
     using Core.Model;
 
-//    public sealed class PluginOc : Plugin<IGeneratorSettings, CodeModelTransformer<CodeModel>, CodeGeneratorOc, CodeNamer, CodeModel> {
-//    }
+    //    public sealed class PluginOc : Plugin<IGeneratorSettings, CodeModelTransformer<CodeModel>, CodeGeneratorOc, CodeNamer, CodeModel> {
+    //    }
     public sealed class PluginOc : Plugin<IGeneratorSettings, TransformerOc, CodeGeneratorOc, CodeNamerObjC, CodeModelObjC>
     {
         public PluginOc()
         {
-            Context = new DependencyInjection.Context {
+            Context = new DependencyInjection.Context
+            {
                 // inherit base settings
                 Context,
 
@@ -27,10 +28,11 @@ namespace AutoRest.ObjC {
                 new Factory<Property, PropertyObjC>(),
                 new Factory<Parameter, ParameterObjC>(),
                 new Factory<DictionaryType, DictionaryTypeObjC>(),
-                new Factory<SequenceType, ArrayTypeObjC>(),
+                new Factory<SequenceType, SequenceTypeObjC>(),
                 new Factory<MethodGroup, MethodGroupObjC>(),
                 new Factory<EnumType, EnumTypeObjC>(),
-                new Factory<PrimaryType, PrimaryTypeObjC>()
+                new Factory<PrimaryType, PrimaryTypeObjC>(),
+                new Factory<Response, ResponseObjC>()
             };
         }
     }

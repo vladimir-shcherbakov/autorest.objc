@@ -1,128 +1,105 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
-using System;
+
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using AutoRest.Core;
-using AutoRest.Core.Model;
 using AutoRest.Core.Utilities;
 using AutoRest.Extensions;
-using static AutoRest.Core.Utilities.DependencyInjection;
+using AutoRest.Core.Model;
+using Newtonsoft.Json;
 
 namespace AutoRest.ObjC.Model
 {
     public class CodeModelObjC : CodeModel
     {
-        private static readonly Regex semVerPattern = new Regex(@"^v?(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-(?<tag>\S+))?$", RegexOptions.Compiled);
-        public string Version { get; }
-        public string UserAgent
+        public override string BaseUrl
         {
             get
             {
-                return $"Azure-SDK-For-ObjC/{Version} arm-{Namespace}/{ApiVersion}";
+                if (!base.BaseUrl.Contains("://"))
+                {
+                    return $"https://{base.BaseUrl}";
+                }
+                return base.BaseUrl;
+            }
+            set
+            {
+                base.BaseUrl = value;
             }
         }
 
-        public static string FrameworkName { get; set; }
-        
-        public CodeModelObjC()
-        {
-            NextMethodUndefined = new List<IModelType>();
-            PagedTypes = new Dictionary<IModelType, string>();
-            Version = FormatVersion(Settings.Instance.PackageVersion);
-        }
+        [JsonIgnore]
+        public IEnumerable<MethodGroupObjC> AllOperations => Operations.Where(operation => !operation.Name.IsNullOrEmpty()).Cast<MethodGroupObjC>();
 
-        public string ServiceName => CodeNamer.Instance.PascalCase(Name ?? string.Empty);
-
-        public string GetDocumentation()
-        {
-            return $"Package {Namespace} implements the Azure ARM {ServiceName} service API version {ApiVersion}.\n\n{(Documentation ?? string.Empty).UnwrapAnchorTags()}";
-        }
-
-        public string BaseClient => "ManagementClient";
-
+        [JsonIgnore]
         public bool IsCustomBaseUri => Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
 
-        public IEnumerable<string> ClientImports
+        [JsonIgnore]
+        public string ServiceClientServiceType
         {
             get
             {
-                var imports = new HashSet<string>();
-                imports.UnionWith(CodeNamerObjC.Instance.AutorestImports);
-                var clientMg = MethodGroups.Where(mg => string.IsNullOrEmpty(mg.Name)).FirstOrDefault();
-                if (clientMg != null && clientMg.Imports != null)
+                return CodeNamerObjC.GetServiceName(Name.ToPascalCase());
+            }
+        }
+
+        [JsonIgnore]
+        public virtual string ImplPackage => "implementation";
+
+        [JsonIgnore]
+        public string ModelsPackage => ".models";
+
+        [JsonIgnore]
+        public IEnumerable<MethodObjC> RootMethods => Methods.Where(m => m.Group.IsNullOrEmpty()).OfType<MethodObjC>();
+
+        [JsonIgnore]
+        public string FullyQualifiedDomainName => Namespace.ToLowerInvariant() + "." + this.Name;
+
+        [JsonIgnore]
+        public virtual IEnumerable<string> ImplImports
+        {
+            get
+            {
+                var classes = new HashSet<string> {FullyQualifiedDomainName};
+                foreach(var methodGroupFullType in this.AllOperations.Select(op => op.MethodGroupFullType).Distinct())
                 {
-                    imports.UnionWith(clientMg.Imports);
+                    classes.Add(methodGroupFullType);
                 }
-                return imports.OrderBy(i => i);
-            }
-        }
-
-        public string ClientDocumentation => string.Format("{0} is the base client for {1}.", BaseClient, ServiceName);
-
-        public Dictionary<IModelType, string> PagedTypes { get; }
-
-        // NextMethodUndefined is used to keep track of those models which are returned by paged methods,
-        // but the next method is not defined in the service client, so these models need a preparer.
-        public List<IModelType> NextMethodUndefined { get; }
-
-        public virtual IEnumerable<MethodGroupObjC> MethodGroups => Operations.Cast<MethodGroupObjC>();
-
-        public bool ShouldValidate => (bool)AutoRest.Core.Settings.Instance.Host?.GetValue<bool?>("client-side-validation").Result;
-
-        public List<PropertyObjC> GlobalParameters
-        {
-            get
-            {
-                return this.Properties.Where(p =>
+                if (this.Properties.Any(p => p.ModelType.IsPrimaryType(KnownPrimaryType.Credentials)))
                 {
-                    return !p.SerializedName.IsApiVersion();
-                }).Select((p) => { return (PropertyObjC)p; }).ToList();
-            }
-        }
-
-        public IEnumerable<MethodObjC> ClientMethods
-        {
-            get
-            {
-                // client methods are the ones with no method group
-                return Methods.Cast<MethodObjC>()
-                    .Where(m => string.IsNullOrEmpty(m.MethodGroup.Name))
-                    .OrderBy(m => m.Name.Value);
-            }
-        }
-
-        /// FormatVersion normalizes a version string into a SemVer if it resembles one. Otherwise,
-        /// it returns the original string unmodified. If version is empty or only comprised of
-        /// whitespace, 
-        public static string FormatVersion(string version)
-        {
-            if (string.IsNullOrWhiteSpace(version))
-            {
-                return "0.0.1";
-            }
-
-            var semVerMatch = semVerPattern.Match(version);
-
-            if (semVerMatch.Success)
-            {
-                var builder = new StringBuilder("v");
-                builder.Append(semVerMatch.Groups["major"].Value);
-                builder.Append('.');
-                builder.Append(semVerMatch.Groups["minor"].Value);
-                builder.Append('.');
-                builder.Append(semVerMatch.Groups["patch"].Value);
-                if (semVerMatch.Groups["tag"].Success)
-                {
-                    builder.Append('-');
-                    builder.Append(semVerMatch.Groups["tag"].Value);
+                    classes.Add("com.microsoft.rest.credentials.ServiceClientCredentials");
                 }
-                return builder.ToString();
-            }
+                classes.AddRange(new[]{
+                        "com.microsoft.rest.ServiceClient",
+                        "com.microsoft.rest.RestClient",
+                        "okhttp3.OkHttpClient",
+                        "retrofit2.Retrofit"
+                    });
 
-            return version;
+                classes.AddRange(RootMethods
+                    .SelectMany(m => m.ImplImports)
+                    .OrderBy(i => i));
+
+                return classes.AsEnumerable();
+            }
+        }
+
+        [JsonIgnore]
+        public virtual List<string> InterfaceImports
+        {
+            get
+            {
+                HashSet<string> classes = new HashSet<string>();
+                
+                classes.AddRange(RootMethods
+                    .SelectMany(m => m.InterfaceImports)
+                    .OrderBy(i => i).Distinct());
+
+                classes.Add("com.microsoft.rest.RestClient");
+
+                return classes.ToList();
+            }
         }
     }
 }
