@@ -1,0 +1,30 @@
+@using System
+@using AutoRest.ObjectiveC.Templates
+@using System.Linq;
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodGroupOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+
+package @(Settings.Namespace.ToLower());
+@EmptyLine
+@foreach (var importClass in Model.InterfaceImports)
+{
+@:import @importClass;
+}
+@EmptyLine
+
+/**
+ * An instance of this class provides access to all the operations defined
+ * in @(Model.TypeName).
+ */
+public interface @Model.TypeName {
+    @foreach (MethodOc method in Model.Methods)
+    {
+    @:@Include(new MethodInterfaceTemplate(), method)
+    @EmptyLine
+    }
+}

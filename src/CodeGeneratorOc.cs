@@ -1,102 +1,101 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoRest.Core;
-using AutoRest.Core.Model;
 using AutoRest.Core.Utilities;
-using AutoRest.Core.Utilities.Collections;
-using AutoRest.ObjC.Model;
-using AutoRest.ObjectiveC.Builder;
-using static AutoRest.Core.Utilities.DependencyInjection;
-using AutoRest.ObjC.Templates;
+using AutoRest.Extensions;
+using AutoRest.Core.Model;
+using System;
+using AutoRest.ObjectiveC.Model;
+using AutoRest.ObjectiveC.Templates;
 
-namespace AutoRest.ObjC
+namespace AutoRest.ObjectiveC
 {
     public class CodeGeneratorOc : CodeGenerator
     {
-        public CodeGeneratorOc()
-        {
-        }
+        private const string ClientRuntimePackage = "com.microsoft.rest:client-runtime:1.0.0-beta6-SNAPSHOT from snapshot repo https://oss.sonatype.org/content/repositories/snapshots/";
+        private const string _packageInfoFileName = "package-info.java";
 
-        private const string HeaderFileExtenson = ".h";
-        private const string ModuleFileExtenson = ".m";
-        private const string ModelsFolderName = "Models";
-        private const string ProtocolsFolderName = "Protocols";
-        private const string OperationsFolderName = "Operations";
-        private string _baseFolderName = "UNDEFINED";
+        public CodeNamerOc Namer { get; private set; }
 
+        public override string UsageInstructions => $"The {ClientRuntimePackage} maven dependency is required to execute the generated code.";
 
-        public override string ImplementationFileExtension => ".json";
+        public override string ImplementationFileExtension => ".java";
 
-        public override string UsageInstructions => $"Your Azure Resource Schema(s) can be found in the specified `output-folder`.";
-
+        /// <summary>
+        /// Generate Java client code for given ServiceClient.
+        /// </summary>
+        /// <param name="serviceClient"></param>
+        /// <returns></returns>
         public override async Task Generate(CodeModel cm)
         {
-            if (!(cm is CodeModelObjC codeModel))
+            var packagePath = $"src/main/java/{cm.Namespace.ToLower().Replace('.', '/')}";
+
+            // get Java specific codeModel
+            var codeModel = cm as CodeModelOc;
+            if (codeModel == null)
             {
                 throw new InvalidCastException("CodeModel is not a Java CodeModel");
             }
 
-            _baseFolderName = cm.Name;
+            // Service client
+            var serviceClientTemplate = new ServiceClientTemplate { Model = codeModel };
+            await Write(serviceClientTemplate, $"{packagePath}/implementation/{codeModel.Name.ToPascalCase()}Impl{ImplementationFileExtension}");
 
-            var sc = ServiceClient.Define(cm.Name)
-                .WithBaseUrl(cm.BaseUrl)
-                .WithKey("df");
+            // Service client interface
+            var serviceClientInterfaceTemplate = new ServiceClientInterfaceTemplate { Model = codeModel };
+            await Write(serviceClientInterfaceTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}{ImplementationFileExtension}");
 
+            // operations
+            foreach (MethodGroupOc methodGroup in codeModel.AllOperations)
+            {
+                // Operation
+                var operationsTemplate = new MethodGroupTemplate { Model = methodGroup };
+                await Write(operationsTemplate, $"{packagePath}/implementation/{methodGroup.TypeName.ToPascalCase()}Impl{ImplementationFileExtension}");
 
-            var modelList = new List<string>();
-            var modelsFolderPath = Path.Combine(_baseFolderName, ModelsFolderName);
+                // Operation interface
+                var operationsInterfaceTemplate = new MethodGroupInterfaceTemplate { Model = methodGroup };
+                await Write(operationsInterfaceTemplate, $"{packagePath}/{methodGroup.TypeName.ToPascalCase()}{ImplementationFileExtension}");
+            }
 
             //Models
-            foreach (var compositeType in cm.ModelTypes.Union(codeModel.HeaderTypes))
+            foreach (CompositeTypeOc modelType in cm.ModelTypes.Union(codeModel.HeaderTypes))
             {
-                var modelType = (CompositeTypeObjC) compositeType;
-                var modelTemplate = new InterfaceModelTemplate { Model = modelType };
-                await Write(modelTemplate, Path.Combine(modelsFolderPath, $"{modelType.Name.ToPascalCase()}.{HeaderFileExtenson}"));
+                var modelTemplate = new ModelTemplate { Model = modelType };
+                await Write(modelTemplate, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{ImplementationFileExtension}");
             }
 
-//
-//            foreach (var compositeType in cm.ModelTypes.Union(cm.HeaderTypes))
-//            {
-//                var modelType = (CompositeTypeObjC) compositeType;
-//                modelList.Add(modelType.Name);
-//                var modelTemplate = new InterfaceModelTemplate { Model = modelType };
-////                var headerContent = "";
-////                var moduleContent = "";
-////
-//                await Write(modelTemplate, Path.Combine(modelsFolderPath, $"{modelType.Name}.{HeaderFileExtenson}"));
-////                await Write(moduleContent, Path.Combine(modelsFolderPath, $"{modelType.Name}.{ModuleFileExtenson}"));
-//
-//
-//
-//            }
-
-            var enumlList = new List<string>();
-            foreach (var enumType in cm.EnumTypes)
+            // Enums
+            foreach (EnumTypeOc enumType in cm.EnumTypes)
             {
-                enumlList.Add(enumType.Name);
+                var enumTemplate = new EnumTemplate { Model = enumType };
+                await Write(enumTemplate, $"{packagePath}/models/{enumTemplate.Model.Name.ToPascalCase()}{ImplementationFileExtension}");
             }
 
+            // Exceptions
+            foreach (CompositeTypeOc exceptionType in codeModel.ErrorTypes)
+            {
+                var exceptionTemplate = new ExceptionTemplate { Model = exceptionType };
+                await Write(exceptionTemplate, $"{packagePath}/models/{exceptionTemplate.Model.ExceptionTypeDefinitionName}{ImplementationFileExtension}");
+            }
 
-//                    .WithOperation("op1")
-//                        .WithParameter("op1-param1")
-//                            .IsRequired(true)
-//                            .OfType("string")
-//                            .WithDefaultValue("some default value")
-//                            .Attach()
-//                        .WithParameter("op1-param2")
-//                            .WithDefaultValue("foo")
-//                            .Attach()
-//                        .Attach();
-
-
-
-            await this.Write("Hello World ANd shch", "ShchFile.m");
+            // package-info.java
+            await Write(new PackageInfoTemplate
+            {
+                Model = new PackageInfoTemplateModel(cm)
+            }, $"{packagePath}/{_packageInfoFileName}");
+            await Write(new PackageInfoTemplate
+            {
+                Model = new PackageInfoTemplateModel(cm, "implementation")
+            }, $"{packagePath}/implementation/{_packageInfoFileName}");
+            await Write(new PackageInfoTemplate
+            {
+                Model = new PackageInfoTemplateModel(cm, "models")
+            }, $"{packagePath}/models/{_packageInfoFileName}");
         }
     }
 }

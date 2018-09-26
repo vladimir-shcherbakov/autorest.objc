@@ -19,7 +19,7 @@
  
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RootNamespace>AutoRest.ObjC</RootNamespace>
+    <RootNamespace>AutoRest.ObjectiveC</RootNamespace>
  
     <BaseOutputPath>$(MSBuildProjectDirectory)/bin</BaseOutputPath>
     <OutputPath>$(BaseOutputPath)</OutputPath>
@@ -66,11 +66,51 @@
   </ItemGroup>
 
    <ItemGroup>
-     <DotnetRazor Remove="Templates\InterfaceModelTemplate.cshtml" />
+     <DotnetRazor Remove="Templates\EnumTemplate.cshtml" />
    </ItemGroup>
 
    <ItemGroup>
-     <Folder Include="Writer\" />
+     <DotnetRazor Remove="Templates\ExceptionTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupRetrofitTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ModelTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\PackageInfoTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientRetrofitTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientTemplate.cshtml" />
    </ItemGroup>
 
 </Project>

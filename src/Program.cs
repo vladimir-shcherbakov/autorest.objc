@@ -1,15 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoRest.Core;
 using AutoRest.Core.Model;
 using AutoRest.Core.Parsing;
 using Microsoft.Perks.JsonRPC;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using IAnyPlugin = AutoRest.Core.Extensibility.IPlugin<AutoRest.Core.Extensibility.IGeneratorSettings, AutoRest.Core.IModelSerializer<AutoRest.Core.Model.CodeModel>, AutoRest.Core.ITransformer<AutoRest.Core.Model.CodeModel>, AutoRest.Core.CodeGenerator, AutoRest.Core.CodeNamer, AutoRest.Core.Model.CodeModel>;
 
-namespace AutoRest.ObjC
+namespace AutoRest.ObjectiveC
 {
     public static class ExtensionsLoader
     {
@@ -25,7 +24,7 @@ namespace AutoRest.ObjC
 
     public class Program : NewPlugin
     {
-        public static int Main(string[] args )
+        public static int Main(string[] args)
         {
             if(args != null && args.Length > 0 && args[0] == "--server")
             {
@@ -62,45 +61,6 @@ namespace AutoRest.ObjC
             }
         }
 
-
-
-        protected async Task<bool> ProcessInternal1()
-        {
-            var files = await ListInputs();
-            if (files.Length != 1)
-            {
-                throw new Exception($"Generator received incorrect number of inputs: {files.Length} : {string.Join(",", files)}");
-            }
-            var modelAsJson = (await ReadFile(files[0])).EnsureYamlIsJson();
-
-            // build settings
-            
-            new Settings
-            {
-                Host = this
-            };
-
-            // process
-            var plugin = new PluginOc();
-            
-            using (plugin.Activate())
-            {
-                var codeModel = plugin.Serializer.Load(modelAsJson);
-                codeModel = plugin.Transformer.TransformCodeModel(codeModel);
-                plugin.CodeGenerator.Generate(codeModel).GetAwaiter().GetResult();
-            }
-
-            // write out files
-            var outFS = Settings.Instance.FileSystemOutput;
-            var outFiles = outFS.GetFiles("", "*", System.IO.SearchOption.AllDirectories);
-            foreach (var outFile in outFiles)
-            {
-                WriteFile(outFile, outFS.ReadAllText(outFile), null);
-            }
-
-            return true;
-        }
-
         protected override async Task<bool> ProcessInternal()
         {
             var files = await ListInputs();
@@ -113,7 +73,7 @@ namespace AutoRest.ObjC
 
             // build settings
             var altNamespace = (await GetValue<string[]>("input-file") ?? new[] { "" }).FirstOrDefault()?.Split('/').Last().Split('\\').Last().Split('.').First();
-
+            
             new Settings
             {
                 Namespace = await GetValue("namespace"),
@@ -135,9 +95,9 @@ namespace AutoRest.ObjC
             Settings.Instance.OutputFileName = await GetValue<string>("output-file");
             //
             // process
-            var plugin = new PluginOc();
+            var plugin = ExtensionsLoader.GetPlugin("objc");
             Settings.PopulateSettings(plugin.Settings, Settings.Instance.CustomSettings);
-
+            
             using (plugin.Activate())
             {
                 Settings.Instance.Namespace = Settings.Instance.Namespace ?? CodeNamer.Instance.GetNamespaceName(altNamespace);

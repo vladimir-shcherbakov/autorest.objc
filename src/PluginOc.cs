@@ -1,38 +1,37 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.TransformerSwift
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 // 
 
+using AutoRest.Core;
+using AutoRest.Core.Extensibility;
+using AutoRest.Core.Model;
 using AutoRest.Core.Utilities;
-using AutoRest.ObjC.Model;
+using AutoRest.ObjectiveC.Model;
+using static AutoRest.Core.Utilities.DependencyInjection;
 
-namespace AutoRest.ObjC {
-    using Core;
-    using Core.Extensibility;
-    using Core.Model;
-
-    //    public sealed class PluginOc : Plugin<IGeneratorSettings, CodeModelTransformer<CodeModel>, CodeGeneratorOc, CodeNamer, CodeModel> {
-    //    }
-    public sealed class PluginOc : Plugin<IGeneratorSettings, TransformerOc, CodeGeneratorOc, CodeNamerObjC, CodeModelObjC>
+namespace AutoRest.ObjectiveC
+{
+    public sealed class PluginOc : Plugin<IGeneratorSettings, TransformerOc, CodeGeneratorOc, CodeNamerOc, CodeModelOc>
     {
         public PluginOc()
         {
-            Context = new DependencyInjection.Context
+            Context = new Context
             {
                 // inherit base settings
                 Context,
 
                 // set code model implementations our own implementations 
-                new Factory<CodeModel, CodeModelObjC>(),
-                new Factory<Method, MethodObjC>(),
-                new Factory<CompositeType, CompositeTypeObjC>(),
-                new Factory<Property, PropertyObjC>(),
-                new Factory<Parameter, ParameterObjC>(),
-                new Factory<DictionaryType, DictionaryTypeObjC>(),
-                new Factory<SequenceType, SequenceTypeObjC>(),
-                new Factory<MethodGroup, MethodGroupObjC>(),
-                new Factory<EnumType, EnumTypeObjC>(),
-                new Factory<PrimaryType, PrimaryTypeObjC>(),
-                new Factory<Response, ResponseObjC>()
+                new Factory<CodeModel, CodeModelOc>(),
+                new Factory<Method, MethodOc>(),
+                new Factory<CompositeType, CompositeTypeOc>(),
+                new Factory<Property, PropertyOc>(),
+                new Factory<Parameter, ParameterOc>(),
+                new Factory<DictionaryType, DictionaryTypeOc>(),
+                new Factory<SequenceType, SequenceTypeOc>(),
+                new Factory<MethodGroup, MethodGroupOc>(),
+                new Factory<EnumType, EnumTypeOc>(),
+                new Factory<PrimaryType, PrimaryTypeOc>(),
+                new Factory<Response, ResponseOc>()
             };
         }
     }

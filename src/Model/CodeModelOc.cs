@@ -9,9 +9,9 @@ using AutoRest.Extensions;
 using AutoRest.Core.Model;
 using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class CodeModelObjC : CodeModel
+    public class CodeModelOc : CodeModel
     {
         public override string BaseUrl
         {
@@ -30,7 +30,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IEnumerable<MethodGroupObjC> AllOperations => Operations.Where(operation => !operation.Name.IsNullOrEmpty()).Cast<MethodGroupObjC>();
+        public IEnumerable<MethodGroupOc> AllOperations => Operations.Where(operation => !operation.Name.IsNullOrEmpty()).Cast<MethodGroupOc>();
 
         [JsonIgnore]
         public bool IsCustomBaseUri => Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
@@ -40,7 +40,7 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                return CodeNamerObjC.GetServiceName(Name.ToPascalCase());
+                return CodeNamerOc.GetServiceName(Name.ToPascalCase());
             }
         }
 
@@ -51,7 +51,7 @@ namespace AutoRest.ObjC.Model
         public string ModelsPackage => ".models";
 
         [JsonIgnore]
-        public IEnumerable<MethodObjC> RootMethods => Methods.Where(m => m.Group.IsNullOrEmpty()).OfType<MethodObjC>();
+        public IEnumerable<MethodOc> RootMethods => Methods.Where(m => m.Group.IsNullOrEmpty()).OfType<MethodOc>();
 
         [JsonIgnore]
         public string FullyQualifiedDomainName => Namespace.ToLowerInvariant() + "." + this.Name;
@@ -61,7 +61,7 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                var classes = new HashSet<string> {FullyQualifiedDomainName};
+                HashSet<string> classes = new HashSet<string> {FullyQualifiedDomainName};
                 foreach(var methodGroupFullType in this.AllOperations.Select(op => op.MethodGroupFullType).Distinct())
                 {
                     classes.Add(methodGroupFullType);

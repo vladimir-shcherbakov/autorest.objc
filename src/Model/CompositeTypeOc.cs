@@ -7,23 +7,23 @@ using AutoRest.Core.Model;
 using AutoRest.Extensions;
 using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class CompositeTypeObjC : CompositeType, IModelTypeObjC
+    public class CompositeTypeOc : CompositeType, IModelTypeOc
     {
         public const string ExternalExtension = "x-ms-external";
         protected string _runtimePackage = "com.microsoft.rest";
 
-        public CompositeTypeObjC()
+        public CompositeTypeOc()
         {
         }
 
-        public CompositeTypeObjC(string name) : base(name)
+        public CompositeTypeOc(string name) : base(name)
         {
         }
 
         [JsonIgnore]
-        public virtual string ModelsPackage => (this.CodeModel as CodeModelObjC)?.ModelsPackage;
+        public virtual string ModelsPackage => (this.CodeModel as CodeModelOc).ModelsPackage;
 
         [JsonIgnore]
         public virtual string Package
@@ -50,7 +50,7 @@ namespace AutoRest.ObjC.Model
             {
                 if (BaseIsPolymorphic)
                 {
-                    foreach (var type in CodeModel.ModelTypes)
+                    foreach (CompositeType type in CodeModel.ModelTypes)
                     {
                         if (type.BaseModelType != null &&
                             type.BaseModelType.SerializedName == this.SerializedName)
@@ -84,7 +84,7 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                return Properties.OfType<PropertyObjC>().Any(p => p.WasFlattened());
+                return Properties.OfType<PropertyOc>().Any(p => p.WasFlattened());
             }
         }
 
@@ -110,12 +110,12 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public virtual IEnumerable<string> ImportList
+        public virtual IEnumerable<String> ImportList
         {
             get
             {
                 var classes = new HashSet<string>();
-                classes.AddRange(Properties.SelectMany(pm => (pm as PropertyObjC)?.Imports));
+                classes.AddRange(Properties.SelectMany(pm => (pm as PropertyOc).Imports));
                 if (this.Properties.Any(p => !p.GetJsonProperty().IsNullOrEmpty()))
                 {
                     classes.Add("com.fasterxml.jackson.annotation.JsonProperty");
@@ -144,13 +144,13 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IModelTypeObjC ResponseVariant => this;
+        public IModelTypeOc ResponseVariant => this;
 
         [JsonIgnore]
-        public IModelTypeObjC ParameterVariant => this;
+        public IModelTypeOc ParameterVariant => this;
 
         [JsonIgnore]
-        public IModelTypeObjC NonNullableVariant => this;
+        public IModelTypeOc NonNullableVariant => this;
 
         [JsonIgnore]
         public string RequiredPropertiesConstructorDeclaration
@@ -162,23 +162,24 @@ namespace AutoRest.ObjC.Model
                     return "";
                 }
                 var requiredProps = Properties.Where(p => p.IsRequired && !p.IsConstant);
-                var declare = requiredProps.Select(p => $"{p.Name}: ({p.ModelTypeName}) {p.Name}");
-                var res = string.Join(" ", declare);
-                return char.ToUpper(res[0]) + res.Substring(1);
+                var declare = requiredProps.Select(p => p.ModelTypeName + " " + p.Name);
+                return string.Join(", ", declare);
             }
         }
 
-        [JsonIgnore] public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired); //&& true == AutoRest.Core.Settings.Instance.Host?.GetValue<bool?>("generate-constructor").Result;
+        [JsonIgnore]
+        //public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired) && true == AutoRest.Core.Settings.Instance.Host?.GetValue<bool?>("generate-constructor").Result;
+        public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired);
 
-        protected IEnumerable<IModelTypeObjC> ParseGenericType()
+        protected IEnumerable<IModelTypeOc> ParseGenericType()
         {
             string name = Name;
-            string[] types = Name.ToString().Split(new string[] { "<", ">", ",", ", " }, StringSplitOptions.RemoveEmptyEntries);
+            string[] types = Name.ToString().Split(new String[] { "<", ">", ",", ", " }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var innerType in types.Where(t => !string.IsNullOrWhiteSpace(t)))
             {
-                if (!CodeNamerObjC.PrimaryTypes.Contains(innerType.Trim()))
+                if (!CodeNamerOc.PrimaryTypes.Contains(innerType.Trim()))
                 {
-                    yield return new CompositeTypeObjC { Name = innerType.Trim(), CodeModel = CodeModel };
+                    yield return new CompositeTypeOc { Name = innerType.Trim(), CodeModel = CodeModel };
                 }
             }
         }

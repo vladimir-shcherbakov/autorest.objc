@@ -4,11 +4,11 @@ using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
 using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class ParameterObjC : Parameter
+    public class ParameterOc : Parameter
     {
-        public ParameterObjC()
+        public ParameterOc()
             : base()
         {
             _implImports = new List<string>();
@@ -45,7 +45,7 @@ namespace AutoRest.ObjC.Model
                 }
                 return WantNullable
                     ? base.ModelType
-                    : (base.ModelType as IModelTypeObjC)?.NonNullableVariant;
+                    : (base.ModelType as IModelTypeOc).NonNullableVariant;
             }
             set
             {
@@ -54,22 +54,22 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IModelTypeObjC ClientType
+        public IModelTypeOc ClientType
         {
             get
             {
-                return ((IModelTypeObjC)ModelType).ParameterVariant;
+                return ((IModelTypeOc)ModelType).ParameterVariant;
             }
         }
 
         [JsonIgnore]
-        public IModelTypeObjC WireType
+        public IModelTypeOc WireType
         {
             get
             {
                 if (ModelType.IsPrimaryType(KnownPrimaryType.Stream))
                 {
-                    var res = new PrimaryTypeObjC(KnownPrimaryType.Stream);
+                    var res = new PrimaryTypeOc(KnownPrimaryType.Stream);
                     res.Name.FixedValue = "RequestBody";
                     return res;
                 }
@@ -78,11 +78,11 @@ namespace AutoRest.ObjC.Model
                     Location != Core.Model.ParameterLocation.FormData &&
                     NeedsSpecialSerialization(ClientType))
                 {
-                    return new PrimaryTypeObjC(KnownPrimaryType.String);
+                    return new PrimaryTypeOc(KnownPrimaryType.String);
                 }
                 else
                 {
-                    return (IModelTypeObjC) ModelType;
+                    return (IModelTypeOc) ModelType;
                 }
             }
         }
@@ -99,8 +99,8 @@ namespace AutoRest.ObjC.Model
                 Location != Core.Model.ParameterLocation.FormData &&
                 NeedsSpecialSerialization(ModelType))
             {
-                var primary = ClientType as PrimaryTypeObjC;
-                var sequence = ClientType as SequenceTypeObjC;
+                var primary = ClientType as PrimaryTypeOc;
+                var sequence = ClientType as SequenceTypeOc;
                 if (primary != null && primary.IsPrimaryType(KnownPrimaryType.ByteArray))
                 {
                     if (WireType.IsPrimaryType(KnownPrimaryType.String))
@@ -127,7 +127,7 @@ namespace AutoRest.ObjC.Model
             return convertClientTypeToWireType(WireType, source, WireName, clientReference);
         }
 
-        private string convertClientTypeToWireType(IModelTypeObjC wireType, string source, string target, string clientReference, int level = 0)
+        private string convertClientTypeToWireType(IModelTypeOc wireType, string source, string target, string clientReference, int level = 0)
         {
             IndentedStringBuilder builder = new IndentedStringBuilder();
             if (wireType.IsPrimaryType(KnownPrimaryType.DateTimeRfc1123))
@@ -179,15 +179,15 @@ namespace AutoRest.ObjC.Model
                     builder.Outdent().AppendLine("}");
                 }
             }
-            else if (wireType is SequenceTypeObjC)
+            else if (wireType is SequenceTypeOc)
             {
                 if (!IsRequired)
                 {
                     builder.AppendLine("{0} {1} = {2};", WireType.Name, target, wireType.GetDefaultValue(Method) ?? "null")
                         .AppendLine("if ({0} != null) {{", source).Indent();
                 }
-                var sequenceType = wireType as SequenceTypeObjC;
-                var elementType = sequenceType.ElementType as IModelTypeObjC;
+                var sequenceType = wireType as SequenceTypeOc;
+                var elementType = sequenceType.ElementType as IModelTypeOc;
                 var itemName = string.Format(CultureInfo.InvariantCulture, "item{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0}{1} = new ArrayList<{2}>();", IsRequired ? wireType.Name + " " : "", target, elementType.Name)
@@ -201,15 +201,15 @@ namespace AutoRest.ObjC.Model
                     builder.Outdent().AppendLine("}");
                 }
             }
-            else if (wireType is DictionaryTypeObjC)
+            else if (wireType is DictionaryTypeOc)
             {
                 if (!IsRequired)
                 {
                     builder.AppendLine("{0} {1} = {2};", WireType.Name, target, wireType.GetDefaultValue(Method) ?? "null")
                         .AppendLine("if ({0} != null) {{", source).Indent();
                 }
-                var dictionaryType = wireType as DictionaryTypeObjC;
-                var valueType = dictionaryType.ValueType as IModelTypeObjC;
+                var dictionaryType = wireType as DictionaryTypeOc;
+                var valueType = dictionaryType.ValueType as IModelTypeOc;
                 var itemName = string.Format(CultureInfo.InvariantCulture, "entry{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0}{1} = new HashMap<String, {2}>();", IsRequired ? wireType.Name + " " : "", target, valueType.Name)

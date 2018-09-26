@@ -4,17 +4,17 @@ using AutoRest.Core.Model;
 using Newtonsoft.Json;
 using AutoRest.Core;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class EnumTypeObjC : EnumType, IModelTypeObjC
+    public class EnumTypeOc : EnumType, IModelTypeOc
     {
-        public EnumTypeObjC()
+        public EnumTypeOc()
         {
             Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" ? "String" : CodeNamer.Instance.GetTypeName(name);
         }
 
         [JsonIgnore]
-        public virtual string ModelsPackage => (this.CodeModel as CodeModelObjC).ModelsPackage;
+        public virtual string ModelsPackage => (this.CodeModel as CodeModelOc).ModelsPackage;
 
         [JsonIgnore]
         public virtual IEnumerable<string> Imports
@@ -31,12 +31,12 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IModelTypeObjC ResponseVariant => this;
+        public IModelTypeOc ResponseVariant => this;
 
         [JsonIgnore]
-        public IModelTypeObjC ParameterVariant => this;
+        public IModelTypeOc ParameterVariant => this;
 
         [JsonIgnore]
-        public IModelTypeObjC NonNullableVariant => this;
+        public IModelTypeOc NonNullableVariant => this;
     }
 }

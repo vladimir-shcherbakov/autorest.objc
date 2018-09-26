@@ -5,18 +5,18 @@ using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
 using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class ResponseObjC : Response
+    public class ResponseOc : Response
     {
         protected List<string> _interfaceImports = new List<string>();
         protected List<string> _implImports = new List<string>();
 
-        public ResponseObjC()
+        public ResponseOc()
         {
         }
 
-        public ResponseObjC(IModelTypeObjC body, IModelTypeObjC headers)
+        public ResponseOc(IModelTypeOc body, IModelTypeOc headers)
             : base(body, headers)
         {
         }
@@ -35,7 +35,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public virtual IModelTypeObjC BodyClientType
+        public virtual IModelTypeOc BodyClientType
         {
             get
             {
@@ -43,10 +43,10 @@ namespace AutoRest.ObjC.Model
             }
         }
 
-        private IModelTypeObjC _bodyWireType;
+        private IModelTypeOc _bodyWireType;
 
         [JsonIgnore]
-        public IModelTypeObjC BodyWireType
+        public IModelTypeOc BodyWireType
         {
             get
             {
@@ -54,11 +54,11 @@ namespace AutoRest.ObjC.Model
                 {
                     if (Body == null)
                     {
-                        _bodyWireType = new PrimaryTypeObjC(KnownPrimaryType.None);
+                        _bodyWireType = new PrimaryTypeOc(KnownPrimaryType.None);
                     }
                     else
                     {
-                        _bodyWireType = (IModelTypeObjC) Body;
+                        _bodyWireType = (IModelTypeOc) Body;
                     }
                 }
                 return _bodyWireType;
@@ -66,7 +66,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IModelTypeObjC HeaderClientType
+        public IModelTypeOc HeaderClientType
         {
             get
             {
@@ -82,7 +82,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IModelTypeObjC HeaderWireType
+        public IModelTypeOc HeaderWireType
         {
             get
             {
@@ -90,7 +90,7 @@ namespace AutoRest.ObjC.Model
                 {
                     return null;
                 }
-                return (IModelTypeObjC)Headers;
+                return (IModelTypeOc)Headers;
             }
         }
 
@@ -185,7 +185,7 @@ namespace AutoRest.ObjC.Model
             get
             {
                 var respvariant = BodyWireType.ResponseVariant;
-                if ((respvariant as PrimaryTypeObjC)?.Nullable != false)
+                if ((respvariant as PrimaryTypeOc)?.Nullable != false)
                 {
                     return respvariant.Name;
                 }
@@ -270,7 +270,7 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                var sequenceType = Body as SequenceTypeObjC;
+                var sequenceType = Body as SequenceTypeOc;
                 return sequenceType != null ? sequenceType.ElementType.Name.ToString() : "Void";
             }
         }
@@ -320,7 +320,7 @@ namespace AutoRest.ObjC.Model
             }
         }
 
-        private string convertToClientType(IModelTypeObjC type, string source, string target, int level = 0)
+        private string convertToClientType(IModelTypeOc type, string source, string target, int level = 0)
         {
             if (type == null)
             {
@@ -329,12 +329,12 @@ namespace AutoRest.ObjC.Model
             
             IndentedStringBuilder builder = new IndentedStringBuilder();
 
-            var sequenceType = type as SequenceTypeObjC;
-            var dictionaryType = type as DictionaryTypeObjC;
+            var sequenceType = type as SequenceTypeOc;
+            var dictionaryType = type as DictionaryTypeOc;
 
             if (sequenceType != null)
             {
-                var elementType = sequenceType.ElementType as IModelTypeObjC;
+                var elementType = sequenceType.ElementType as IModelTypeOc;
                 var itemName = string.Format(CultureInfo.InvariantCulture, "item{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0} = new ArrayList<{1}>();", target, elementType.ResponseVariant.Name)
@@ -348,7 +348,7 @@ namespace AutoRest.ObjC.Model
             }
             else if (dictionaryType != null)
             {
-                var valueType = dictionaryType.ValueType as IModelTypeObjC;
+                var valueType = dictionaryType.ValueType as IModelTypeOc;
                 var itemName = string.Format(CultureInfo.InvariantCulture, "entry{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0} = new HashMap<String, {1}>();", target, valueType.ResponseVariant.Name)

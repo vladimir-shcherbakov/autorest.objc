@@ -9,11 +9,11 @@ using AutoRest.Core;
 using AutoRest.Core.Utilities;
 using AutoRest.Extensions;
 using AutoRest.Core.Model;
-using AutoRest.ObjC.Model;
+using AutoRest.ObjectiveC.Model;
 
-namespace AutoRest.ObjC
+namespace AutoRest.ObjectiveC
 {
-    public class CodeNamerObjC : CodeNamer
+    public class CodeNamerOc : CodeNamer
     {
         private Dictionary<IModelType, IModelType> _visited = new Dictionary<IModelType, IModelType>();
 
@@ -24,16 +24,28 @@ namespace AutoRest.ObjC
         /// <summary>
         /// Initializes a new instance of CSharpCodeNamingFramework.
         /// </summary>
-        public CodeNamerObjC()
+        public CodeNamerOc()
         {
+            // List retrieved from
+            // http://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
             ReservedWords.AddRange(new []
             {
-                "if", "else", "switch", "case", "default", "break", "int", "float", "char", "double", "long", "for", "while", "do",
-                "void", "goto", "auto", "signed", "const", "extern", "register", "unsigned", "return", "continue", "enum", "sizeof",
-                "struct", "typedef", "union", "volatile"
+                "abstract", "assert",   "boolean",  "break",    "byte",
+                "case",     "catch",    "char",     "class",    "const",
+                "continue", "default",  "do",       "double",   "else",
+                "enum",     "extends",  "false",    "final",    "finally",
+                "float",    "for",      "goto",     "if",       "implements",
+                "import",   "int",      "long",     "interface","instanceof",
+                "native",   "new",      "null",     "package",  "private",
+                "protected","public",   "return",   "short",    "static",
+                "strictfp", "super",    "switch",   "synchronized","this",
+                "throw",    "throws",   "transient","true",     "try",
+                "void",     "volatile", "while",    "date",     "datetime",
+                "period",   "stream",   "string",   "object", "header"
             });
 
-            PrimaryTypes = new HashSet<string>
+            PrimaryTypes = new HashSet<string>();
+            new HashSet<string>
             {
                 "int", "Integer",
                 "long", "Long",
@@ -50,8 +62,10 @@ namespace AutoRest.ObjC
                 "Duration",
                 "Period",
                 "BigDecimal",
-                "InputStream",
-           
+                "InputStream"
+            }.ForEach(s => PrimaryTypes.Add(s));
+            new HashSet<string>
+            {
                 "int",
                 "long",
                 "bool",
@@ -59,7 +73,7 @@ namespace AutoRest.ObjC
                 "float",
                 "byte",
                 "byte[]"
-            };
+            }.ForEach(s => PrimaryTypes.Add(s));
         }
 
         #endregion

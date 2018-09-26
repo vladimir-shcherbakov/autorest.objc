@@ -1,21 +1,19 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
-
-using AutoRest.Core.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using AutoRest.Core.Utilities;
+using AutoRest.Core.Model;
+using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class PrimaryTypeObjC : PrimaryType, IModelTypeObjC
+    public class PrimaryTypeOc : PrimaryType, IModelTypeOc
     {
-        public PrimaryTypeObjC()
+        public PrimaryTypeOc()
         {
             Name.OnGet += v => ImplementationName;
         }
 
-        public PrimaryTypeObjC(KnownPrimaryType type)
+        public PrimaryTypeOc(KnownPrimaryType type)
             : base(type)
         {
             Name.OnGet += v => ImplementationName;
@@ -23,6 +21,7 @@ namespace AutoRest.ObjC.Model
 
         public bool WantNullable { get; private set; } = true;
 
+        [JsonIgnore]
         public bool Nullable
         {
             get
@@ -31,7 +30,6 @@ namespace AutoRest.ObjC.Model
                 {
                     return true;
                 }
-
                 switch (KnownPrimaryType)
                 {
                     case KnownPrimaryType.None:
@@ -42,74 +40,88 @@ namespace AutoRest.ObjC.Model
                     case KnownPrimaryType.UnixTime:
                         return false;
                 }
-
                 return true;
             }
         }
 
+        [JsonIgnore]
         public override string DefaultValue
         {
             get
             {
-                switch (Name)
+                if (Name == "byte[]")
                 {
-                    case "byte[]":
-                        return "new byte[0]";
-                    case "Byte[]":
-                        return "new Byte[0]";
-                    default:
-                        if (Nullable)
-                        {
-                            return null;
-                        }
-                        else
-                        {
-                            throw new NotSupportedException(this.Name + " does not have default value!");
-                        }
+                    return "new byte[0]";
+                }
+                else if (Name == "Byte[]")
+                {
+                    return "new Byte[0]";
+                }
+                else if (Nullable)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new NotSupportedException(this.Name + " does not have default value!");
                 }
             }
         }
 
-        public IModelTypeObjC ParameterVariant
+        [JsonIgnore]
+        public IModelTypeOc ParameterVariant
         {
             get
             {
-                switch (KnownPrimaryType)
+                if (KnownPrimaryType == KnownPrimaryType.DateTimeRfc1123)
                 {
-                    case KnownPrimaryType.DateTimeRfc1123:
-                        return new PrimaryTypeObjC(KnownPrimaryType.DateTime);
-                    case KnownPrimaryType.UnixTime:
-                        return new PrimaryTypeObjC(KnownPrimaryType.DateTime);
-                    case KnownPrimaryType.Base64Url:
-                        return new PrimaryTypeObjC(KnownPrimaryType.ByteArray);
-                    case KnownPrimaryType.Stream:
-                        return new PrimaryTypeObjC(KnownPrimaryType.ByteArray);
-                    default:
-                        return this;
+                    return new PrimaryTypeOc(KnownPrimaryType.DateTime);
+                }
+                else if (KnownPrimaryType == KnownPrimaryType.UnixTime)
+                {
+                    return new PrimaryTypeOc(KnownPrimaryType.DateTime);
+                }
+                else if (KnownPrimaryType == KnownPrimaryType.Base64Url)
+                {
+                    return new PrimaryTypeOc(KnownPrimaryType.ByteArray);
+                }
+                else if (KnownPrimaryType == KnownPrimaryType.Stream)
+                {
+                    return new PrimaryTypeOc(KnownPrimaryType.ByteArray);
+                }
+                else
+                {
+                    return this;
                 }
             }
         }
 
-        public IModelTypeObjC ResponseVariant
+        [JsonIgnore]
+        public IModelTypeOc ResponseVariant
         {
             get
             {
-                switch (KnownPrimaryType)
+                if (KnownPrimaryType == KnownPrimaryType.DateTimeRfc1123)
                 {
-                    case KnownPrimaryType.DateTimeRfc1123:
-                        return new PrimaryTypeObjC(KnownPrimaryType.DateTime);
-                    case KnownPrimaryType.UnixTime:
-                        return new PrimaryTypeObjC(KnownPrimaryType.DateTime);
-                    case KnownPrimaryType.Base64Url:
-                        return new PrimaryTypeObjC(KnownPrimaryType.ByteArray);
-                    case KnownPrimaryType.None:
-                        return NonNullableVariant;
+                    return new PrimaryTypeOc(KnownPrimaryType.DateTime);
                 }
-
+                else if (KnownPrimaryType == KnownPrimaryType.UnixTime)
+                {
+                    return new PrimaryTypeOc(KnownPrimaryType.DateTime);
+                }
+                else if (KnownPrimaryType == KnownPrimaryType.Base64Url)
+                {
+                    return new PrimaryTypeOc(KnownPrimaryType.ByteArray);
+                }
+                else if (KnownPrimaryType == KnownPrimaryType.None)
+                {
+                    return NonNullableVariant;
+                }
                 return this;
             }
         }
 
+        [JsonIgnore]
         public IEnumerable<string> Imports
         {
             get
@@ -151,14 +163,16 @@ namespace AutoRest.ObjC.Model
             }
         }
 
-        public IModelTypeObjC NonNullableVariant =>
-            new PrimaryTypeObjC
+        [JsonIgnore]
+        public IModelTypeOc NonNullableVariant => 
+            new PrimaryTypeOc
             {
                 KnownPrimaryType = KnownPrimaryType,
                 Format = Format,
                 WantNullable = false
             };
 
+        [JsonIgnore]
         public virtual string ImplementationName
         {
             get
@@ -166,39 +180,39 @@ namespace AutoRest.ObjC.Model
                 switch (KnownPrimaryType)
                 {
                     case KnownPrimaryType.None:
-                        return WantNullable ? "Any" : "void";
+                        return WantNullable ? "Void" : "void";
                     case KnownPrimaryType.Base64Url:
-                        return "NSURI*";
+                        return "Base64Url";
                     case KnownPrimaryType.Boolean:
-                        return WantNullable ? "NSNumber*" : "BOOL";
+                        return WantNullable ? "Boolean" : "boolean";
                     case KnownPrimaryType.ByteArray:
-                        return "NSData*";
+                        return "byte[]";
                     case KnownPrimaryType.Date:
-                        return "NSDate*";
+                        return "LocalDate";
                     case KnownPrimaryType.DateTime:
-                        return "NSDate*";
+                        return "DateTime";
                     case KnownPrimaryType.DateTimeRfc1123:
-                        return "NSDate*";
+                        return "DateTimeRfc1123";
                     case KnownPrimaryType.Double:
-                        return WantNullable ? "NSNumber*" : "double";
+                        return WantNullable ? "Double" : "double";
                     case KnownPrimaryType.Decimal:
-                        return "NSNumber*";
+                        return "BigDecimal";
                     case KnownPrimaryType.Int:
-                        return WantNullable ? "NSNumber*" : "int";
+                        return WantNullable ? "Integer" : "int";
                     case KnownPrimaryType.Long:
-                        return WantNullable ? "NSNumber*" : "long";
+                        return WantNullable ? "Long" : "long";
                     case KnownPrimaryType.Stream:
-                        return "NSInputStream*";
+                        return "InputStream";
                     case KnownPrimaryType.String:
-                        return "NSString*";
+                        return "String";
                     case KnownPrimaryType.TimeSpan:
-                        return "NSTimeInterval*";
+                        return "Period";
                     case KnownPrimaryType.UnixTime:
-                        return WantNullable ? "NSNumber*" : "long";
+                        return WantNullable ? "Long" : "long";
                     case KnownPrimaryType.Uuid:
-                        return "NSUUID*";
+                        return "UUID";
                     case KnownPrimaryType.Object:
-                        return "NSObject*";
+                        return "Object";
                     case KnownPrimaryType.Credentials:
                         return "ServiceClientCredentials";
                 }

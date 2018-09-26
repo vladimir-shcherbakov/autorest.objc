@@ -7,9 +7,9 @@ using System.Globalization;
 using System.Text;
 using AutoRest.Core.Model;
 using AutoRest.Core.Utilities;
-using AutoRest.ObjC.Model;
+using AutoRest.ObjectiveC.Model;
 
-namespace AutoRest.ObjC
+namespace AutoRest.ObjectiveC
 {
     public static class ClientModelExtensions
     {
@@ -100,7 +100,7 @@ namespace AutoRest.ObjC
             {
                 return new List<string>();
             }
-            return ((IModelTypeObjC) type).Imports;
+            return ((IModelTypeOc) type).Imports;
         }
 
         public static string ImportFrom(this HttpMethod httpMethod)

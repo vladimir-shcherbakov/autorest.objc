@@ -14,26 +14,26 @@ using AutoRest.Core.Model;
 using Newtonsoft.Json;
 using AutoRest.Core.Utilities.Collections;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class MethodObjC : Method
+    public class MethodOc : Method
     {
         [JsonIgnore]
-        public virtual IEnumerable<ParameterObjC> RetrofitParameters
+        public virtual IEnumerable<ParameterOc> RetrofitParameters
         {
             get
             {
-                var parameters = LogicalParameters.OfType<ParameterObjC>().Where(p => p.Location != ParameterLocation.None)
+                var parameters = LogicalParameters.OfType<ParameterOc>().Where(p => p.Location != ParameterLocation.None)
                     .Where(p => !p.Extensions.ContainsKey("hostParameter")).ToList();
                 if (IsParameterizedHost)
                 {
-                    parameters.Add(new ParameterObjC
+                    parameters.Add(new ParameterOc
                     {
                         Name = "parameterizedHost",
                         SerializedName = "x-ms-parameterized-host",
                         Location = ParameterLocation.Header,
                         IsRequired = true,
-                        ModelType = new PrimaryTypeObjC(KnownPrimaryType.String)
+                        ModelType = new PrimaryTypeOc(KnownPrimaryType.String)
                     });
                 }
                 return parameters;
@@ -41,7 +41,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IEnumerable<ParameterObjC> OrderedRetrofitParameters
+        public IEnumerable<ParameterOc> OrderedRetrofitParameters
         {
             get
             {
@@ -59,7 +59,7 @@ namespace AutoRest.ObjC.Model
             get
             {
                 List<string> declarations = new List<string>();
-                foreach (ParameterObjC parameter in OrderedRetrofitParameters)
+                foreach (ParameterOc parameter in OrderedRetrofitParameters)
                 {
                     bool alreadyEncoded = parameter.Extensions.ContainsKey(SwaggerExtensions.SkipUrlEncodingExtension) &&
                         (bool) parameter.Extensions[SwaggerExtensions.SkipUrlEncodingExtension] == true;
@@ -294,7 +294,7 @@ namespace AutoRest.ObjC.Model
                 if (conditionalAssignment)
                 {
                     builder.AppendLine("{0} {1} = null;",
-                            ((ParameterObjC) transformation.OutputParameter).ClientType.ParameterVariant.Name,
+                            ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name,
                             outParamName);
                     builder.AppendLine("if ({0}) {{", nullCheck).Indent();
                 }
@@ -303,7 +303,7 @@ namespace AutoRest.ObjC.Model
                     transformation.OutputParameter.ModelType is CompositeType)
                 {
                     builder.AppendLine("{0}{1} = new {2}();",
-                        !conditionalAssignment ? ((ParameterObjC)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
+                        !conditionalAssignment ? ((ParameterOc)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
                         outParamName,
                         transformation.OutputParameter.ModelType.Name);
                 }
@@ -312,7 +312,7 @@ namespace AutoRest.ObjC.Model
                 {
                     builder.AppendLine("{0}{1}{2};",
                         !conditionalAssignment && !(transformation.OutputParameter.ModelType is CompositeType) ?
-                            ((ParameterObjC)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
+                            ((ParameterOc)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
                         outParamName,
                         GetMapping(mapping, filterRequired));
                 }
@@ -365,11 +365,11 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IEnumerable<ParameterObjC> RequiredNullableParameters
+        public IEnumerable<ParameterOc> RequiredNullableParameters
         {
             get
             {
-                foreach (ParameterObjC param in Parameters)
+                foreach (ParameterOc param in Parameters)
                 {
                     if (!param.ModelType.IsPrimaryType(KnownPrimaryType.Int) &&
                         !param.ModelType.IsPrimaryType(KnownPrimaryType.Double) &&
@@ -385,11 +385,11 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IEnumerable<ParameterObjC> ParametersToValidate
+        public IEnumerable<ParameterOc> ParametersToValidate
         {
             get
             {
-                foreach (ParameterObjC param in Parameters)
+                foreach (ParameterOc param in Parameters)
                 {
                     if (param.ModelType is PrimaryType ||
                         param.ModelType is EnumType ||
@@ -425,7 +425,7 @@ namespace AutoRest.ObjC.Model
                     parameters += ", ";
                 }
                 parameters += string.Format(CultureInfo.InvariantCulture, "final ServiceCallback<{0}> serviceCallback",
-                    ReturnTypeObjC.GenericBodyClientTypeString);
+                    ReturnTypeOc.GenericBodyClientTypeString);
                 return parameters;
             }
         }
@@ -441,7 +441,7 @@ namespace AutoRest.ObjC.Model
                     parameters += ", ";
                 }
                 parameters += string.Format(CultureInfo.InvariantCulture, "final ServiceCallback<{0}> serviceCallback",
-                    ReturnTypeObjC.GenericBodyClientTypeString);
+                    ReturnTypeOc.GenericBodyClientTypeString);
                 return parameters;
             }
         }
@@ -481,13 +481,13 @@ namespace AutoRest.ObjC.Model
         /// exclude global parameters
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<ParameterObjC> LocalParameters
+        public IEnumerable<ParameterOc> LocalParameters
         {
             get
             {
                 //Omit parameter-group properties for now since Java doesn't support them yet
                 var par = Parameters
-                    .OfType<ParameterObjC>()
+                    .OfType<ParameterOc>()
                     .Where(p => p != null && !p.IsClientProperty && !string.IsNullOrWhiteSpace(p.Name))
                     .OrderBy(item => !item.IsRequired)
                     .ToList();
@@ -519,7 +519,7 @@ namespace AutoRest.ObjC.Model
             {
                 if (this.DefaultResponse.Body is CompositeType)
                 {
-                    var type = this.DefaultResponse.Body as CompositeTypeObjC;
+                    var type = this.DefaultResponse.Body as CompositeTypeOc;
                     return type.ExceptionTypeDefinitionName;
                 }
                 else
@@ -603,21 +603,21 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public ResponseObjC ReturnTypeObjC => ReturnType as ResponseObjC;
+        public ResponseOc ReturnTypeOc => ReturnType as ResponseOc;
 
         [JsonIgnore]
-        public virtual string ReturnTypeResponseName => ReturnTypeObjC?.BodyClientType?.ServiceResponseVariant()?.Name;
+        public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.Name;
 
         public virtual string ResponseGeneration(bool filterRequired = false)
         {
-            if (ReturnTypeObjC.NeedsConversion)
+            if (ReturnTypeOc.NeedsConversion)
             {
                 IndentedStringBuilder builder= new IndentedStringBuilder();
                 builder.AppendLine("ServiceResponse<{0}> response = {1}Delegate(call.execute());",
-                    ReturnTypeObjC.GenericBodyWireTypeString, this.Name.ToCamelCase());
-                builder.AppendLine("{0} body = null;", ReturnTypeObjC.BodyClientType.Name)
+                    ReturnTypeOc.GenericBodyWireTypeString, this.Name.ToCamelCase());
+                builder.AppendLine("{0} body = null;", ReturnTypeOc.BodyClientType.Name)
                     .AppendLine("if (response.body() != null) {")
-                    .Indent().AppendLine("{0}", ReturnTypeObjC.ConvertBodyToClientType("response.body()", "body"))
+                    .Indent().AppendLine("{0}", ReturnTypeOc.ConvertBodyToClientType("response.body()", "body"))
                     .Outdent().AppendLine("}");
                 return builder.ToString();
             }
@@ -629,9 +629,9 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                if (ReturnTypeObjC.NeedsConversion)
+                if (ReturnTypeOc.NeedsConversion)
                 {
-                    return "new ServiceResponse<" + ReturnTypeObjC.GenericBodyClientTypeString + ">(body, response.response())";
+                    return "new ServiceResponse<" + ReturnTypeOc.GenericBodyClientTypeString + ">(body, response.response())";
                 }
                 return this.Name + "Delegate(call.execute())";
             }
@@ -640,19 +640,19 @@ namespace AutoRest.ObjC.Model
         public virtual string ClientResponse(bool filterRequired = false)
         {
             IndentedStringBuilder builder = new IndentedStringBuilder();
-            if (ReturnTypeObjC.NeedsConversion)
+            if (ReturnTypeOc.NeedsConversion)
             {
-                builder.AppendLine("ServiceResponse<{0}> result = {1}Delegate(response);", ReturnTypeObjC.GenericBodyWireTypeString, this.Name);
-                builder.AppendLine("{0} body = null;", ReturnTypeObjC.BodyClientType.Name)
+                builder.AppendLine("ServiceResponse<{0}> result = {1}Delegate(response);", ReturnTypeOc.GenericBodyWireTypeString, this.Name);
+                builder.AppendLine("{0} body = null;", ReturnTypeOc.BodyClientType.Name)
                     .AppendLine("if (result.body() != null) {")
-                    .Indent().AppendLine("{0}", ReturnTypeObjC.ConvertBodyToClientType("result.body()", "body"))
+                    .Indent().AppendLine("{0}", ReturnTypeOc.ConvertBodyToClientType("result.body()", "body"))
                     .Outdent().AppendLine("}");
                 builder.AppendLine("ServiceResponse<{0}> clientResponse = new ServiceResponse<{0}>(body, result.response());",
-                    ReturnTypeObjC.GenericBodyClientTypeString);
+                    ReturnTypeOc.GenericBodyClientTypeString);
             }
             else
             {
-                builder.AppendLine("{0} clientResponse = {1}Delegate(response);", ReturnTypeObjC.WireResponseTypeString, this.Name);
+                builder.AppendLine("{0} clientResponse = {1}Delegate(response);", ReturnTypeOc.WireResponseTypeString, this.Name);
             }
             return builder.ToString();
         }
@@ -689,18 +689,18 @@ namespace AutoRest.ObjC.Model
                 // static imports
                 imports.Add("rx.Observable");
                 imports.Add("com.microsoft.rest.ServiceFuture");
-                imports.Add("com.microsoft.rest." + ReturnTypeObjC.ClientResponseType);
+                imports.Add("com.microsoft.rest." + ReturnTypeOc.ClientResponseType);
                 imports.Add("com.microsoft.rest.ServiceCallback");
                 // parameter types
-                this.Parameters.OfType<ParameterObjC>().ForEach(p => imports.AddRange(p.InterfaceImports));
+                this.Parameters.OfType<ParameterOc>().ForEach(p => imports.AddRange(p.InterfaceImports));
                 // return type
-                imports.AddRange(this.ReturnTypeObjC.InterfaceImports);
+                imports.AddRange(this.ReturnTypeOc.InterfaceImports);
                 // exceptions
                 this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
                     .ForEach(ex =>
                     {
-                        string exceptionImport = CodeNamerObjC.GetJavaException(ex, CodeModel);
-                        if (exceptionImport != null) imports.Add(CodeNamerObjC.GetJavaException(ex, CodeModel));
+                        string exceptionImport = CodeNamerOc.GetJavaException(ex, CodeModel);
+                        if (exceptionImport != null) imports.Add(CodeNamerOc.GetJavaException(ex, CodeModel));
                     });                return imports.ToList();
             }
         }
@@ -728,7 +728,7 @@ namespace AutoRest.ObjC.Model
                     imports.Add("okhttp3.ResponseBody");
                 }
                 imports.Add("com.microsoft.rest.ServiceFuture");
-                imports.Add("com.microsoft.rest." + ReturnTypeObjC.ClientResponseType);
+                imports.Add("com.microsoft.rest." + ReturnTypeOc.ClientResponseType);
                 imports.Add("com.microsoft.rest.ServiceCallback");
                 this.RetrofitParameters.ForEach(p => imports.AddRange(p.RetrofitImports));
                 // Http verb annotations
@@ -744,23 +744,23 @@ namespace AutoRest.ObjC.Model
                     imports.Add("com.microsoft.rest.Validator");
                 }
                 // parameters
-                this.LocalParameters.Concat(this.LogicalParameters.OfType<ParameterObjC>())
+                this.LocalParameters.Concat(this.LogicalParameters.OfType<ParameterOc>())
                     .ForEach(p => imports.AddRange(p.ClientImplImports));
                 this.RetrofitParameters.ForEach(p => imports.AddRange(p.WireImplImports));
                 // return type
-                imports.AddRange(this.ReturnTypeObjC.ImplImports);
+                imports.AddRange(this.ReturnTypeOc.ImplImports);
                 if (ReturnType.Body.IsPrimaryType(KnownPrimaryType.Stream))
                 {
                     imports.Add("retrofit2.http.Streaming");
                 }
                 // response type (can be different from return type)
-                this.Responses.ForEach(r => imports.AddRange((r.Value as ResponseObjC).ImplImports));
+                this.Responses.ForEach(r => imports.AddRange((r.Value as ResponseOc).ImplImports));
                 // exceptions
                 this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
                     .ForEach(ex =>
                     {
-                        string exceptionImport = CodeNamerObjC.GetJavaException(ex, CodeModel);
-                        if (exceptionImport != null) imports.Add(CodeNamerObjC.GetJavaException(ex, CodeModel));
+                        string exceptionImport = CodeNamerOc.GetJavaException(ex, CodeModel);
+                        if (exceptionImport != null) imports.Add(CodeNamerOc.GetJavaException(ex, CodeModel));
                     });
                 // parameterized host
                 if (IsParameterizedHost)

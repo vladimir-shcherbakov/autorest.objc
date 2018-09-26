@@ -7,11 +7,11 @@ using AutoRest.Core.Model;
 using AutoRest.Extensions;
 using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class PropertyObjC : Property
+    public class PropertyOc : Property
     {
-        public PropertyObjC()
+        public PropertyOc()
         {
         }
 
@@ -35,9 +35,12 @@ namespace AutoRest.ObjC.Model
                 }
                 return WantNullable 
                     ? base.ModelType 
-                    : (base.ModelType as IModelTypeObjC)?.NonNullableVariant;
+                    : (base.ModelType as IModelTypeOc).NonNullableVariant;
             }
-            set => base.ModelType = value;
+            set
+            {
+                base.ModelType = value;
+            }
         }
 
         [JsonIgnore]
@@ -53,9 +56,9 @@ namespace AutoRest.ObjC.Model
                 {
                     return "new DateTime(this." + Name + " * 1000L, DateTimeZone.UTC)";
                 }
-                else if (ModelType.Name != ((IModelTypeObjC)ModelType).ResponseVariant.Name)
+                else if (ModelType.Name != ((IModelTypeOc)ModelType).ResponseVariant.Name)
                 {
-                    return string.Format("this.{0}.{1}()", Name, ((IModelTypeObjC)ModelType).ResponseVariant.Name.ToCamelCase(), CultureInfo.InvariantCulture);
+                    return string.Format("this.{0}.{1}()", Name, ((IModelTypeOc)ModelType).ResponseVariant.Name.ToCamelCase(), CultureInfo.InvariantCulture);
                 }
                 else
                 {
@@ -77,7 +80,7 @@ namespace AutoRest.ObjC.Model
                 {
                     return string.Format("{0}.toDateTime(DateTimeZone.UTC).getMillis() / 1000", Name, CultureInfo.InvariantCulture);
                 }
-                else if (ModelType.Name != ((IModelTypeObjC)ModelType).ResponseVariant.Name)
+                else if (ModelType.Name != ((IModelTypeOc)ModelType).ResponseVariant.Name)
                 {
                     return string.Format("new {0}({1})", ModelType.Name, Name, CultureInfo.InvariantCulture);
                 }
@@ -104,7 +107,7 @@ namespace AutoRest.ObjC.Model
                     || ModelType.IsPrimaryType(KnownPrimaryType.Base64Url))
                 {
                     imports.AddRange(ModelType.ImportSafe());
-                    imports.AddRange(((IModelTypeObjC)ModelType).ResponseVariant.ImportSafe());
+                    imports.AddRange(((IModelTypeOc)ModelType).ResponseVariant.ImportSafe());
                 }
                 return imports;
             }

@@ -8,15 +8,15 @@ using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
 using Newtonsoft.Json;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public class MethodGroupObjC : MethodGroup
+    public class MethodGroupOc : MethodGroup
     {
-        public MethodGroupObjC()
+        public MethodGroupOc()
         {
             Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
         }
-        public MethodGroupObjC(string name) : base(name)
+        public MethodGroupOc(string name) : base(name)
         {
             Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
         }
@@ -81,7 +81,7 @@ namespace AutoRest.ObjC.Model
             get
             {
                 if (this.Methods
-                    .OfType<MethodObjC>()
+                    .OfType<MethodOc>()
                     .SelectMany(m => m.ImplImports)
                     .Any(i => i.Split('.').LastOrDefault() == TypeName))
                 {
@@ -96,7 +96,7 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                return CodeNamerObjC.GetServiceName(Name.ToPascalCase());
+                return CodeNamerOc.GetServiceName(Name.ToPascalCase());
             }
         }
 
@@ -121,7 +121,7 @@ namespace AutoRest.ObjC.Model
                     imports.Add(MethodGroupFullType);
                 }
                 imports.AddRange(this.Methods
-                    .OfType<MethodObjC>()
+                    .OfType<MethodOc>()
                     .SelectMany(m => m.ImplImports)
                     .OrderBy(i => i).Distinct());
                 return imports;
@@ -134,7 +134,7 @@ namespace AutoRest.ObjC.Model
             get
             {
                 return this.Methods
-                    .OfType<MethodObjC>()
+                    .OfType<MethodOc>()
                     .SelectMany(m => m.InterfaceImports)
                     .OrderBy(i => i).Distinct();
             }

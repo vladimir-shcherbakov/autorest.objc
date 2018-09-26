@@ -1,19 +1,19 @@
 ﻿using AutoRest.Core.Model;
 using System.Collections.Generic;
 
-namespace AutoRest.ObjC.Model
+namespace AutoRest.ObjectiveC.Model
 {
-    public interface IModelTypeObjC : IModelType
+    public interface IModelTypeOc : IModelType
     {
         IEnumerable<string> Imports { get; }
         
-        IModelTypeObjC ResponseVariant { get; }
-        IModelTypeObjC ParameterVariant { get; }
+        IModelTypeOc ResponseVariant { get; }
+        IModelTypeOc ParameterVariant { get; }
 
-        IModelTypeObjC NonNullableVariant { get; }
+        IModelTypeOc NonNullableVariant { get; }
     }
 
-    public static class ModelTypeExtensions
+    public static class IModelTypeExtensions
     {
         public static IModelType ServiceResponseVariant(this IModelType original, bool wantNullable = false)
         {
@@ -21,12 +21,12 @@ namespace AutoRest.ObjC.Model
             {
                 return original; // the original is always nullable
             }
-            return (original as IModelTypeObjC)?.ResponseVariant?.NonNullableVariant ?? original;
+            return (original as IModelTypeOc)?.ResponseVariant?.NonNullableVariant ?? original;
         }
 
         public static string GetDefaultValue(this IModelType type, Method parent)
         {
-            return type is PrimaryTypeObjC && type.Name == "RequestBody"
+            return type is PrimaryTypeOc && type.Name == "RequestBody"
                 ? "RequestBody.create(MediaType.parse(\"" + parent.RequestContentType + "\"), new byte[0])"
                 : type.DefaultValue;
         }
