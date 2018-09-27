@@ -48,7 +48,7 @@ namespace AutoRest.ObjectiveC.Model
         public virtual string ImplPackage => "implementation";
 
         [JsonIgnore]
-        public string ModelsPackage => ".models";
+        public string ModelsPackage => "Models/";
 
         [JsonIgnore]
         public IEnumerable<MethodOc> RootMethods => Methods.Where(m => m.Group.IsNullOrEmpty()).OfType<MethodOc>();
@@ -61,27 +61,27 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                HashSet<string> classes = new HashSet<string> {FullyQualifiedDomainName};
+                var imports = new HashSet<string> {FullyQualifiedDomainName};
                 foreach(var methodGroupFullType in this.AllOperations.Select(op => op.MethodGroupFullType).Distinct())
                 {
-                    classes.Add(methodGroupFullType);
+                    imports.Add(methodGroupFullType);
                 }
                 if (this.Properties.Any(p => p.ModelType.IsPrimaryType(KnownPrimaryType.Credentials)))
                 {
-                    classes.Add("com.microsoft.rest.credentials.ServiceClientCredentials");
+                    //imports.Add("com.microsoft.rest.credentials.ServiceClientCredentials");
                 }
-                classes.AddRange(new[]{
-                        "com.microsoft.rest.ServiceClient",
-                        "com.microsoft.rest.RestClient",
-                        "okhttp3.OkHttpClient",
-                        "retrofit2.Retrofit"
-                    });
+//                classes.AddRange(new[]{
+//                        "com.microsoft.rest.ServiceClient",
+//                        "com.microsoft.rest.RestClient",
+//                        "okhttp3.OkHttpClient",
+//                        "retrofit2.Retrofit"
+//                    });
 
-                classes.AddRange(RootMethods
+                imports.AddRange(RootMethods
                     .SelectMany(m => m.ImplImports)
                     .OrderBy(i => i));
 
-                return classes.AsEnumerable();
+                return imports.AsEnumerable();
             }
         }
 
@@ -90,15 +90,15 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                HashSet<string> classes = new HashSet<string>();
+                var imports = new HashSet<string>();
                 
-                classes.AddRange(RootMethods
+                imports.AddRange(RootMethods
                     .SelectMany(m => m.InterfaceImports)
                     .OrderBy(i => i).Distinct());
 
-                classes.Add("com.microsoft.rest.RestClient");
+//                classes.Add("com.microsoft.rest.RestClient");
 
-                return classes.ToList();
+                return imports.ToList();
             }
         }
     }

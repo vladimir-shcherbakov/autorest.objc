@@ -46,7 +46,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> imports = new List<string> { "java.util.List" };
+                List<string> imports = new List<string>();
                 return imports.Concat(((IModelTypeOc) this.ElementType).Imports);
             }
         }

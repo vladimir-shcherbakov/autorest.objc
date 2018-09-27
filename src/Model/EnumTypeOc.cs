@@ -21,12 +21,13 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                if (Name != "String")
-                {
-                    yield return string.Join(".",
-                        CodeModel?.Namespace.ToLowerInvariant(),
-                        "models", Name);
-                }
+//                if (Name != "String")
+//                {
+//                    yield return string.Join(".",
+//                        CodeModel?.Namespace.ToLowerInvariant(),
+//                        "models", Name);
+//                }
+                yield return $"Models/{Name}";
             }
         }
 

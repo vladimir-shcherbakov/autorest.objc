@@ -10,50 +10,18 @@
  */
 @EmptyLine
 
-package @(Settings.Namespace.ToLower());
 @EmptyLine
-@foreach (var importClass in Model.InterfaceImports)
+@foreach (var import in Model.InterfaceImports)
 {
-@:import @importClass;
+@:#import "@(import).h"
 }
 @EmptyLine
 
 /**
  * The interface for @Model.Name class.
  */
-public interface @Model.Name {
-    /**
-     * Gets the REST client.
-     *
-     * @@return the {@@link RestClient} object.
-    */
-    RestClient restClient();
-@EmptyLine
-    /**
-     * The default base URL.
-     */
-    String DEFAULT_BASE_URL = "@Model.BaseUrl";
-@foreach (var property in Model.Properties)
-{
-@EmptyLine
-@:    /**
-@:     * Gets @(property.Documentation).
-@:     *
-@:     * @@return the @(property.Name) value.
-@:     */
-@:    @property.ModelType.ServiceResponseVariant().Name @(property.Name.ToCamelCase())();
-if(!property.IsReadOnly)
-{
-@EmptyLine
-@:    /**
-@:     * Sets @(property.Documentation).
-@:     *
-@:     * @@param @(property.Name.ToCamelCase()) the @(property.Name) value.
-@:     * @@return the service client itself
-@:     */
-@:    @(Model.Name) with@(property.Name.ToPascalCase())(@(property.ModelType.ServiceResponseVariant().Name) @(property.Name.ToCamelCase()));
-}
-}
+@@protocol I@(Model.Name)
+
 
 @foreach (var operation in Model.AllOperations)
 {
@@ -67,12 +35,38 @@ if(!property.IsReadOnly)
 @EmptyLine
 @if (Model.RootMethods.Any())
 {
-<text>
-    @foreach (MethodOc method in Model.RootMethods)
+    foreach (MethodOc method in Model.RootMethods)
     {
     @:@Include(new MethodInterfaceTemplate(), method)
     @EmptyLine
     }
-</text>
 }
+@@end
+
+@EmptyLine
+@@interface @Model.Name : NSObject <I@(Model.Name)>
+@EmptyLine
+    /**
+    The default base URL.
+    @Model.BaseUrl
+    */
+    @@property (readonly) (NSString*) DEFAULT_BASE_URL;
+@foreach (var property in Model.Properties)
+{
+    @EmptyLine
+    @:/**
+    @:@(property.Documentation).
+    @:*/
+    @:@@property @(property.IsReadOnly ? " (readonly) " : "") (@(property.ModelType.ServiceResponseVariant().Name)) @(property.Name.ToCamelCase());
 }
+@EmptyLine
+@{
+    var initParams = Model.Properties
+        .Where(p => !p.IsReadOnly)
+        .Select(p=>$"{p.Name}: ({p.ModelTypeName}) {p.Name}");
+    var str = string.Join(" ", initParams);
+    var paramDecl = char.ToUpper(str[0]) + str.Substring(1);
+    @:- initWith@(paramDecl);
+}
+
+@@end

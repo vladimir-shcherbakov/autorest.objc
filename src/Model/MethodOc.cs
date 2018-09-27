@@ -59,9 +59,9 @@ namespace AutoRest.ObjectiveC.Model
             get
             {
                 List<string> declarations = new List<string>();
-                foreach (ParameterOc parameter in OrderedRetrofitParameters)
+                foreach (var parameter in OrderedRetrofitParameters)
                 {
-                    bool alreadyEncoded = parameter.Extensions.ContainsKey(SwaggerExtensions.SkipUrlEncodingExtension) &&
+                    var alreadyEncoded = parameter.Extensions.ContainsKey(SwaggerExtensions.SkipUrlEncodingExtension) &&
                         (bool) parameter.Extensions[SwaggerExtensions.SkipUrlEncodingExtension] == true;
 
                     StringBuilder declarationBuilder = new StringBuilder();
@@ -114,7 +114,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> declarations = new List<string>();
+                var declarations = new List<string>();
                 foreach (var parameter in LocalParameters.Where(p => !p.IsConstant))
                 {
                     declarations.Add(parameter.ClientType.ParameterVariant.Name + " " + parameter.Name);
@@ -130,7 +130,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> declarations = new List<string>();
+                var declarations = new List<string>();
                 foreach (var parameter in LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
                 {
                     declarations.Add(parameter.ClientType.ParameterVariant.Name + " " + parameter.Name);
@@ -146,7 +146,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> invocations = new List<string>();
+                var invocations = new List<string>();
                 foreach (var parameter in LocalParameters.Where(p => !p.IsConstant))
                 {
                     invocations.Add(parameter.Name);
@@ -162,7 +162,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> invocations = new List<string>();
+                var invocations = new List<string>();
                 foreach (var parameter in LocalParameters)
                 {
                     if (parameter.IsRequired)
@@ -185,7 +185,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> invocations = new List<string>();
+                var invocations = new List<string>();
                 foreach (var parameter in LocalParameters)
                 {
                     if (parameter.IsRequired && !parameter.IsConstant)
@@ -204,7 +204,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> invocations = new List<string>();
+                var invocations = new List<string>();
                 foreach (var parameter in OrderedRetrofitParameters)
                 {
                     invocations.Add(parameter.WireName);
@@ -220,7 +220,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> invocations = new List<string>();
+                var invocations = new List<string>();
                 foreach (var parameter in OrderedRetrofitParameters)
                 {
                     invocations.Add(parameter.WireName);
@@ -685,23 +685,24 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                HashSet<string> imports = new HashSet<string>();
+                var imports = new HashSet<string>();
                 // static imports
-                imports.Add("rx.Observable");
-                imports.Add("com.microsoft.rest.ServiceFuture");
-                imports.Add("com.microsoft.rest." + ReturnTypeOc.ClientResponseType);
-                imports.Add("com.microsoft.rest.ServiceCallback");
+//                imports.Add("rx.Observable");
+//                imports.Add("com.microsoft.rest.ServiceFuture");
+//                imports.Add("com.microsoft.rest." + ReturnTypeOc.ClientResponseType);
+//                imports.Add("com.microsoft.rest.ServiceCallback");
                 // parameter types
                 this.Parameters.OfType<ParameterOc>().ForEach(p => imports.AddRange(p.InterfaceImports));
                 // return type
                 imports.AddRange(this.ReturnTypeOc.InterfaceImports);
                 // exceptions
-                this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
-                    .ForEach(ex =>
-                    {
-                        string exceptionImport = CodeNamerOc.GetJavaException(ex, CodeModel);
-                        if (exceptionImport != null) imports.Add(CodeNamerOc.GetJavaException(ex, CodeModel));
-                    });                return imports.ToList();
+//                this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+//                    .ForEach(ex =>
+//                    {
+//                        string exceptionImport = CodeNamerOc.GetJavaException(ex, CodeModel);
+//                        if (exceptionImport != null) imports.Add(CodeNamerOc.GetJavaException(ex, CodeModel));
+//                    });
+                return imports.ToList();
             }
         }
 
@@ -710,63 +711,63 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                HashSet<string> imports = new HashSet<string>();
+                var imports = new HashSet<string>();
                 // static imports
-                imports.Add("rx.Observable");
-                imports.Add("rx.functions.Func1");
-                if (RequestContentType == "multipart/form-data" || RequestContentType == "application/x-www-form-urlencoded")
-                {
-                    imports.Add("retrofit2.http.Multipart");
-                }
-                else
-                {
-                    imports.Add("retrofit2.http.Headers");
-                }
-                imports.Add("retrofit2.Response");
-                if (this.HttpMethod != HttpMethod.Head)
-                {
-                    imports.Add("okhttp3.ResponseBody");
-                }
-                imports.Add("com.microsoft.rest.ServiceFuture");
-                imports.Add("com.microsoft.rest." + ReturnTypeOc.ClientResponseType);
-                imports.Add("com.microsoft.rest.ServiceCallback");
-                this.RetrofitParameters.ForEach(p => imports.AddRange(p.RetrofitImports));
-                // Http verb annotations
-                imports.Add(this.HttpMethod.ImportFrom());
-                // response type conversion
-                if (this.Responses.Any())
-                {
-                    imports.Add("com.google.common.reflect.TypeToken");
-                }
-                // validation
-                if (!ParametersToValidate.IsNullOrEmpty())
-                {
-                    imports.Add("com.microsoft.rest.Validator");
-                }
-                // parameters
-                this.LocalParameters.Concat(this.LogicalParameters.OfType<ParameterOc>())
-                    .ForEach(p => imports.AddRange(p.ClientImplImports));
-                this.RetrofitParameters.ForEach(p => imports.AddRange(p.WireImplImports));
-                // return type
-                imports.AddRange(this.ReturnTypeOc.ImplImports);
-                if (ReturnType.Body.IsPrimaryType(KnownPrimaryType.Stream))
-                {
-                    imports.Add("retrofit2.http.Streaming");
-                }
-                // response type (can be different from return type)
-                this.Responses.ForEach(r => imports.AddRange((r.Value as ResponseOc).ImplImports));
-                // exceptions
-                this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
-                    .ForEach(ex =>
-                    {
-                        string exceptionImport = CodeNamerOc.GetJavaException(ex, CodeModel);
-                        if (exceptionImport != null) imports.Add(CodeNamerOc.GetJavaException(ex, CodeModel));
-                    });
-                // parameterized host
-                if (IsParameterizedHost)
-                {
-                    imports.Add("com.google.common.base.Joiner");
-                }
+//                imports.Add("rx.Observable");
+//                imports.Add("rx.functions.Func1");
+//                if (RequestContentType == "multipart/form-data" || RequestContentType == "application/x-www-form-urlencoded")
+//                {
+//                    imports.Add("retrofit2.http.Multipart");
+//                }
+//                else
+//                {
+//                    imports.Add("retrofit2.http.Headers");
+//                }
+//                imports.Add("retrofit2.Response");
+//                if (this.HttpMethod != HttpMethod.Head)
+//                {
+//                    imports.Add("okhttp3.ResponseBody");
+//                }
+//                imports.Add("com.microsoft.rest.ServiceFuture");
+//                imports.Add("com.microsoft.rest." + ReturnTypeOc.ClientResponseType);
+//                imports.Add("com.microsoft.rest.ServiceCallback");
+//                this.RetrofitParameters.ForEach(p => imports.AddRange(p.RetrofitImports));
+//                // Http verb annotations
+//                imports.Add(this.HttpMethod.ImportFrom());
+//                // response type conversion
+//                if (this.Responses.Any())
+//                {
+//                    imports.Add("com.google.common.reflect.TypeToken");
+//                }
+//                // validation
+//                if (!ParametersToValidate.IsNullOrEmpty())
+//                {
+//                    imports.Add("com.microsoft.rest.Validator");
+//                }
+//                // parameters
+//                this.LocalParameters.Concat(this.LogicalParameters.OfType<ParameterOc>())
+//                    .ForEach(p => imports.AddRange(p.ClientImplImports));
+//                this.RetrofitParameters.ForEach(p => imports.AddRange(p.WireImplImports));
+//                // return type
+//                imports.AddRange(this.ReturnTypeOc.ImplImports);
+//                if (ReturnType.Body.IsPrimaryType(KnownPrimaryType.Stream))
+//                {
+//                    imports.Add("retrofit2.http.Streaming");
+//                }
+//                // response type (can be different from return type)
+//                this.Responses.ForEach(r => imports.AddRange((r.Value as ResponseOc).ImplImports));
+//                // exceptions
+//                this.ExceptionString.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+//                    .ForEach(ex =>
+//                    {
+//                        string exceptionImport = CodeNamerOc.GetJavaException(ex, CodeModel);
+//                        if (exceptionImport != null) imports.Add(CodeNamerOc.GetJavaException(ex, CodeModel));
+//                    });
+//                // parameterized host
+//                if (IsParameterizedHost)
+//                {
+//                    imports.Add("com.google.common.base.Joiner");
+//                }
                 return imports.ToList();
             }
         }

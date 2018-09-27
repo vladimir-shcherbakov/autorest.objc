@@ -92,7 +92,7 @@ namespace AutoRest.ObjectiveC
         /// <summary>
         /// A null friendly wrapper around type imports.
         /// </summary>
-        /// <param name="type">an instance of IJavaType</param>
+        /// <param name="type">an instance of IModelType</param>
         /// <returns>a list of imports to append</returns>
         public static IEnumerable<string> ImportSafe(this IModelType type)
         {

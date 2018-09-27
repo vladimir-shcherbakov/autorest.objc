@@ -96,20 +96,21 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var imports = new List<string>(ModelType.ImportSafe()
-                        .Where(c => !c.StartsWith(
-                            string.Join(
-                                ".",
-                                Parent?.CodeModel?.Namespace.ToLowerInvariant(),
-                                "models"),
-                            StringComparison.OrdinalIgnoreCase)));
-                if (ModelType.IsPrimaryType(KnownPrimaryType.DateTimeRfc1123)
-                    || ModelType.IsPrimaryType(KnownPrimaryType.Base64Url))
-                {
-                    imports.AddRange(ModelType.ImportSafe());
-                    imports.AddRange(((IModelTypeOc)ModelType).ResponseVariant.ImportSafe());
-                }
-                return imports;
+                yield return  @"Models/{Name}";
+//                var imports = new List<string>(ModelType.ImportSafe()
+//                        .Where(c => !c.StartsWith(
+//                            string.Join(
+//                                "",
+//                                Parent?.CodeModel?.Namespace.ToLowerInvariant(),
+//                                "models"),
+//                            StringComparison.OrdinalIgnoreCase)));
+//                if (ModelType.IsPrimaryType(KnownPrimaryType.DateTimeRfc1123)
+//                    || ModelType.IsPrimaryType(KnownPrimaryType.Base64Url))
+//                {
+//                    imports.AddRange(ModelType.ImportSafe());
+//                    imports.AddRange(((IModelTypeOc)ModelType).ResponseVariant.ImportSafe());
+//                }
+//                return imports;
             }
         }
     }

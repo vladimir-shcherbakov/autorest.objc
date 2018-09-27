@@ -12,7 +12,7 @@ namespace AutoRest.ObjectiveC.Model
     public class CompositeTypeOc : CompositeType, IModelTypeOc
     {
         public const string ExternalExtension = "x-ms-external";
-        protected string _runtimePackage = "com.microsoft.rest";
+        protected string _runtimePackage = "Models";
 
         public CompositeTypeOc()
         {
@@ -35,10 +35,11 @@ namespace AutoRest.ObjectiveC.Model
                 }
                 else
                 {
-                    return string.Join(
-                        ".",
-                        CodeModel?.Namespace.ToLowerInvariant(),
-                        "models");
+//                    return string.Join(
+//                        ".",
+//                        CodeModel?.Namespace.ToLowerInvariant(),
+//                        "models");
+                    return @"Models";
                 }
             }
         }
@@ -103,43 +104,43 @@ namespace AutoRest.ObjectiveC.Model
                 }
                 else
                 {
-                    imports.Add(string.Join(".", Package, Name));
+                    imports.Add(string.Join("/", Package, Name));
                 }
                 return imports;
             }
         }
 
         [JsonIgnore]
-        public virtual IEnumerable<String> ImportList
+        public virtual IEnumerable<string> ImportList
         {
             get
             {
-                var classes = new HashSet<string>();
-                classes.AddRange(Properties.SelectMany(pm => (pm as PropertyOc).Imports));
-                if (this.Properties.Any(p => !p.GetJsonProperty().IsNullOrEmpty()))
-                {
-                    classes.Add("com.fasterxml.jackson.annotation.JsonProperty");
-                }
-                // For polymorphism
-                if (BaseIsPolymorphic)
-                {
-                    classes.Add("com.fasterxml.jackson.annotation.JsonTypeInfo");
-                    classes.Add("com.fasterxml.jackson.annotation.JsonTypeName");
-                    if (SubTypes.Any())
-                    {
-                        classes.Add("com.fasterxml.jackson.annotation.JsonSubTypes");
-                    }
-                }
-                // For flattening
-                if (NeedsFlatten)
-                {
-                    classes.Add("com.microsoft.rest.serializer.JsonFlatten");
-                }
-                if (SkipParentValidation)
-                {
-                    classes.Add("com.microsoft.rest.SkipParentValidation");
-                }
-                return classes.AsEnumerable();
+                var imports = new HashSet<string>();
+                imports.AddRange(Properties.SelectMany(pm => (pm as PropertyOc).Imports));
+//                if (this.Properties.Any(p => !p.GetJsonProperty().IsNullOrEmpty()))
+//                {
+//                    imports.Add("com.fasterxml.jackson.annotation.JsonProperty");
+//                }
+//                // For polymorphism
+//                if (BaseIsPolymorphic)
+//                {
+//                    imports.Add("com.fasterxml.jackson.annotation.JsonTypeInfo");
+//                    imports.Add("com.fasterxml.jackson.annotation.JsonTypeName");
+//                    if (SubTypes.Any())
+//                    {
+//                        imports.Add("com.fasterxml.jackson.annotation.JsonSubTypes");
+//                    }
+//                }
+//                // For flattening
+//                if (NeedsFlatten)
+//                {
+//                    imports.Add("com.microsoft.rest.serializer.JsonFlatten");
+//                }
+//                if (SkipParentValidation)
+//                {
+//                    imports.Add("com.microsoft.rest.SkipParentValidation");
+//                }
+                return imports.AsEnumerable();
             }
         }
 

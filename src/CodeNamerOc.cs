@@ -165,21 +165,22 @@ namespace AutoRest.ObjectiveC
 
         public static string GetJavaException(string exception, CodeModel cm)
         {
-            switch (exception) {
-                case "IOException":
-                    return "java.io.IOException";
-                case "CloudException":
-                    return "com.microsoft.azure.CloudException";
-                case "RestException":
-                    return "com.microsoft.rest.RestException";
-                case "IllegalArgumentException":
-                    return null;
-                case "InterruptedException":
-                    return null;
-                default:
-                    return (cm.Namespace.ToLowerInvariant())
-                        + ".models." + exception;
-            }
+//            switch (exception) {
+//                case "IOException":
+//                    return "java.io.IOException";
+//                case "CloudException":
+//                    return "com.microsoft.azure.CloudException";
+//                case "RestException":
+//                    return "com.microsoft.rest.RestException";
+//                case "IllegalArgumentException":
+//                    return null;
+//                case "InterruptedException":
+//                    return null;
+//                default:
+//                    return (cm.Namespace.ToLowerInvariant())
+//                        + ".models." + exception;
+//            }
+            return "";
         }
 
         #endregion

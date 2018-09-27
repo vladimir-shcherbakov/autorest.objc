@@ -128,34 +128,34 @@ namespace AutoRest.ObjectiveC.Model
             {
                 switch (KnownPrimaryType)
                 {
-                    case KnownPrimaryType.Base64Url:
-                        yield return "com.microsoft.rest.Base64Url";
-                        break;
-                    case KnownPrimaryType.Date:
-                        yield return "org.joda.time.LocalDate";
-                        break;
-                    case KnownPrimaryType.DateTime:
-                        yield return "org.joda.time.DateTime";
-                        break;
-                    case KnownPrimaryType.DateTimeRfc1123:
-                        yield return "com.microsoft.rest.DateTimeRfc1123";
-                        break;
-                    case KnownPrimaryType.Decimal:
-                        yield return "java.math.BigDecimal";
-                        break;
-                    case KnownPrimaryType.Stream:
-                        yield return "java.io.InputStream";
-                        break;
-                    case KnownPrimaryType.TimeSpan:
-                        yield return "org.joda.time.Period";
-                        break;
-                    case KnownPrimaryType.UnixTime:
-                        yield return "org.joda.time.DateTime";
-                        yield return "org.joda.time.DateTimeZone";
-                        break;
-                    case KnownPrimaryType.Uuid:
-                        yield return "java.util.UUID";
-                        break;
+//                    case KnownPrimaryType.Base64Url:
+//                        yield return "com.microsoft.rest.Base64Url";
+//                        break;
+//                    case KnownPrimaryType.Date:
+//                        yield return "org.joda.time.LocalDate";
+//                        break;
+//                    case KnownPrimaryType.DateTime:
+//                        yield return "org.joda.time.DateTime";
+//                        break;
+//                    case KnownPrimaryType.DateTimeRfc1123:
+//                        yield return "com.microsoft.rest.DateTimeRfc1123";
+//                        break;
+//                    case KnownPrimaryType.Decimal:
+//                        yield return "java.math.BigDecimal";
+//                        break;
+//                    case KnownPrimaryType.Stream:
+//                        yield return "java.io.InputStream";
+//                        break;
+//                    case KnownPrimaryType.TimeSpan:
+//                        yield return "org.joda.time.Period";
+//                        break;
+//                    case KnownPrimaryType.UnixTime:
+//                        yield return "org.joda.time.DateTime";
+//                        yield return "org.joda.time.DateTimeZone";
+//                        break;
+//                    case KnownPrimaryType.Uuid:
+//                        yield return "java.util.UUID";
+//                        break;
                     case KnownPrimaryType.Credentials:
                         yield return "com.microsoft.rest.ServiceClientCredentials";
                         break;
