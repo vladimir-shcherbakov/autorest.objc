@@ -15,34 +15,21 @@ namespace AutoRest.ObjC.Model
     {
         public override string BaseUrl
         {
-            get
-            {
-                if (!base.BaseUrl.Contains("://"))
-                {
-                    return $"https://{base.BaseUrl}";
-                }
-                return base.BaseUrl;
-            }
-            set
-            {
-                base.BaseUrl = value;
-            }
+            get => !base.BaseUrl.Contains("://") 
+                ? $"https://{base.BaseUrl}" 
+                : base.BaseUrl;
+            set => base.BaseUrl = value;
         }
 
         [JsonIgnore]
         public IEnumerable<MethodGroupObjC> AllOperations => Operations.Where(operation => !operation.Name.IsNullOrEmpty()).Cast<MethodGroupObjC>();
+        //public IEnumerable<MethodGroup> AllOperations => Operations.Where(operation => !operation.Name.IsNullOrEmpty());
 
         [JsonIgnore]
         public bool IsCustomBaseUri => Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
 
         [JsonIgnore]
-        public string ServiceClientServiceType
-        {
-            get
-            {
-                return CodeNamerObjC.GetServiceName(Name.ToPascalCase());
-            }
-        }
+        public string ServiceClientServiceType => CodeNamerObjC.GetServiceName(Name.ToPascalCase());
 
         [JsonIgnore]
         public virtual string ImplPackage => "implementation";
@@ -90,7 +77,7 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                HashSet<string> classes = new HashSet<string>();
+                var classes = new HashSet<string>();
                 
                 classes.AddRange(RootMethods
                     .SelectMany(m => m.InterfaceImports)

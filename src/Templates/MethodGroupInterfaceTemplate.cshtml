@@ -1,0 +1,24 @@
+@using System
+@using AutoRest.ObjC.Templates
+@using System.Linq;
+@using AutoRest.ObjC
+@using AutoRest.ObjC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjC.Model.MethodGroupObjC>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+
+@EmptyLine
+
+/**
+ * An instance of this class provides access to all the operations defined
+ * in @(Model.TypeName).
+ */
+public interface @Model.TypeName {
+    @foreach (MethodObjC method in Model.Methods)
+    {
+    @:@Include(new MethodInterfaceTemplate(), method)
+    @EmptyLine
+    }
+}

@@ -21,6 +21,9 @@ namespace AutoRest.ObjC.Model
             set => base.SerializedName = value;
         }
 
+        public override string ModelTypeName => (ModelType is CompositeTypeObjC)
+            ? $"{base.ModelTypeName} *"
+            : $"{base.ModelTypeName}";
 
         [JsonIgnore]
         public bool WantNullable => IsXNullable ?? !IsRequired;

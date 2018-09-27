@@ -50,6 +50,12 @@
     </PropertyGroup>
     <Exec Condition="$(SolutionDir) != '' AND $(OS) =='WINDOWS_NT' " Command="$(ResGenFix)" EchoOff="true" WorkingDirectory="$(MSBuildProjectDirectory)" /> 
   </Target>
+  
+  <ItemGroup>
+    <Compile Remove="Writer\**" />
+    <EmbeddedResource Remove="Writer\**" />
+    <None Remove="Writer\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
@@ -66,11 +72,47 @@
   </ItemGroup>
 
    <ItemGroup>
-     <DotnetRazor Remove="Templates\InterfaceModelTemplate.cshtml" />
+     <DotnetRazor Remove="Writer\**" />
    </ItemGroup>
 
    <ItemGroup>
-     <Folder Include="Writer\" />
+     <DotnetRazor Remove="Templates\EnumTemplateImpl.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ModelTemplateImpl.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\EnumTemplateInterface.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ModelTemplateInterface.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientTemplate.cshtml" />
    </ItemGroup>
 
 </Project>

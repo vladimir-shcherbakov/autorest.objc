@@ -23,19 +23,22 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                var parameters = LogicalParameters.OfType<ParameterObjC>().Where(p => p.Location != ParameterLocation.None)
-                    .Where(p => !p.Extensions.ContainsKey("hostParameter")).ToList();
-                if (IsParameterizedHost)
-                {
-                    parameters.Add(new ParameterObjC
-                    {
-                        Name = "parameterizedHost",
-                        SerializedName = "x-ms-parameterized-host",
-                        Location = ParameterLocation.Header,
-                        IsRequired = true,
-                        ModelType = new PrimaryTypeObjC(KnownPrimaryType.String)
-                    });
-                }
+                var parameters = LogicalParameters.OfType<ParameterObjC>();
+//                    .Where(p => p.Location != ParameterLocation.None)
+//                    .Where(p => !p.Extensions.ContainsKey("hostParameter"))
+//                    .ToList();
+                
+//                if (IsParameterizedHost)
+//                {
+//                    parameters.Add(new ParameterObjC
+//                    {
+//                        Name = "parameterizedHost",
+//                        SerializedName = "x-ms-parameterized-host",
+//                        Location = ParameterLocation.Header,
+//                        IsRequired = true,
+//                        ModelType = new PrimaryTypeObjC(KnownPrimaryType.String)
+//                    });
+//                }
                 return parameters;
             }
         }
@@ -369,8 +372,9 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                foreach (ParameterObjC param in Parameters)
+                foreach (var parameter in Parameters)
                 {
+                    var param = (ParameterObjC) parameter;
                     if (!param.ModelType.IsPrimaryType(KnownPrimaryType.Int) &&
                         !param.ModelType.IsPrimaryType(KnownPrimaryType.Double) &&
                         !param.ModelType.IsPrimaryType(KnownPrimaryType.Boolean) &&
@@ -389,8 +393,9 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                foreach (ParameterObjC param in Parameters)
+                foreach (var parameter in Parameters)
                 {
+                    var param = (ParameterObjC) parameter;
                     if (param.ModelType is PrimaryType ||
                         param.ModelType is EnumType ||
                         param.IsConstant)
@@ -406,13 +411,7 @@ namespace AutoRest.ObjC.Model
         /// Gets the expression for response body initialization
         /// </summary>
         [JsonIgnore]
-        public virtual string InitializeResponseBody
-        {
-            get
-            {
-                return string.Empty;
-            }
-        }
+        public virtual string InitializeResponseBody => string.Empty;
 
         [JsonIgnore]
         public virtual string MethodParameterDeclarationWithCallback
@@ -544,22 +543,18 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public virtual string ExceptionString
-        {
-            get
-            {
-                return string.Join(", ", Exceptions);
-            }
-        }
+        public virtual string ExceptionString => string.Join(", ", Exceptions);
 
         [JsonIgnore]
         public virtual List<string> ExceptionStatements
         {
             get
             {
-                List<string> exceptions = new List<string>();
-                exceptions.Add(OperationExceptionTypeString + " exception thrown from REST call");
-                exceptions.Add("IOException exception thrown from serialization/deserialization");
+                var exceptions = new List<string>
+                {
+                    OperationExceptionTypeString + " exception thrown from REST call",
+                    "IOException exception thrown from serialization/deserialization"
+                };
                 if (RequiredNullableParameters.Any())
                 {
                     exceptions.Add("IllegalArgumentException exception thrown from invalid parameters");
@@ -569,38 +564,13 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public string CallType
-        {
-            get
-            {
-                if (this.HttpMethod == HttpMethod.Head)
-                {
-                    return "Void";
-                }
-                else
-                {
-                    return "ResponseBody";
-                }
-            }
-        }
+        public string CallType => this.HttpMethod == HttpMethod.Head ? "Void" : "ResponseBody";
 
         [JsonIgnore]
-        public virtual string ResponseBuilder
-        {
-            get
-            {
-                return "ServiceResponseBuilder";
-            }
-        }
+        public virtual string ResponseBuilder => "ServiceResponseBuilder";
 
         [JsonIgnore]
-        public virtual string RuntimeBasePackage
-        {
-            get
-            {
-                return "com.microsoft.rest";
-            }
-        }
+        public virtual string RuntimeBasePackage => "com.microsoft.rest";
 
         [JsonIgnore]
         public ResponseObjC ReturnTypeObjC => ReturnType as ResponseObjC;
@@ -610,18 +580,15 @@ namespace AutoRest.ObjC.Model
 
         public virtual string ResponseGeneration(bool filterRequired = false)
         {
-            if (ReturnTypeObjC.NeedsConversion)
-            {
-                IndentedStringBuilder builder= new IndentedStringBuilder();
-                builder.AppendLine("ServiceResponse<{0}> response = {1}Delegate(call.execute());",
-                    ReturnTypeObjC.GenericBodyWireTypeString, this.Name.ToCamelCase());
-                builder.AppendLine("{0} body = null;", ReturnTypeObjC.BodyClientType.Name)
-                    .AppendLine("if (response.body() != null) {")
-                    .Indent().AppendLine("{0}", ReturnTypeObjC.ConvertBodyToClientType("response.body()", "body"))
-                    .Outdent().AppendLine("}");
-                return builder.ToString();
-            }
-            return "";
+            if (!ReturnTypeObjC.NeedsConversion) return "";
+            IndentedStringBuilder builder= new IndentedStringBuilder();
+            builder.AppendLine("ServiceResponse<{0}> response = {1}Delegate(call.execute());",
+                ReturnTypeObjC.GenericBodyWireTypeString, this.Name.ToCamelCase());
+            builder.AppendLine("{0} body = null;", ReturnTypeObjC.BodyClientType.Name)
+                .AppendLine("if (response.body() != null) {")
+                .Indent().AppendLine("{0}", ReturnTypeObjC.ConvertBodyToClientType("response.body()", "body"))
+                .Outdent().AppendLine("}");
+            return builder.ToString();
         }
 
         [JsonIgnore]
@@ -639,7 +606,7 @@ namespace AutoRest.ObjC.Model
 
         public virtual string ClientResponse(bool filterRequired = false)
         {
-            IndentedStringBuilder builder = new IndentedStringBuilder();
+            var builder = new IndentedStringBuilder();
             if (ReturnTypeObjC.NeedsConversion)
             {
                 builder.AppendLine("ServiceResponse<{0}> result = {1}Delegate(response);", ReturnTypeObjC.GenericBodyWireTypeString, this.Name);
@@ -672,25 +639,21 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public virtual string CallbackDocumentation
-        {
-            get
-            {
-                return " * @param serviceCallback the async ServiceCallback to handle successful and failed responses.";
-            }
-        }
+        public virtual string CallbackDocumentation => " * @param serviceCallback the async ServiceCallback to handle successful and failed responses.";
 
         [JsonIgnore]
         public virtual List<string> InterfaceImports
         {
             get
             {
-                HashSet<string> imports = new HashSet<string>();
+                var imports = new HashSet<string>
+                {
+                    "rx.Observable",
+                    "com.microsoft.rest.ServiceFuture",
+                    "com.microsoft.rest." + ReturnTypeObjC.ClientResponseType,
+                    "com.microsoft.rest.ServiceCallback"
+                };
                 // static imports
-                imports.Add("rx.Observable");
-                imports.Add("com.microsoft.rest.ServiceFuture");
-                imports.Add("com.microsoft.rest." + ReturnTypeObjC.ClientResponseType);
-                imports.Add("com.microsoft.rest.ServiceCallback");
                 // parameter types
                 this.Parameters.OfType<ParameterObjC>().ForEach(p => imports.AddRange(p.InterfaceImports));
                 // return type
@@ -710,10 +673,8 @@ namespace AutoRest.ObjC.Model
         {
             get
             {
-                HashSet<string> imports = new HashSet<string>();
+                var imports = new HashSet<string> {"rx.Observable", "rx.functions.Func1"};
                 // static imports
-                imports.Add("rx.Observable");
-                imports.Add("rx.functions.Func1");
                 if (RequestContentType == "multipart/form-data" || RequestContentType == "application/x-www-form-urlencoded")
                 {
                     imports.Add("retrofit2.http.Multipart");

@@ -1,0 +1,34 @@
+@using System
+@using AutoRest.ObjC.Templates
+@using System.Linq;
+@using AutoRest.ObjC
+@using AutoRest.ObjC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjC.Model.MethodGroupObjC>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+
+
+/**
+ * An instance of this class provides access to all the operations defined
+ * in @(Model.TypeName).
+ */
+public class @(Model.MethodGroupImplType)@(Model.ParentDeclaration) {
+    /** The Retrofit service to perform REST calls. */
+    private @Model.MethodGroupServiceType service;
+    /** The service client containing this operation class. */
+    private @(Model.ServiceClientType) client;
+    @EmptyLine
+    /**
+     * Initializes an instance of @(Model.TypeName).
+     *
+     * @@param retrofit the Retrofit instance built from a Retrofit Builder.
+     * @@param client the instance of the service client containing this operation class.
+     */
+    public @(Model.MethodGroupImplType)(Retrofit retrofit, @(Model.ServiceClientType) client) {
+        this.service = retrofit.create(@(Model.MethodGroupServiceType).class);
+        this.client = client;
+    }
+    @EmptyLine
+}

@@ -1,0 +1,72 @@
+@using System
+@using AutoRest.ObjC.Templates
+@using System.Linq
+@using AutoRest.Core.Utilities
+@using AutoRest.ObjC
+@using AutoRest.ObjC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjC.Model.CodeModelObjC>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+
+@EmptyLine
+
+/**
+ * The interface for @Model.Name class.
+ */
+public interface @Model.Name {
+    /**
+     * Gets the REST client.
+     *
+     * @@return the {@@link RestClient} object.
+    */
+    RestClient restClient();
+@EmptyLine
+    /**
+     * The default base URL.
+     */
+    String DEFAULT_BASE_URL = "@Model.BaseUrl";
+@foreach (var property in Model.Properties)
+{
+@EmptyLine
+@:    /**
+@:     * Gets @(property.Documentation).
+@:     *
+@:     * @@return the @(property.Name) value.
+@:     */
+@:    @property.ModelType.ServiceResponseVariant().Name @(property.Name.ToCamelCase())();
+if(!property.IsReadOnly)
+{
+@EmptyLine
+@:    /**
+@:     * Sets @(property.Documentation).
+@:     *
+@:     * @@param @(property.Name.ToCamelCase()) the @(property.Name) value.
+@:     * @@return the service client itself
+@:     */
+@:    @(Model.Name) with@(property.Name.ToPascalCase())(@(property.ModelType.ServiceResponseVariant().Name) @(property.Name.ToCamelCase()));
+}
+}
+
+@foreach (var operation in Model.AllOperations)
+{
+@EmptyLine
+@:    /**
+@:     * Gets the @(operation.TypeName) object to access its operations.
+@:     * @@return the @(operation.TypeName) object.
+@:     */
+@:    @(operation.TypeName) @(operation.Name)();
+}
+@EmptyLine
+@if (Model.RootMethods.Any())
+{
+<text>
+    @foreach (MethodObjC method in Model.RootMethods)
+    {
+    @:@Include(new MethodInterfaceTemplate(), method)
+    @EmptyLine
+    }
+</text>
+}
+}

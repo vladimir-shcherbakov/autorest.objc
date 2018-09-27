@@ -8,6 +8,7 @@ namespace AutoRest.ObjC.Model
         IEnumerable<string> Imports { get; }
         
         IModelTypeObjC ResponseVariant { get; }
+        
         IModelTypeObjC ParameterVariant { get; }
 
         IModelTypeObjC NonNullableVariant { get; }

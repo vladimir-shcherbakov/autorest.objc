@@ -37,7 +37,8 @@ namespace AutoRest.ObjC
 
         public override async Task Generate(CodeModel cm)
         {
-            if (!(cm is CodeModelObjC codeModel))
+            var codeModel = cm as CodeModelObjC;
+            if (codeModel == null)
             {
                 throw new InvalidCastException("CodeModel is not a Java CodeModel");
             }
@@ -51,30 +52,56 @@ namespace AutoRest.ObjC
 
             var modelList = new List<string>();
             var modelsFolderPath = Path.Combine(_baseFolderName, ModelsFolderName);
-
+/*
             //Models
             foreach (var compositeType in cm.ModelTypes.Union(codeModel.HeaderTypes))
             {
                 var modelType = (CompositeTypeObjC) compositeType;
-                var modelTemplate = new InterfaceModelTemplate { Model = modelType };
-                await Write(modelTemplate, Path.Combine(modelsFolderPath, $"{modelType.Name.ToPascalCase()}.{HeaderFileExtenson}"));
+                
+                var interfaceModelTemplate = new ModelTemplateInterface { Model = modelType };
+                await Write(interfaceModelTemplate, Path.Combine(modelsFolderPath, $"{modelType.Name.ToPascalCase()}{HeaderFileExtenson}"));
+                
+                var implModelTemplate = new ModelTemplateImpl { Model = modelType };
+                await Write(implModelTemplate, Path.Combine(modelsFolderPath, $"{modelType.Name.ToPascalCase()}{ModuleFileExtenson}"));
             }
 
-//
-//            foreach (var compositeType in cm.ModelTypes.Union(cm.HeaderTypes))
+            // Enums
+            foreach (var enumType in cm.EnumTypes)
+            {
+                var enumTypeObjC = (EnumTypeObjC) enumType;
+                
+                var interfaceEnumTemplate = new EnumTemplateInterface { Model = enumTypeObjC };
+                await Write(interfaceEnumTemplate, Path.Combine(modelsFolderPath, $"{interfaceEnumTemplate.Model.Name.ToPascalCase()}{HeaderFileExtenson}"));
+                
+                var implEnumTemplate = new EnumTemplateImpl { Model = enumTypeObjC };
+                await Write(implEnumTemplate, Path.Combine(modelsFolderPath, $"{implEnumTemplate.Model.Name.ToPascalCase()}{ModuleFileExtenson}"));
+            }
+*/
+
+            var protocolsFolderPath = Path.Combine(_baseFolderName, ProtocolsFolderName);
+
+            // Service client
+            var serviceClientTemplate = new ServiceClientTemplate { Model = codeModel };
+            await Write(serviceClientTemplate,  Path.Combine(protocolsFolderPath, $"{codeModel.Name.ToPascalCase()}Impl{ModuleFileExtenson}"));
+
+            // Service client interface
+            var serviceClientInterfaceTemplate = new ServiceClientInterfaceTemplate { Model = codeModel };
+            await Write(serviceClientInterfaceTemplate,  Path.Combine(protocolsFolderPath, $"{cm.Name.ToPascalCase()}{HeaderFileExtenson}"));
+
+
+            // operations
+//            var op = cm.Operations;
+//            foreach (MethodGroupObjC methodGroup in codeModel.AllOperations)
 //            {
-//                var modelType = (CompositeTypeObjC) compositeType;
-//                modelList.Add(modelType.Name);
-//                var modelTemplate = new InterfaceModelTemplate { Model = modelType };
-////                var headerContent = "";
-////                var moduleContent = "";
-////
-//                await Write(modelTemplate, Path.Combine(modelsFolderPath, $"{modelType.Name}.{HeaderFileExtenson}"));
-////                await Write(moduleContent, Path.Combine(modelsFolderPath, $"{modelType.Name}.{ModuleFileExtenson}"));
+//                // Operation
+//                var operationsTemplate = new MethodGroupTemplate { Model = methodGroup };
+//                await Write(operationsTemplate, Path.Combine(protocolsFolderPath, $"{methodGroup.TypeName.ToPascalCase()}Impl{ModuleFileExtenson}"));
 //
-//
-//
+//                // Operation protocol
+//                var operationsInterfaceTemplate = new MethodGroupInterfaceTemplate { Model = methodGroup };
+//                await Write(operationsInterfaceTemplate, Path.Combine(protocolsFolderPath, $"{methodGroup.TypeName.ToPascalCase()}{HeaderFileExtenson}"));
 //            }
+
 
             var enumlList = new List<string>();
             foreach (var enumType in cm.EnumTypes)

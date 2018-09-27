@@ -8,13 +8,13 @@
 @inherits AutoRest.Core.Template<AutoRest.ObjC.Model.CompositeTypeObjC>
 
 @Header("// ")
-
+@EmptyLine
 #import <Foundation/Foundation.h>
 @EmptyLine
 /**
 @if (string.IsNullOrEmpty(Model.Summary) && string.IsNullOrEmpty(Model.Documentation))
 {
-    @:@WrapComment(" * ", "The " + Model.Name + " model.")
+    @:@WrapComment("", "The " + Model.Name + " model.")
 }
 else
 {
@@ -23,7 +23,7 @@ else
 }
 */
 @EmptyLine
-@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject") {
+@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject")
 @EmptyLine
 @foreach (PropertyObjC property in Model.Properties)
 {
@@ -38,32 +38,19 @@ else
         @:@WrapComment("", property.Documentation.EscapeXmlComment().Period())
     }
     @:*/
-    @:@@property @property.ModelType.Name @property.Name;
+    @:@@property @property.ModelTypeName @property.Name;
     @EmptyLine
 }
-@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties)
-{
-<text>
-    /**
-        Initializes an instance of @(Model.Name) class.
-    @foreach (var property in Model.Properties.Where(p => p.IsRequired && !p.IsConstant))
-    {
+@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties) {
+    @:/**
+        @:Initializes an instance of @(Model.Name) class.
+    foreach (var property in Model.Properties.Where(p => p.IsRequired && !p.IsConstant)) {
         @: @@param @property.Name @property.Javadoc()
     }
-    */
-    - (id) init@(Model.RequiredPropertiesConstructorDeclaration);
-    @if (Model.GenerateConstructorForRequiredProperties)
-    {
-        @:self = [super init];
-        @:if (self) {
-        foreach (var property in Model.Properties.Where(p => p.IsRequired && !p.IsConstant))
-        {
-            @:_@(property.Name) = @property.Name;
-        }
-        @:}
-        @:return self;
+    @:*/
+    if (Model.GenerateConstructorForRequiredProperties) {
+    @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration);
     }
-</text>
 }
 
 @foreach (PropertyObjC property in Model.Properties) {
@@ -73,22 +60,11 @@ if (!property.IsReadOnly && !(property.IsRequired && Model.GenerateConstructorFo
     @EmptyLine
     /**
         Set @property.Javadoc()
-        
         @@param @property.Name the @property.Name value to set
         @@return the @(Model.Name) object itself.
     */
-    - (@(Model.Name)*) with@(property.Name.ToPascalCase()): (@(((IModelTypeObjC)property.ModelType).ResponseVariant.Name)) @property.Name {
-    @if (property.ModelType.Name != ((IModelTypeObjC)property.ModelType).ResponseVariant.Name) {
-        @:if (@property.Name == null) {
-        @:    @(property.Name) = null;
-        @:} else {
-        @:    @(property.Name) = @(property.FromClientForm);
-        @:}
-    } else {
-        @:_@(property.Name) = @property.Name;
-    }
-        return self;
-    }
+@*    - (@(Model.Name)*) with@(property.Name.ToPascalCase()): (@(((IModelTypeObjC)property.ModelType).ResponseVariant.Name)) @property.Name;*@
+    - (@(Model.Name)*) with@(property.Name.ToPascalCase()): (@property.ModelTypeName) @property.Name;
 </text>
 }
 

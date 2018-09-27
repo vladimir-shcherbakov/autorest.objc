@@ -14,7 +14,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public virtual string ModelsPackage => (this.CodeModel as CodeModelObjC).ModelsPackage;
+        public virtual string ModelsPackage => (this.CodeModel as CodeModelObjC)?.ModelsPackage;
 
         [JsonIgnore]
         public virtual IEnumerable<string> Imports

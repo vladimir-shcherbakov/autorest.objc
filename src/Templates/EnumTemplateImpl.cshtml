@@ -1,0 +1,51 @@
+﻿@using System.Linq
+@using AutoRest.Core.Model
+@using AutoRest.ObjC
+@inherits AutoRest.Core.Template<AutoRest.ObjC.Model.EnumTypeObjC>
+/**
+@Header(" * ").TrimMultilineHeader()
+*/
+
+@if (!Model.ModelAsString) {
+@:#import "@(Model.Name).h"
+@EmptyLine
+@:@@implementation @(Model.Name)Tr
+@EmptyLine
+@:+ (NSString*) convertToStringEnumValue: (@(Model.Name)) ev {
+    @:switch(ev) {
+    foreach (var v in Model.Values) {
+        @:case @v.MemberName: return @@"@v.SerializedName";
+    }
+        @:default: @@"Unknown"
+    @:}
+@:}
+@EmptyLine
+@:@@end
+} else {
+<text>
+public final class @(Model.Name) extends ExpandableStringEnum<@(Model.Name)> {
+@for (int i = 0; i < Model.Values.Count; i++)
+{
+@:    /** Static value @(Model.Values[i].SerializedName) for @(Model.Name). */
+@:    public static final @(Model.Name) @(Model.Values[i].MemberName) = fromString("@(Model.Values[i].SerializedName)");
+@EmptyLine
+}
+    /**
+     * Creates or finds a @(Model.Name) from its string representation.
+     * @@param name a name to look for
+     * @@return the corresponding @(Model.Name)
+     */
+    @@JsonCreator
+    public static @(Model.Name) fromString(String name) {
+        return fromString(name, @(Model.Name).class);
+    }
+@EmptyLine
+    /**
+     * @@return known @(Model.Name) values
+     */
+    public static Collection<@(Model.Name)> values() {
+        return values(@(Model.Name).class);
+    }
+}
+</text>
+}

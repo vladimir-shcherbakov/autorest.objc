@@ -6,6 +6,7 @@ using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
 using AutoRest.Extensions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace AutoRest.ObjC.Model
 {
@@ -69,8 +70,7 @@ namespace AutoRest.ObjC.Model
             {
                 if (this.Extensions.ContainsKey(SwaggerExtensions.NameOverrideExtension))
                 {
-                    var ext = this.Extensions[SwaggerExtensions.NameOverrideExtension] as Newtonsoft.Json.Linq.JContainer;
-                    if (ext != null && ext["name"] != null)
+                    if (this.Extensions[SwaggerExtensions.NameOverrideExtension] is JContainer ext && ext["name"] != null)
                     {
                         return ext["name"].ToString();
                     }
@@ -163,6 +163,15 @@ namespace AutoRest.ObjC.Model
                 }
                 var requiredProps = Properties.Where(p => p.IsRequired && !p.IsConstant);
                 var declare = requiredProps.Select(p => $"{p.Name}: ({p.ModelTypeName}) {p.Name}");
+
+//                var declare = requiredProps.Select(p =>
+//                {
+//                    var type = (p.ModelType is CompositeTypeObjC)
+//                        ? $"{p.ModelTypeName} *"
+//                        : $"{p.ModelTypeName}";
+//                    return $"{p.Name}: ({type}) {p.Name}";
+//                });
+
                 var res = string.Join(" ", declare);
                 return char.ToUpper(res[0]) + res.Substring(1);
             }

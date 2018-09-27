@@ -47,20 +47,12 @@ namespace AutoRest.ObjC.Model
                     ? base.ModelType
                     : (base.ModelType as IModelTypeObjC)?.NonNullableVariant;
             }
-            set
-            {
-                base.ModelType = value;
-            }
+
+            set => base.ModelType = value;
         }
 
         [JsonIgnore]
-        public IModelTypeObjC ClientType
-        {
-            get
-            {
-                return ((IModelTypeObjC)ModelType).ParameterVariant;
-            }
-        }
+        public IModelTypeObjC ClientType => ((IModelTypeObjC)ModelType).ParameterVariant;
 
         [JsonIgnore]
         public IModelTypeObjC WireType
@@ -69,21 +61,19 @@ namespace AutoRest.ObjC.Model
             {
                 if (ModelType.IsPrimaryType(KnownPrimaryType.Stream))
                 {
-                    var res = new PrimaryTypeObjC(KnownPrimaryType.Stream);
-                    res.Name.FixedValue = "RequestBody";
+                    var res = new PrimaryTypeObjC(KnownPrimaryType.Stream) {Name = {FixedValue = "RequestBody"}};
                     return res;
                 }
-                else if (!ModelType.IsPrimaryType(KnownPrimaryType.Base64Url) &&
+
+                if (!ModelType.IsPrimaryType(KnownPrimaryType.Base64Url) &&
                     Location != Core.Model.ParameterLocation.Body &&
                     Location != Core.Model.ParameterLocation.FormData &&
                     NeedsSpecialSerialization(ClientType))
                 {
                     return new PrimaryTypeObjC(KnownPrimaryType.String);
                 }
-                else
-                {
-                    return (IModelTypeObjC) ModelType;
-                }
+
+                return (IModelTypeObjC) ModelType;
             }
         }
 
@@ -103,14 +93,9 @@ namespace AutoRest.ObjC.Model
                 var sequence = ClientType as SequenceTypeObjC;
                 if (primary != null && primary.IsPrimaryType(KnownPrimaryType.ByteArray))
                 {
-                    if (WireType.IsPrimaryType(KnownPrimaryType.String))
-                    {
-                        return string.Format(CultureInfo.InvariantCulture, "{0} {1} = Base64.encodeBase64String({2});", WireType.Name, WireName, source);
-                    }
-                    else
-                    {
-                        return string.Format(CultureInfo.InvariantCulture, "{0} {1} = Base64Url.encode({2});", WireType.Name, WireName, source);
-                    }
+                    return string.Format(CultureInfo.InvariantCulture, WireType.IsPrimaryType(KnownPrimaryType.String) 
+                        ? "{0} {1} = Base64.encodeBase64String({2});" 
+                        : "{0} {1} = Base64Url.encode({2});", WireType.Name, WireName, source);
                 }
                 else if (sequence != null)
                 {
@@ -124,10 +109,10 @@ namespace AutoRest.ObjC.Model
                 }
             }
 
-            return convertClientTypeToWireType(WireType, source, WireName, clientReference);
+            return ConvertClientTypeToWireType(WireType, source, WireName, clientReference);
         }
 
-        private string convertClientTypeToWireType(IModelTypeObjC wireType, string source, string target, string clientReference, int level = 0)
+        private string ConvertClientTypeToWireType(IModelTypeObjC wireType, string source, string target, string clientReference, int level = 0)
         {
             IndentedStringBuilder builder = new IndentedStringBuilder();
             if (wireType.IsPrimaryType(KnownPrimaryType.DateTimeRfc1123))
@@ -192,7 +177,7 @@ namespace AutoRest.ObjC.Model
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0}{1} = new ArrayList<{2}>();", IsRequired ? wireType.Name + " " : "", target, elementType.Name)
                     .AppendLine("for ({0} {1} : {2}) {{", elementType.ParameterVariant.Name, itemName, source)
-                    .Indent().AppendLine(convertClientTypeToWireType(elementType, itemName, itemTarget, clientReference, level + 1))
+                    .Indent().AppendLine(ConvertClientTypeToWireType(elementType, itemName, itemTarget, clientReference, level + 1))
                         .AppendLine("{0}.add({1});", target, itemTarget)
                     .Outdent().Append("}");
                 _implImports.Add("java.util.ArrayList");
@@ -214,7 +199,7 @@ namespace AutoRest.ObjC.Model
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0}{1} = new HashMap<String, {2}>();", IsRequired ? wireType.Name + " " : "", target, valueType.Name)
                     .AppendLine("for (Map.Entry<String, {0}> {1} : {2}.entrySet()) {{", valueType.ParameterVariant.Name, itemName, source)
-                    .Indent().AppendLine(convertClientTypeToWireType(valueType, itemName + ".getValue()", itemTarget, clientReference, level + 1))
+                    .Indent().AppendLine(ConvertClientTypeToWireType(valueType, itemName + ".getValue()", itemTarget, clientReference, level + 1))
                         .AppendLine("{0}.put({1}.getKey(), {2});", target, itemName, itemTarget)
                     .Outdent().Append("}");
                 _implImports.Add("java.util.HashMap");
@@ -227,13 +212,7 @@ namespace AutoRest.ObjC.Model
         }
 
         [JsonIgnore]
-        public IEnumerable<string> InterfaceImports
-        {
-            get
-            {
-                return ClientType.Imports;
-            }
-        }
+        public IEnumerable<string> InterfaceImports => ClientType.Imports;
 
         [JsonIgnore]
         public IEnumerable<string> RetrofitImports
@@ -255,13 +234,7 @@ namespace AutoRest.ObjC.Model
         private List<string> _implImports;
 
         [JsonIgnore]
-        public IEnumerable<string> ClientImplImports
-        {
-            get
-            {
-                return ClientType.Imports;
-            }
-        }
+        public IEnumerable<string> ClientImplImports => ClientType.Imports;
 
         [JsonIgnore]
         public IEnumerable<string> WireImplImports
@@ -295,22 +268,20 @@ namespace AutoRest.ObjC.Model
             {
                 return "retrofit2.http.Part";
             }
-            else if (parameterLocation != Core.Model.ParameterLocation.None)
+
+            if (parameterLocation != Core.Model.ParameterLocation.None)
             {
                 return "retrofit2.http." + parameterLocation.ToString();
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         private bool NeedsSpecialSerialization(IModelType type)
         {
-            var known = type as PrimaryType;
-            return known != null &&
-                type.IsPrimaryType(KnownPrimaryType.ByteArray) ||
-                type is SequenceType;
+            return type is PrimaryType known 
+                && type.IsPrimaryType(KnownPrimaryType.ByteArray) 
+                || type is SequenceType;
         }
     }
 }
