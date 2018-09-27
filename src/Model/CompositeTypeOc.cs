@@ -153,6 +153,8 @@ namespace AutoRest.ObjectiveC.Model
         [JsonIgnore]
         public IModelTypeOc NonNullableVariant => this;
 
+        public string NameForMethod => $"{Name}*";
+
         [JsonIgnore]
         public string RequiredPropertiesConstructorDeclaration
         {

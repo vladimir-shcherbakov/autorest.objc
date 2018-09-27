@@ -25,7 +25,7 @@
 @: * @@return the @Model.ReturnTypeResponseName.EscapeXmlComment() object if successful.
 }
  */
-@Model.ReturnTypeResponseName @(Model.Name)(@Model.MethodRequiredParameterDeclaration);
+void @(Model.Name)@(Model.MethodRequiredParameterDeclaration) @Model.CallbackForMethod;
 </text>
 }
 /**
@@ -47,5 +47,5 @@
 @: * @@return the @Model.ReturnTypeResponseName.EscapeXmlComment() object if successful.
 }
  */
-@Model.ReturnTypeResponseName @(Model.Name)(@Model.MethodParameterDeclaration);
+(void) @(Model.Name)@(Model.MethodParameterDeclaration) @Model.CallbackForMethod;
 @EmptyLine

@@ -10,7 +10,8 @@ namespace AutoRest.ObjectiveC.Model
     {
         public EnumTypeOc()
         {
-            Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" ? "String" : CodeNamer.Instance.GetTypeName(name);
+            //Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" ? "String" : CodeNamer.Instance.GetTypeName(name);
+            Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" ? "NSString" : CodeNamer.Instance.GetTypeName(name);
         }
 
         [JsonIgnore]
@@ -39,5 +40,7 @@ namespace AutoRest.ObjectiveC.Model
 
         [JsonIgnore]
         public IModelTypeOc NonNullableVariant => this;
+
+        public string NameForMethod => $"{Name}*";
     }
 }

@@ -172,6 +172,8 @@ namespace AutoRest.ObjectiveC.Model
                 WantNullable = false
             };
 
+        public string NameForMethod  => $"{Name}";
+
         [JsonIgnore]
         public virtual string ImplementationName
         {
@@ -180,39 +182,39 @@ namespace AutoRest.ObjectiveC.Model
                 switch (KnownPrimaryType)
                 {
                     case KnownPrimaryType.None:
-                        return WantNullable ? "Void" : "void";
+                        return WantNullable ? "Any" : "void";
                     case KnownPrimaryType.Base64Url:
-                        return "Base64Url";
+                        return "NSURL*";
                     case KnownPrimaryType.Boolean:
-                        return WantNullable ? "Boolean" : "boolean";
+                        return WantNullable ? "NSNumber*" : "BOOL";
                     case KnownPrimaryType.ByteArray:
-                        return "byte[]";
+                        return "NSData*";
                     case KnownPrimaryType.Date:
-                        return "LocalDate";
+                        return "NSDate*";
                     case KnownPrimaryType.DateTime:
-                        return "DateTime";
+                        return "NSDate*";
                     case KnownPrimaryType.DateTimeRfc1123:
-                        return "DateTimeRfc1123";
+                        return "NSDate*";
                     case KnownPrimaryType.Double:
-                        return WantNullable ? "Double" : "double";
+                        return WantNullable ? "NSNumber*" : "double";
                     case KnownPrimaryType.Decimal:
-                        return "BigDecimal";
+                        return "NSNumber*";
                     case KnownPrimaryType.Int:
-                        return WantNullable ? "Integer" : "int";
+                        return WantNullable ? "NSNumber*" : "int";
                     case KnownPrimaryType.Long:
-                        return WantNullable ? "Long" : "long";
+                        return WantNullable ? "NSNumber*" : "long";
                     case KnownPrimaryType.Stream:
-                        return "InputStream";
+                        return "NSInputStream*";
                     case KnownPrimaryType.String:
-                        return "String";
+                        return "NSString*";
                     case KnownPrimaryType.TimeSpan:
-                        return "Period";
+                        return "NSTimeInterval*";
                     case KnownPrimaryType.UnixTime:
-                        return WantNullable ? "Long" : "long";
+                        return WantNullable ? "NSDate" : "long";
                     case KnownPrimaryType.Uuid:
-                        return "UUID";
+                        return "NSUUID*";
                     case KnownPrimaryType.Object:
-                        return "Object";
+                        return "NSObject*";
                     case KnownPrimaryType.Credentials:
                         return "ServiceClientCredentials";
                 }

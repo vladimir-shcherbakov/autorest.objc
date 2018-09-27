@@ -10,7 +10,15 @@ namespace AutoRest.ObjectiveC.Model
     {
         public SequenceTypeOc()
         {
-            Name.OnGet += v => $"List<{ElementType.Name}>";
+            
+//            Name.OnGet += v => $"List<{ElementType.Name}>";
+            Name.OnGet += v =>
+            {
+                var et = (ElementType as IModelTypeOc);
+                var name = et?.Name;
+                return $"NSArray<{(ElementType as IModelTypeOc)?.NameForMethod}> *";
+            };
+            
         }
 
         [JsonIgnore]
@@ -18,7 +26,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var respvariant = (ElementType as IModelTypeOc).ResponseVariant;
+                var respvariant = (ElementType as IModelTypeOc)?.ResponseVariant;
                 if (respvariant != ElementType && (respvariant as PrimaryTypeOc)?.Nullable != false)
                 {
                     return new SequenceTypeOc { ElementType = respvariant };
@@ -32,7 +40,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var respvariant = (ElementType as IModelTypeOc).ParameterVariant;
+                var respvariant = (ElementType as IModelTypeOc)?.ParameterVariant;
                 if (respvariant != ElementType && (respvariant as PrimaryTypeOc)?.Nullable != false)
                 {
                     return new SequenceTypeOc { ElementType = respvariant };
@@ -46,12 +54,14 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> imports = new List<string>();
+                var imports = new List<string>();
                 return imports.Concat(((IModelTypeOc) this.ElementType).Imports);
             }
         }
 
         [JsonIgnore]
         public IModelTypeOc NonNullableVariant => this;
+
+        public string NameForMethod => $"{Name}";
     }
 }

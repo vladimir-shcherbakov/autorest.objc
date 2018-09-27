@@ -45,11 +45,11 @@ namespace AutoRest.ObjectiveC
 
             // Service client
             var serviceClientTemplate = new ServiceClientTemplate { Model = codeModel };
-            await Write(serviceClientTemplate, $"{packagePath}/{codeModel.Name.ToPascalCase()}Impl{ImplementationFileExtension}");
+            await Write(serviceClientTemplate, $"{packagePath}/{codeModel.Name.ToPascalCase()}{ImplementationFileExtension}");
 
             // Service client interface
             var serviceClientInterfaceTemplate = new ServiceClientInterfaceTemplate { Model = codeModel };
-            await Write(serviceClientInterfaceTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}{ImplementationFileExtension}");
+            await Write(serviceClientInterfaceTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}{InterfaceFileExtension}");
 
             // operations
 //            foreach (MethodGroupOc methodGroup in codeModel.AllOperations)
@@ -71,17 +71,19 @@ namespace AutoRest.ObjectiveC
 //            }
 
             // Enums
-//            foreach (EnumTypeOc enumType in cm.EnumTypes)
-//            {
-//                var enumTemplate = new EnumTemplate { Model = enumType };
-//                await Write(enumTemplate, $"{packagePath}/models/{enumTemplate.Model.Name.ToPascalCase()}{ImplementationFileExtension}");
-//            }
+            foreach (EnumTypeOc enumType in cm.EnumTypes)
+            {
+                var enumTemplate = new EnumTemplate { Model = enumType };
+                await Write(enumTemplate, $"{packagePath}/models/{enumTemplate.Model.Name.ToPascalCase()}{InterfaceFileExtension}");
+                var enumTemplateImpl = new EnumTemplateImpl { Model = enumType };
+                await Write(enumTemplateImpl, $"{packagePath}/models/{enumTemplate.Model.Name.ToPascalCase()}{ImplementationFileExtension}");
+            }
 
             // Exceptions
 //            foreach (CompositeTypeOc exceptionType in codeModel.ErrorTypes)
 //            {
 //                var exceptionTemplate = new ExceptionTemplate { Model = exceptionType };
-//                await Write(exceptionTemplate, $"{packagePath}/models/{exceptionTemplate.Model.ExceptionTypeDefinitionName}{ImplementationFileExtension}");
+//                await Write(exceptionTemplate, $"{packagePath}/models/{exceptionTemplate.Model.ExceptionTypeDefinitionName}{enumTemplateImpl}");
 //            }
 
             // package-info

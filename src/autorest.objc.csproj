@@ -113,4 +113,8 @@
      <DotnetRazor Remove="Templates\ServiceClientTemplate.cshtml" />
    </ItemGroup>
 
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\EnumTemplateImpl.cshtml" />
+   </ItemGroup>
+
 </Project>

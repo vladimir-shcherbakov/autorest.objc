@@ -11,17 +11,19 @@ namespace AutoRest.ObjectiveC.Model
         IModelTypeOc ParameterVariant { get; }
 
         IModelTypeOc NonNullableVariant { get; }
+
+        string NameForMethod { get; }
     }
 
-    public static class IModelTypeExtensions
+    public static class ModelTypeExtensions
     {
-        public static IModelType ServiceResponseVariant(this IModelType original, bool wantNullable = false)
+        public static IModelTypeOc ServiceResponseVariant(this IModelType original, bool wantNullable = false)
         {
             if (wantNullable)
             {
-                return original; // the original is always nullable
+                return (IModelTypeOc)original; // the original is always nullable
             }
-            return (original as IModelTypeOc)?.ResponseVariant?.NonNullableVariant ?? original;
+            return (IModelTypeOc) ((original as IModelTypeOc)?.ResponseVariant?.NonNullableVariant ?? original);
         }
 
         public static string GetDefaultValue(this IModelType type, Method parent)

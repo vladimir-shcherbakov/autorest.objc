@@ -114,14 +114,14 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var declarations = new List<string>();
-                foreach (var parameter in LocalParameters.Where(p => !p.IsConstant))
-                {
-                    declarations.Add(parameter.ClientType.ParameterVariant.Name + " " + parameter.Name);
-                }
+                var declarations = LocalParameters
+                    .Where(p => !p.IsConstant)
+                    .Select(parameter => 
+                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.ParameterVariant.NameForMethod}) {parameter.Name}")
+                    .ToList();
 
-                var declaration = string.Join(", ", declarations);
-                return declaration;
+                var declaration = string.Join(" ", declarations);
+                return declaration.StartWithUppercase();
             }
         }
 
@@ -130,14 +130,14 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var declarations = new List<string>();
-                foreach (var parameter in LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
-                {
-                    declarations.Add(parameter.ClientType.ParameterVariant.Name + " " + parameter.Name);
-                }
+                var declarations = LocalParameters
+                    .Where(p => !p.IsConstant && p.IsRequired)
+                    .Select(parameter => 
+                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.ParameterVariant.NameForMethod}) {parameter.Name}")
+                    .ToList();
 
-                var declaration = string.Join(", ", declarations);
-                return declaration;
+                var declaration = string.Join(" ", declarations);
+                return declaration.StartWithUppercase();
             }
         }
 
@@ -569,50 +569,27 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public string CallType
-        {
-            get
-            {
-                if (this.HttpMethod == HttpMethod.Head)
-                {
-                    return "Void";
-                }
-                else
-                {
-                    return "ResponseBody";
-                }
-            }
-        }
+        public string CallType => this.HttpMethod == HttpMethod.Head ? "Any" : "ResponseBody";
 
         [JsonIgnore]
-        public virtual string ResponseBuilder
-        {
-            get
-            {
-                return "ServiceResponseBuilder";
-            }
-        }
+        public virtual string ResponseBuilder => "ServiceResponseBuilder";
 
         [JsonIgnore]
-        public virtual string RuntimeBasePackage
-        {
-            get
-            {
-                return "com.microsoft.rest";
-            }
-        }
+        public virtual string RuntimeBasePackage => "com.microsoft.rest";
 
         [JsonIgnore]
         public ResponseOc ReturnTypeOc => ReturnType as ResponseOc;
 
         [JsonIgnore]
-        public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.Name;
+        public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.NameForMethod;
+        
+        public virtual string CallbackForMethod => $"withCallback: (void(^)({ReturnTypeResponseName}, NSError*)) callback";
 
         public virtual string ResponseGeneration(bool filterRequired = false)
         {
             if (ReturnTypeOc.NeedsConversion)
             {
-                IndentedStringBuilder builder= new IndentedStringBuilder();
+                var builder= new IndentedStringBuilder();
                 builder.AppendLine("ServiceResponse<{0}> response = {1}Delegate(call.execute());",
                     ReturnTypeOc.GenericBodyWireTypeString, this.Name.ToCamelCase());
                 builder.AppendLine("{0} body = null;", ReturnTypeOc.BodyClientType.Name)

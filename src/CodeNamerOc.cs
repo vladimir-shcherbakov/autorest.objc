@@ -30,50 +30,20 @@ namespace AutoRest.ObjectiveC
             // http://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
             ReservedWords.AddRange(new []
             {
-                "abstract", "assert",   "boolean",  "break",    "byte",
-                "case",     "catch",    "char",     "class",    "const",
-                "continue", "default",  "do",       "double",   "else",
-                "enum",     "extends",  "false",    "final",    "finally",
-                "float",    "for",      "goto",     "if",       "implements",
-                "import",   "int",      "long",     "interface","instanceof",
-                "native",   "new",      "null",     "package",  "private",
-                "protected","public",   "return",   "short",    "static",
-                "strictfp", "super",    "switch",   "synchronized","this",
-                "throw",    "throws",   "transient","true",     "try",
-                "void",     "volatile", "while",    "date",     "datetime",
-                "period",   "stream",   "string",   "object", "header"
+                "if", "else", "switch", "case", "default", "break", "int", "float", "char", "double", "long", "for", "while", "do",
+                "void", "goto", "auto", "signed", "const", "extern", "register", "unsigned", "return", "continue", "enum", "sizeof",
+                "struct", "typedef", "union", "volatile"
             });
 
-            PrimaryTypes = new HashSet<string>();
-            new HashSet<string>
-            {
-                "int", "Integer",
-                "long", "Long",
-                "object", "Object",
-                "bool", "Boolean",
-                "double", "Double",
-                "float", "Float",
-                "byte", "Byte",
-                "byte[]", "Byte[]",
-                "String",
-                "LocalDate",
-                "DateTime",
-                "DateTimeRfc1123",
-                "Duration",
-                "Period",
-                "BigDecimal",
-                "InputStream"
-            }.ForEach(s => PrimaryTypes.Add(s));
-            new HashSet<string>
+            PrimaryTypes = new HashSet<string>
             {
                 "int",
                 "long",
-                "bool",
                 "double",
                 "float",
                 "byte",
                 "byte[]"
-            }.ForEach(s => PrimaryTypes.Add(s));
+            };
         }
 
         #endregion
