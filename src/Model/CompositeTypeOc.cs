@@ -51,7 +51,7 @@ namespace AutoRest.ObjectiveC.Model
             {
                 if (BaseIsPolymorphic)
                 {
-                    foreach (CompositeType type in CodeModel.ModelTypes)
+                    foreach (var type in CodeModel.ModelTypes)
                     {
                         if (type.BaseModelType != null &&
                             type.BaseModelType.SerializedName == this.SerializedName)

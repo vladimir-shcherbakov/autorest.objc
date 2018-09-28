@@ -12,11 +12,18 @@
 // @(Settings.Namespace.ToLower())@Model.ModelsPackage;
 @EmptyLine
 
-@foreach (var import in Model.ImportList)
+@foreach (var property in Model.Properties .OfType<PropertyOc>())
 {
-@:#import @import;
-}
+    var imports = (property.ModelType as IModelTypeOc)?.Imports;
+    if (imports != null)
+    {
+        foreach (var import in imports)
+        {
+@:#import "@(import).h"
+        }
+    }
 @EmptyLine
+}
 
 /**
 @if (string.IsNullOrEmpty(Model.Summary) && string.IsNullOrEmpty(Model.Documentation))

@@ -37,8 +37,7 @@ namespace AutoRest.ObjectiveC
             var packagePath = $"objc/{cm.Namespace.ToLower().Replace('.', '/')}";
 
             // get ObjectiveC specific codeModel
-            var codeModel = cm as CodeModelOc;
-            if (codeModel == null)
+            if (!(cm is CodeModelOc codeModel))
             {
                 throw new InvalidCastException("CodeModel is not a ObjectiveC CodeModel");
             }
@@ -66,6 +65,7 @@ namespace AutoRest.ObjectiveC
             //Models
             foreach (CompositeTypeOc modelType in cm.ModelTypes.Union(codeModel.HeaderTypes))
             {
+                //var cp = modelType.ComposedProperties; // combined whith base type props if any
                 var modelTemplate = new ModelTemplate { Model = modelType };
                 await Write(modelTemplate, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{InterfaceFileExtension}");
                 var modelTemplateImpl = new ModelTemplateImpl { Model = modelType };

@@ -649,13 +649,8 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public virtual string CallbackDocumentation
-        {
-            get
-            {
-                return " * @param serviceCallback the async ServiceCallback to handle successful and failed responses.";
-            }
-        }
+        public virtual string CallbackDocumentation => 
+            " * @param serviceCallback the async ServiceCallback to handle successful and failed responses.";
 
         [JsonIgnore]
         public virtual List<string> InterfaceImports

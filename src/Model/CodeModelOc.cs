@@ -15,18 +15,8 @@ namespace AutoRest.ObjectiveC.Model
     {
         public override string BaseUrl
         {
-            get
-            {
-                if (!base.BaseUrl.Contains("://"))
-                {
-                    return $"https://{base.BaseUrl}";
-                }
-                return base.BaseUrl;
-            }
-            set
-            {
-                base.BaseUrl = value;
-            }
+            get => !base.BaseUrl.Contains("://") ? $"https://{base.BaseUrl}" : base.BaseUrl;
+            set => base.BaseUrl = value;
         }
 
         [JsonIgnore]
@@ -36,13 +26,7 @@ namespace AutoRest.ObjectiveC.Model
         public bool IsCustomBaseUri => Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
 
         [JsonIgnore]
-        public string ServiceClientServiceType
-        {
-            get
-            {
-                return CodeNamerOc.GetServiceName(Name.ToPascalCase());
-            }
-        }
+        public string ServiceClientServiceType => CodeNamerOc.GetServiceName(Name.ToPascalCase());
 
         [JsonIgnore]
         public virtual string ImplPackage => "implementation";

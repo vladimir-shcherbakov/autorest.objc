@@ -227,13 +227,7 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public IEnumerable<string> InterfaceImports
-        {
-            get
-            {
-                return ClientType.Imports;
-            }
-        }
+        public IEnumerable<string> InterfaceImports => ClientType.Imports;
 
         [JsonIgnore]
         public IEnumerable<string> RetrofitImports
