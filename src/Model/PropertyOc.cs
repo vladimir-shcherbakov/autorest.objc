@@ -96,7 +96,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                yield return  @"Models/{Name}";
+                yield return  @"<Foundation/Foundation.h>";
 //                var imports = new List<string>(ModelType.ImportSafe()
 //                        .Where(c => !c.StartsWith(
 //                            string.Join(

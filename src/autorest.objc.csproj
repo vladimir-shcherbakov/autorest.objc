@@ -117,4 +117,8 @@
      <DotnetRazor Remove="Templates\EnumTemplateImpl.cshtml" />
    </ItemGroup>
 
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ModelTemplateImpl.cshtml" />
+   </ItemGroup>
+
 </Project>

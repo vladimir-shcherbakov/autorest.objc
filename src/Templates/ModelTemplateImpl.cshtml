@@ -1,0 +1,37 @@
+﻿@using System.Linq
+@using System.Collections.Generic
+@using AutoRest.Core.Model
+@using AutoRest.Core.Utilities
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.CompositeTypeOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+#import "@(Model.Name).h"
+@EmptyLine
+
+@@implementation @(Model.Name)
+@EmptyLine
+
+@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties) {
+if (Model.GenerateConstructorForRequiredProperties) {
+    @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration) {
+        @:self = [super init];
+        @:if (self) {
+        foreach (var property in Model.Properties.Where(p => p.IsRequired && !p.IsConstant)) {
+            @:_@(property.Name) = @property.Name;
+        }
+        foreach (var property in Model.Properties.Where(p => p.IsConstant)) {
+            @: // constants initialization
+            @:@(property.Name) = @(property.DefaultValue);
+        }
+
+        @:}
+        @:return self;
+    @:}
+}
+@EmptyLine
+}
+@@end

@@ -165,8 +165,8 @@ namespace AutoRest.ObjectiveC.Model
                     return "";
                 }
                 var requiredProps = Properties.Where(p => p.IsRequired && !p.IsConstant);
-                var declare = requiredProps.Select(p => p.ModelTypeName + " " + p.Name);
-                return string.Join(", ", declare);
+                var declare = requiredProps.Select(p => $"{p.Name}: ({(p.ModelType as IModelTypeOc)?.NameForMethod}) {p.Name}");                
+                return string.Join(" ", declare).StartWithUppercase();
             }
         }
 

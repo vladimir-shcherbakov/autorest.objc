@@ -64,11 +64,13 @@ namespace AutoRest.ObjectiveC
 //            }
 
             //Models
-//            foreach (CompositeTypeOc modelType in cm.ModelTypes.Union(codeModel.HeaderTypes))
-//            {
-//                var modelTemplate = new ModelTemplate { Model = modelType };
-//                await Write(modelTemplate, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{ImplementationFileExtension}");
-//            }
+            foreach (CompositeTypeOc modelType in cm.ModelTypes.Union(codeModel.HeaderTypes))
+            {
+                var modelTemplate = new ModelTemplate { Model = modelType };
+                await Write(modelTemplate, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{InterfaceFileExtension}");
+                var modelTemplateImpl = new ModelTemplateImpl { Model = modelType };
+                await Write(modelTemplateImpl, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{ImplementationFileExtension}");
+            }
 
             // Enums
             foreach (EnumTypeOc enumType in cm.EnumTypes)
