@@ -47,15 +47,15 @@
 @@interface @Model.Name : NSObject <I@(Model.Name)>
 @EmptyLine
     /**
-    The default base URL.
-    @Model.BaseUrl
+        The default base URL. @Model.BaseUrl
     */
     @@property (readonly) (NSString*) DEFAULT_BASE_URL;
+
 @foreach (var property in Model.Properties)
 {
     @EmptyLine
     @:/**
-    @:@(property.Documentation).
+        @:@(property.Documentation).
     @:*/
     @:@@property @(property.IsReadOnly ? " (readonly) " : "") (@(property.ModelType.ServiceResponseVariant().Name)) @(property.Name.ToCamelCase());
 }
@@ -66,7 +66,7 @@
         .Select(p=>$"{p.Name}: ({p.ModelTypeName}) {p.Name}");
     var str = string.Join(" ", initParams);
     var paramDecl = char.ToUpper(str[0]) + str.Substring(1);
-    @:- initWith@(paramDecl);
+    @:+ (id<I@(Model.Name)>) createWith@(paramDecl);
 }
-
+@EmptyLine
 @@end

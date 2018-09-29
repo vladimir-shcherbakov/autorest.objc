@@ -7,9 +7,7 @@
 @inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.CompositeTypeOc>
 /**
 @Header(" * ").TrimMultilineHeader()
- */
-@EmptyLine
-// @(Settings.Namespace.ToLower())@Model.ModelsPackage;
+*/
 @EmptyLine
 
 @foreach (var property in Model.Properties .OfType<PropertyOc>())
@@ -22,9 +20,7 @@
 @:#import "@(import).h"
         }
     }
-@EmptyLine
 }
-
 /**
 @if (string.IsNullOrEmpty(Model.Summary) && string.IsNullOrEmpty(Model.Documentation))
 {

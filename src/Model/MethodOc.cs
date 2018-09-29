@@ -121,7 +121,10 @@ namespace AutoRest.ObjectiveC.Model
                     .ToList();
 
                 var declaration = string.Join(" ", declarations);
-                return declaration.StartWithUppercase();
+                var declarationWithCallback = string.IsNullOrEmpty(declaration)
+                    ? CallbackForMethod
+                    : $"{declaration} {CallbackForMethod}";
+                return declarationWithCallback.StartWithUppercase();
             }
         }
 
@@ -137,7 +140,11 @@ namespace AutoRest.ObjectiveC.Model
                     .ToList();
 
                 var declaration = string.Join(" ", declarations);
-                return declaration.StartWithUppercase();
+                var declarationWithCallback = string.IsNullOrEmpty(declaration)
+                    ? CallbackForMethod
+                    : $"{declaration} {CallbackForMethod}";
+
+                return declarationWithCallback.StartWithUppercase();
             }
         }
 
@@ -583,7 +590,7 @@ namespace AutoRest.ObjectiveC.Model
         [JsonIgnore]
         public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.NameForMethod;
         
-        public virtual string CallbackForMethod => $"withCallback: (void(^)({ReturnTypeResponseName}, NSError*)) callback";
+        public virtual string CallbackForMethod => $"withCallback : (void(^)({ReturnTypeResponseName}, NSError*)) callback";
 
         public virtual string ResponseGeneration(bool filterRequired = false)
         {
