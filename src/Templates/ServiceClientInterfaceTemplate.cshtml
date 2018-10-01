@@ -15,6 +15,10 @@
 {
 @:#import "Models/@(import).h"
 }
+@foreach (var operation in Model.AllOperations)
+{
+@:#import "Operations/@(operation.TypeName).h"
+}
 @EmptyLine
 
 /**
@@ -26,11 +30,11 @@
 @foreach (var operation in Model.AllOperations)
 {
 @EmptyLine
-@:    /**
-@:     * Gets the @(operation.TypeName) object to access its operations.
-@:     * @@return the @(operation.TypeName) object.
-@:     */
-@:    @(operation.TypeName) @(operation.Name)();
+    @:/**
+    @: * Gets the @(operation.TypeName)Protocol object to access its operations.
+    @: * @@return the @(operation.TypeName) object.
+    @: */
+    @:- (id<@(operation.TypeName)Protocol>) @(operation.Name);
 }
 @EmptyLine
 @if (Model.RootMethods.Any())
@@ -55,18 +59,27 @@
 {
     @EmptyLine
     @:/**
-        @:@(property.Documentation).
-    @:*/
+    @: * @(property.Documentation).
+    @: */
     @:@@property @(property.IsReadOnly ? " (readonly) " : "") @(property.ModelType.ServiceResponseVariant().Name) @(property.Name.ToCamelCase());
 }
 @EmptyLine
 @{
-    var initParams = Model.Properties
-        .Where(p => !p.IsReadOnly)
-        .Select(p=>$"{p.Name}: ({p.ModelTypeName}) {p.Name}");
-    var str = string.Join(" ", initParams);
-    var paramDecl = char.ToUpper(str[0]) + str.Substring(1);
+    var notRoParams = Model.Properties
+        .Where(p => !p.IsReadOnly).ToList();
+
+    if (notRoParams.Any())
+    {
+        var decl = notRoParams
+            .Select(p=>$"{p.Name}: ({p.ModelTypeName}) {p.Name}");
+        var declStr = string.Join(" ", decl);
+        var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
     @:+ (id<@(Model.Name)Protocol>) createWith@(paramDecl);
+    }
+    else
+    {
+    @:+ (id<I@(Model.Name)>) create;
+    }
 }
 @EmptyLine
 @@end

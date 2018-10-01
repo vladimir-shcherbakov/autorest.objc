@@ -60,11 +60,11 @@ namespace AutoRest.ObjectiveC
 //            }
 
             // operations
-            foreach (MethodGroupOc methodGroup in codeModel.AllOperations)
+            foreach (var methodGroup in codeModel.AllOperations)
             {
                 // Operation
                 var operationsTemplate = new MethodGroupTemplate { Model = methodGroup };
-                await Write(operationsTemplate, $"{packagePath}/Operations/{methodGroup.TypeName.ToPascalCase()}Impl{ImplementationFileExtension}");
+                await Write(operationsTemplate, $"{packagePath}/Operations/{methodGroup.TypeName.ToPascalCase()}{ImplementationFileExtension}");
 
                 // Operation interface
                 var operationsInterfaceTemplate = new MethodGroupInterfaceTemplate { Model = methodGroup };

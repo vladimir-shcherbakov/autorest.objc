@@ -22,58 +22,22 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public string MethodGroupFullType
-        {
-            get
-            {
-                return (CodeModel.Namespace.ToLowerInvariant()) + "." + TypeName;
-            }
-        }
+        public string MethodGroupFullType => (CodeModel.Namespace.ToLowerInvariant()) + "." + TypeName;
 
         [JsonIgnore]
-        public virtual string MethodGroupDeclarationType
-        {
-            get
-            {
-                return TypeName;
-            }
-        }
+        public virtual string MethodGroupDeclarationType => TypeName;
 
         [JsonIgnore]
-        public string MethodGroupImplType
-        {
-            get
-            {
-                return TypeName + ImplClassSuffix;
-            }
-        }
+        public string MethodGroupImplType => TypeName + ImplClassSuffix;
 
         [JsonIgnore]
-        public virtual string ImplClassSuffix
-        {
-            get
-            {
-                return "Impl";
-            }
-        }
+        public virtual string ImplClassSuffix => "Impl";
 
         [JsonIgnore]
-        public virtual string ParentDeclaration
-        {
-            get
-            {
-                return " implements " + MethodGroupTypeString;
-            }
-        }
+        public virtual string ParentDeclaration => " implements " + MethodGroupTypeString;
 
         [JsonIgnore]
-        public virtual string ImplPackage
-        {
-            get
-            {
-                return "implementation";
-            }
-        }
+        public virtual string ImplPackage => "implementation";
 
         [JsonIgnore]
         public string MethodGroupTypeString
@@ -92,30 +56,17 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public string MethodGroupServiceType
-        {
-            get
-            {
-                return CodeNamerOc.GetServiceName(Name.ToPascalCase());
-            }
-        }
+        public string MethodGroupServiceType => CodeNamerOc.GetServiceName(Name.ToPascalCase());
 
         [JsonIgnore]
-        public virtual string ServiceClientType
-        {
-            get
-            {
-                return CodeModel.Name + "Impl";
-            }
-        }
+        public virtual string ServiceClientType => CodeModel.Name + "Impl";
 
         [JsonIgnore]
         public virtual IEnumerable<string> ImplImports
         {
             get
             {
-                var imports = new List<string>();
-                imports.Add("retrofit2.Retrofit");
+                var imports = new List<string> {"retrofit2.Retrofit"};
                 if (MethodGroupTypeString == TypeName)
                 {
                     imports.Add(MethodGroupFullType);

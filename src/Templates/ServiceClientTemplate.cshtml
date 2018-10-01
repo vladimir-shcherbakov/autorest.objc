@@ -80,27 +80,22 @@
         @:@(Model.Name)* client = [[@(Model.Name) alloc] init];
         @:return client;
     @:}
-
     }
 }
 @EmptyLine
-@* @foreach (var operation in Model.AllOperations) *@
-@* { *@
-@* @EmptyLine *@
-@* @:    /** *@
-@* @:     * The @(operation.TypeName) object to access its operations. *@
-@* @:     */ *@
-@* @:    private @(operation.TypeName) @(operation.Name); *@
-@* @EmptyLine *@
-@* @:    /** *@
-@* @:     * Gets the @(operation.TypeName) object to access its operations. *@
-@* @:     * @@return the @(operation.TypeName) object. *@
-@* @:     */ *@
-@* @:    public @(operation.TypeName) @(operation.Name)() { *@
-@* @:        return this.@(operation.Name); *@
-@* @:    } *@
-@* } *@
-@* @EmptyLine *@
+@foreach (var operation in Model.AllOperations)
+{
+    @EmptyLine
+    @:/**
+    @: * The @(operation.TypeName) object to access its operations.
+    @: */
+    @:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
+        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) init] alloc];
+        @: return op;
+    @:}
+    @EmptyLine
+}
+@EmptyLine
 
 @if (Model.RootMethods.Any())
 {

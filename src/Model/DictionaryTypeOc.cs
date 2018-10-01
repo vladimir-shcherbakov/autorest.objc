@@ -20,7 +20,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                List<string> imports = new List<string> { "java.util.Map" };
+                var imports = new List<string> ();
                 return imports.Concat((this.ValueType as IModelTypeOc)?.Imports ?? Enumerable.Empty<string>());
             }
         }
@@ -30,7 +30,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var respvariant = (ValueType as IModelTypeOc).ResponseVariant;
+                var respvariant = (ValueType as IModelTypeOc)?.ResponseVariant;
                 if (respvariant != ValueType && (respvariant as PrimaryTypeOc)?.Nullable != false)
                 {
                     return new DictionaryTypeOc { ValueType = respvariant };
@@ -44,7 +44,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var respvariant = (ValueType as IModelTypeOc).ParameterVariant;
+                var respvariant = (ValueType as IModelTypeOc)?.ParameterVariant;
                 if (respvariant != ValueType && (respvariant as PrimaryTypeOc)?.Nullable != false)
                 {
                     return new DictionaryTypeOc { ValueType = respvariant };
