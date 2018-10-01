@@ -14,22 +14,14 @@ namespace AutoRest.ObjectiveC.Model
             _implImports = new List<string>();
             Name.OnGet += name => !IsClientProperty
                 ? name
-                : string.Format(CultureInfo.InvariantCulture,
-                        "{0}.{1}()",
-                        Method != null && true == Method.Group.IsNullOrEmpty() ? "this" : "this.client",
-                        ClientProperty.Name.ToCamelCase());
+                : $"self.{name}"
+//                : string.Format(CultureInfo.InvariantCulture,
+//                        "{0}.{1}()",
+//                        Method != null && true == Method.Group.IsNullOrEmpty() ? "this" : "this.client",
+//                        ClientProperty.Name.ToCamelCase())
+                ;
 
-            DefaultValue.OnGet += defaultValue =>
-            {
-                if (ModelType is PrimaryType pt && pt.KnownPrimaryType == KnownPrimaryType.Decimal)
-                {
-                    return $"new BigDecimal(\"{defaultValue}\")";
-                }
-                else
-                {
-                    return defaultValue;
-                }
-            };
+            DefaultValue.OnGet += defaultValue => defaultValue;
         }
 
         [JsonIgnore]
@@ -45,12 +37,9 @@ namespace AutoRest.ObjectiveC.Model
                 }
                 return WantNullable
                     ? base.ModelType
-                    : (base.ModelType as IModelTypeOc).NonNullableVariant;
+                    : (base.ModelType as IModelTypeOc)?.NonNullableVariant;
             }
-            set
-            {
-                base.ModelType = value;
-            }
+            set => base.ModelType = value;
         }
 
         [JsonIgnore]

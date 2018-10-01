@@ -32,7 +32,8 @@ namespace AutoRest.ObjectiveC
             {
                 "if", "else", "switch", "case", "default", "break", "int", "float", "char", "double", "long", "for", "while", "do",
                 "void", "goto", "auto", "signed", "const", "extern", "register", "unsigned", "return", "continue", "enum", "sizeof",
-                "struct", "typedef", "union", "volatile"
+                "struct", "typedef", "union", "volatile",
+                "description"
             });
 
             PrimaryTypes = new HashSet<string>
@@ -61,11 +62,9 @@ namespace AutoRest.ObjectiveC
 
         public override string GetPropertyName(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return name;
-            }
-            return CamelCase(RemoveInvalidCharacters(GetEscapedReservedName(name, "Property")));
+            return string.IsNullOrWhiteSpace(name) 
+                ? name
+                : CamelCase(RemoveInvalidCharacters(GetEscapedReservedName(name, "Property")));
         }
 
         public override string GetMethodName(string name)
@@ -97,7 +96,7 @@ namespace AutoRest.ObjectiveC
             string result = RemoveInvalidCharacters(new Regex("[\\ -]+").Replace(name, "_"));
             Func<char, bool> isUpper = new Func<char, bool>(c => c >= 'A' && c <= 'Z');
             Func<char, bool> isLower = new Func<char, bool>(c => c >= 'a' && c <= 'z');
-            for (int i = 1; i < result.Length - 1; i++)
+            for (var i = 1; i < result.Length - 1; i++)
             {
                 if (isUpper(result[i]))
                 {
@@ -159,15 +158,14 @@ namespace AutoRest.ObjectiveC
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
-            var primaryType = type as PrimaryType;
-            if (defaultValue != null && primaryType != null)
+            if (defaultValue != null && type is PrimaryType primaryType)
             {
                 if (primaryType.KnownPrimaryType == KnownPrimaryType.Double)
                 {
-                    return double.Parse(defaultValue).ToString();
+                    return double.Parse(defaultValue).ToString(CultureInfo.InvariantCulture);
                 }
                 if (primaryType.KnownPrimaryType == KnownPrimaryType.String)
                 {

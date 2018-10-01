@@ -1,25 +1,32 @@
 ﻿@using System.Linq
+@using AutoRest.Core.Model
 @using AutoRest.ObjectiveC
 @inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.EnumTypeOc>
 /**
 @Header(" * ").TrimMultilineHeader()
  */
 @EmptyLine
-
-
+#import <Foundation/Foundation.h>
+@EmptyLine
 /**
  * Defines values for @(Model.Name).
  */
 @if (!Model.ModelAsString)
 {
 @:@@interface @(Model.Name) : NSString
-@EmptyLine
-for (var i = 0; i < Model.Values.Count; i++)
-{
-    @:/** @((Model.Values[i].Description != null ? Model.Values[i].Description.TrimEnd(new char[] {'.'}) : "Enum value " + Model.Values[i].SerializedName) + ".") */
-    @:@@property (class, readonly) (@(Model.Name)*) @(Model.Values[i].MemberName);
     @EmptyLine
-}
+    @:+ (NSArray<@(Model.Name)*> *) enumerate;
+    @EmptyLine
+    @:+ (@(Model.Name) *) fromString: (NSString *) string;
+    @EmptyLine
+    @:+ (NSString *) toStringValue: (@(Model.Name) *) value;
+    @EmptyLine
+    foreach (var value in Model.Values)
+    {
+        /** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
+    @:@@property (class, readonly) @Model.Name* @value.MemberName;
+    @EmptyLine
+    }
 @:@@end
 }
 else

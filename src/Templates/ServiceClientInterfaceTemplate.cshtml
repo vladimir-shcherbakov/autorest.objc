@@ -13,14 +13,14 @@
 @EmptyLine
 @foreach (var import in Model.InterfaceImports)
 {
-@:#import "@(import).h"
+@:#import "Models/@(import).h"
 }
 @EmptyLine
 
 /**
  * The interface for @Model.Name class.
  */
-@@protocol I@(Model.Name)
+@@protocol @(Model.Name)Protocol
 
 
 @foreach (var operation in Model.AllOperations)
@@ -44,12 +44,12 @@
 @@end
 
 @EmptyLine
-@@interface @Model.Name : NSObject <I@(Model.Name)>
+@@interface @Model.Name : NSObject <@(Model.Name)Protocol>
 @EmptyLine
     /**
         The default base URL. @Model.BaseUrl
     */
-    @@property (readonly) (NSString*) DEFAULT_BASE_URL;
+    @@property (readonly) NSString* DEFAULT_BASE_URL;
 
 @foreach (var property in Model.Properties)
 {
@@ -57,7 +57,7 @@
     @:/**
         @:@(property.Documentation).
     @:*/
-    @:@@property @(property.IsReadOnly ? " (readonly) " : "") (@(property.ModelType.ServiceResponseVariant().Name)) @(property.Name.ToCamelCase());
+    @:@@property @(property.IsReadOnly ? " (readonly) " : "") @(property.ModelType.ServiceResponseVariant().Name) @(property.Name.ToCamelCase());
 }
 @EmptyLine
 @{
@@ -66,7 +66,7 @@
         .Select(p=>$"{p.Name}: ({p.ModelTypeName}) {p.Name}");
     var str = string.Join(" ", initParams);
     var paramDecl = char.ToUpper(str[0]) + str.Substring(1);
-    @:+ (id<I@(Model.Name)>) createWith@(paramDecl);
+    @:+ (id<@(Model.Name)Protocol>) createWith@(paramDecl);
 }
 @EmptyLine
 @@end

@@ -71,7 +71,7 @@ namespace AutoRest.ObjectiveC.Model
                 if (this.Extensions.ContainsKey(SwaggerExtensions.NameOverrideExtension))
                 {
                     var ext = this.Extensions[SwaggerExtensions.NameOverrideExtension] as Newtonsoft.Json.Linq.JContainer;
-                    if (ext != null && ext["name"] != null)
+                    if (ext?["name"] != null)
                     {
                         return ext["name"].ToString();
                     }
@@ -97,16 +97,16 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var imports = new List<string>();
-                if (Name.Contains('<'))
-                {
-                    imports.AddRange(ParseGenericType().SelectMany(t => t.Imports));
-                }
-                else
-                {
-                    imports.Add(string.Join("/", Package, Name));
-                }
-                return imports;
+//                var imports = new List<string>();
+//                if (Name.Contains('<'))
+//                {
+//                    imports.AddRange(ParseGenericType().SelectMany(t => t.Imports));
+//                }
+//                else
+//                {
+//                    imports.Add(string.Join("/", Package, Name));
+//                }
+                yield return Name;
             }
         }
 
@@ -177,7 +177,7 @@ namespace AutoRest.ObjectiveC.Model
         protected IEnumerable<IModelTypeOc> ParseGenericType()
         {
             string name = Name;
-            string[] types = Name.ToString().Split(new String[] { "<", ">", ",", ", " }, StringSplitOptions.RemoveEmptyEntries);
+            string[] types = Name.ToString().Split(new string[] { "<", ">", ",", ", " }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var innerType in types.Where(t => !string.IsNullOrWhiteSpace(t)))
             {
                 if (!CodeNamerOc.PrimaryTypes.Contains(innerType.Trim()))

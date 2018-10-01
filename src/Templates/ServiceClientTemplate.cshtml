@@ -40,7 +40,12 @@
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
 
-    @:+ (id<I@(Model.Name)>) createWith@(paramDecl) {
+        var invoc = notRoParams
+            .Select(p=>$"{p.Name}: {p.Name}");
+        var invocStr = string.Join(" ", invoc);
+        var paramInvoc = char.ToUpper(invocStr[0]) + invocStr.Substring(1);
+
+    @:- (id) initWith@(paramDecl) {
         @:self = [super init];
         @:if (self) {
             @:@baseUrlIntit;
@@ -55,19 +60,30 @@
         @:}
         @:return self;
     @:}
+    @EmptyLine
+    @:+ (id<@(Model.Name)Protocol>) createWith@(paramDecl) {
+        @:@(Model.Name)* client = [[@(Model.Name) alloc] initWith@(paramInvoc)];
+        @:return client;
+    @:}
     }
     else
     {
-    @:+ (id<I@(Model.Name)>) create {
+    @:- (id) init {
         @:@baseUrlIntit;
         foreach (var ro in roParamsInit)
         {
         @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
         }
-        @:}
+    @:}
+    @EmptyLine
+    @:+ (id<I@(Model.Name)>) create {
+        @:@(Model.Name)* client = [[@(Model.Name) alloc] init];
+        @:return client;
+    @:}
+
     }
 }
-
+@EmptyLine
 @* @foreach (var operation in Model.AllOperations) *@
 @* { *@
 @* @EmptyLine *@

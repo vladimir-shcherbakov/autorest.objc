@@ -121,4 +121,8 @@
      <DotnetRazor Remove="Templates\ModelTemplateImpl.cshtml" />
    </ItemGroup>
 
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\RootMethodInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
 </Project>

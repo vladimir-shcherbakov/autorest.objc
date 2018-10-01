@@ -6,135 +6,130 @@
 @inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodOc>
 @if (Model.LocalParameters.Any(p => !p.IsConstant && !p.IsRequired))
 {
-<text>
-    /**
-    @if (!string.IsNullOrEmpty(Model.Summary))
+    @:/**
+    if (!string.IsNullOrEmpty(Model.Summary))
     {
     @: * @Model.Summary.EscapeXmlComment().Period()
     }
-    @if (!string.IsNullOrEmpty(Model.Description))
+    if (!string.IsNullOrEmpty(Model.Description))
     {
     @: * @Model.Description.EscapeXmlComment().Period()
     }
-     *
-    @foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
+    @: *
+    foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
     {
     @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
     }
-    @if (Model.ReturnType.Body != null)
+    @: * @Model.CallbackParameterDescription
+    @: * @@throws IllegalArgumentException if a parameter fails the validation
+    @: */
+    @:- (void) @(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
+    foreach (var param in Model.RequiredNullableParameters)
     {
-    @: * @@return the @Model.ReturnTypeResponseName.EscapeXmlComment() object if successful.
-    }
-     */
-    - (void) @(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
-@if (@Model.ReturnTypeResponseName == "void")
-{
-        @:@(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterInvocation).toBlocking().single().body();
-}
-else
-{
-        @:return @(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterInvocation).toBlocking().single().body();
-}
-    }
-@EmptyLine
-
-    /**
-    @if (!string.IsNullOrEmpty(Model.Summary))
-    {
-    @: * @Model.Summary.EscapeXmlComment().Period()
-    }
-    @if (!string.IsNullOrEmpty(Model.Description))
-    {
-    @: * @Model.Description.EscapeXmlComment().Period()
-    }
-     *
-    @foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
-    {
-    @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
-    }
-     * @@throws IllegalArgumentException thrown if parameters fail the validation
-    @if (Model.ReturnType.Body != null)
-    {
-    @: * @@return the observable to the @Model.ReturnTypeOc.GenericBodyClientTypeString.EscapeXmlComment() object
-    }
-    else
-    {
-    @: * @@return the {@@link @Model.ReturnTypeOc.ClientResponseType} object if successful.
-    }
-     */
-    public Observable<@Model.ReturnTypeOc.ClientResponseTypeString> @(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterDeclaration) {
-@foreach (var param in Model.RequiredNullableParameters)
-{
-        @:if (@param.Name == null) {
-        @:    throw new IllegalArgumentException("Parameter @param.Name is required and cannot be null.");
+        @:if (@param.Name == nil) {
+            @:NSException *e = [NSException
+                @:exceptionWithName: @@"IllegalArgumentException"
+                @:reason: @@"Parameter @param.Name is required and cannot be nil."
+                @:userInfo: nil];
+            @:@@throw e;
         @:}
-}
-@foreach (var param in Model.ParametersToValidate.Where(p => p.IsRequired))
-{
-        @:Validator.validate(@(param.Name));
-}
-@foreach (ParameterOc parameter in Model.LocalParameters)
-{
-        if (!parameter.IsRequired)
-        {
-        @:final @(parameter.ClientType.Name) @(parameter.Name) = @(parameter.ClientType.GetDefaultValue(Model) ?? "null");
-        }
-        if (parameter.IsConstant)
-        {
-        @:final @(parameter.ClientType.Name) @(parameter.Name) = @(parameter.DefaultValue ?? "null");
-        }
-}
-        @Model.BuildInputMappings(true)
-
-@if (Model.IsParameterizedHost)
-{
-        @:String parameterizedHost = Joiner.on(", ").join(@Model.HostParameterReplacementArgs);
-}
-        @Model.ParameterConversion
-        return service.@(Model.Name)(@Model.MethodRequiredParameterApiInvocation)
-            .flatMap(new Func1<Response<@Model.CallType>, Observable<@(Model.ReturnTypeOc.ClientResponseTypeString)>>() {
-                @@Override
-                public Observable<@(Model.ReturnTypeOc.ClientResponseTypeString)> call(Response<@Model.CallType> response) {
-                    try {
-                        @Model.ClientResponse()
-                        return Observable.just(clientResponse);
-                    } catch (Throwable t) {
-                        return Observable.error(t);
-                    }
-                }
-            });
     }
-@EmptyLine
-</text>
+
+@*    if (@Model.ReturnTypeResponseName == "void")*@
+@*    {*@
+@*        @:@(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterInvocation).toBlocking().single().body();*@
+@*    }*@
+@*    else*@
+@*    {*@
+@*        @:return @(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterInvocation).toBlocking().single().body();*@
+@*    }*@
+    @:}
+    @EmptyLine
+
+@*    @:public Observable<@Model.ReturnTypeOc.ClientResponseTypeString> @(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterDeclaration) {*@
+@*    foreach (var param in Model.RequiredNullableParameters)*@
+@*    {*@
+@*        @:if (@param.Name == null) {*@
+@*        @:    throw new IllegalArgumentException("Parameter @param.Name is required and cannot be null.");*@
+@*        @:}*@
+@*    }*@
+@*    foreach (var param in Model.ParametersToValidate.Where(p => p.IsRequired))*@
+@*    {*@
+@*        @:Validator.validate(@(param.Name));*@
+@*    }*@
+@*    foreach (ParameterOc parameter in Model.LocalParameters)*@
+@*    {*@
+@*        if (!parameter.IsRequired)*@
+@*        {*@
+@*        @:final @(parameter.ClientType.Name) @(parameter.Name) = @(parameter.ClientType.GetDefaultValue(Model) ?? "null");*@
+@*        }*@
+@*        if (parameter.IsConstant)*@
+@*        {*@
+@*        @:final @(parameter.ClientType.Name) @(parameter.Name) = @(parameter.DefaultValue ?? "null");*@
+@*        }*@
+@*    }*@
+@*        @Model.BuildInputMappings(true)*@
+@**@
+@*    if (Model.IsParameterizedHost)*@
+@*    {*@
+@*        @:String parameterizedHost = Joiner.on(", ").join(@Model.HostParameterReplacementArgs);*@
+@*    }*@
+@*        @Model.ParameterConversion*@
+@*        <text>*@
+@*        return service.@(Model.Name)(@Model.MethodRequiredParameterApiInvocation)*@
+@*            .flatMap(new Func1<Response<@Model.CallType>, Observable<@(Model.ReturnTypeOc.ClientResponseTypeString)>>() {*@
+@*                @@Override*@
+@*                public Observable<@(Model.ReturnTypeOc.ClientResponseTypeString)> call(Response<@Model.CallType> response) {*@
+@*                    try {*@
+@*                        @Model.ClientResponse()*@
+@*                        return Observable.just(clientResponse);*@
+@*                    } catch (Throwable t) {*@
+@*                        return Observable.error(t);*@
+@*                    }*@
+@*                }*@
+@*            });*@
+@*        </text>*@
+@*    @:}*@
+@*@EmptyLine*@
+@**@
 }
 
     /**
-    @if (!string.IsNullOrEmpty(Model.Summary))
-    {
+@if (!string.IsNullOrEmpty(Model.Summary))
+{
     @: * @Model.Summary.EscapeXmlComment().Period()
-    }
-    @if (!string.IsNullOrEmpty(Model.Description))
-    {
+}
+@if (!string.IsNullOrEmpty(Model.Description))
+{
     @: * @Model.Description.EscapeXmlComment().Period()
-    }
-     *
-    @foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
-    {
+}
+    *
+@foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
+{
     @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
-    }
-    @if (Model.ReturnType.Body != null)
-    {
-    @: * @@return the @Model.ReturnTypeResponseName.EscapeXmlComment() object if successful.
-    }
-    */
+}
+     * @Model.CallbackParameterDescription
+     * @@throws IllegalArgumentException if a parameter fails the validation
+     */
     - (void) @(Model.Name)@(Model.MethodParameterDeclaration) {
-@if (@Model.ReturnTypeResponseName == "void")
-{
-        @:@(Model.Name)WithServiceResponseAsync(@Model.MethodParameterInvocation).toBlocking().single().body();
-}
-else
-{
-        @:return @(Model.Name)WithServiceResponseAsync(@Model.MethodParameterInvocation).toBlocking().single().body();
-}
+    @foreach (var param in Model.RequiredNullableParameters)
+    {
+        @:if (@param.Name == nil) {
+            @:NSException *e = [NSException
+                @:exceptionWithName: @@"IllegalArgumentException"
+                @:reason: @@"Parameter @param.Name is required and cannot be nil."
+                @:userInfo: nil];
+            @:@@throw e;
+        @:}
+    }
+
+@*@if (@Model.ReturnTypeResponseName == "void")*@
+@*{*@
+@*        @:@(Model.Name)WithServiceResponseAsync(@Model.MethodParameterInvocation).toBlocking().single().body();*@
+@*}*@
+@*else*@
+@*{*@
+@*        @:return @(Model.Name)WithServiceResponseAsync(@Model.MethodParameterInvocation).toBlocking().single().body();*@
+@*}*@
     }
 @EmptyLine

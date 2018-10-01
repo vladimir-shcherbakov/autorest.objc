@@ -211,11 +211,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var invocations = new List<string>();
-                foreach (var parameter in OrderedRetrofitParameters)
-                {
-                    invocations.Add(parameter.WireName);
-                }
+                var invocations = OrderedRetrofitParameters.Select(parameter => parameter.WireName).ToList();
 
                 var declaration = string.Join(", ", invocations);
                 return declaration;
@@ -227,11 +223,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var invocations = new List<string>();
-                foreach (var parameter in OrderedRetrofitParameters)
-                {
-                    invocations.Add(parameter.WireName);
-                }
+                var invocations = OrderedRetrofitParameters.Select(parameter => parameter.WireName).ToList();
 
                 var declaration = string.Join(", ", invocations);
                 return declaration;
@@ -252,7 +244,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                IndentedStringBuilder builder = new IndentedStringBuilder();
+                var builder = new IndentedStringBuilder();
                 foreach (var p in RetrofitParameters)
                 {
                     if (p.NeedsConversion)
@@ -269,7 +261,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                IndentedStringBuilder builder = new IndentedStringBuilder();
+                var builder = new IndentedStringBuilder();
                 foreach (var p in RetrofitParameters.Where(p => p.IsRequired))
                 {
                     if (p.NeedsConversion)
@@ -376,18 +368,15 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                foreach (ParameterOc param in Parameters)
-                {
-                    if (!param.ModelType.IsPrimaryType(KnownPrimaryType.Int) &&
-                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Double) &&
-                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Boolean) &&
-                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Long) &&
-                        !param.ModelType.IsPrimaryType(KnownPrimaryType.UnixTime) &&
-                        !param.IsConstant && param.IsRequired)
-                    {
-                        yield return param;
-                    }
-                }
+                return Parameters.Cast<ParameterOc>()
+                    .Where(param => 
+                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Int) 
+                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.Double) 
+                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.Boolean) 
+                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.Long) 
+                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.UnixTime) 
+                        && !param.IsConstant 
+                        && param.IsRequired);
             }
         }
 
@@ -495,7 +484,7 @@ namespace AutoRest.ObjectiveC.Model
                 //Omit parameter-group properties for now since Java doesn't support them yet
                 var par = Parameters
                     .OfType<ParameterOc>()
-                    .Where(p => p != null && !p.IsClientProperty && !string.IsNullOrWhiteSpace(p.Name))
+                    .Where(p => !p.IsClientProperty && !string.IsNullOrWhiteSpace(p.Name))
                     .OrderBy(item => !item.IsRequired)
                     .ToList();
                 return par;
@@ -527,7 +516,7 @@ namespace AutoRest.ObjectiveC.Model
                 if (this.DefaultResponse.Body is CompositeType)
                 {
                     var type = this.DefaultResponse.Body as CompositeTypeOc;
-                    return type.ExceptionTypeDefinitionName;
+                    return type?.ExceptionTypeDefinitionName;
                 }
                 else
                 {
@@ -551,26 +540,24 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public virtual string ExceptionString
-        {
-            get
-            {
-                return string.Join(", ", Exceptions);
-            }
-        }
+        public virtual string ExceptionString => string.Join(", ", Exceptions);
 
         [JsonIgnore]
         public virtual List<string> ExceptionStatements
         {
             get
             {
-                List<string> exceptions = new List<string>();
-                exceptions.Add(OperationExceptionTypeString + " exception thrown from REST call");
-                exceptions.Add("IOException exception thrown from serialization/deserialization");
+                var exceptions = new List<string>
+                {
+                    OperationExceptionTypeString + " exception thrown from REST call",
+                    "IOException exception thrown from serialization/deserialization"
+                };
+
                 if (RequiredNullableParameters.Any())
                 {
                     exceptions.Add("IllegalArgumentException exception thrown from invalid parameters");
                 }
+
                 return exceptions;
             }
         }
@@ -589,8 +576,16 @@ namespace AutoRest.ObjectiveC.Model
 
         [JsonIgnore]
         public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.NameForMethod;
+
+        public virtual string CallbackForMethod => ReturnTypeResponseName == "void"
+            ? $"withCallback : (void(^)(NSError*)) callback"
+            : $"withCallback : (void(^)({ReturnTypeResponseName}, NSError*)) callback";
+
+        public virtual string CallbackParameterDescription => ReturnTypeResponseName == "void"
+            ? $"@param callback A block where NSError* is nil if the operation is successful"
+            : $"@param callback A block where {ReturnTypeResponseName} is a result object and NSError* is nil if the operation is successful";
+
         
-        public virtual string CallbackForMethod => $"withCallback : (void(^)({ReturnTypeResponseName}, NSError*)) callback";
 
         public virtual string ResponseGeneration(bool filterRequired = false)
         {

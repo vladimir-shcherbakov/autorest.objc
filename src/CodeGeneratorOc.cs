@@ -50,35 +50,44 @@ namespace AutoRest.ObjectiveC
             var serviceClientInterfaceTemplate = new ServiceClientInterfaceTemplate { Model = codeModel };
             await Write(serviceClientInterfaceTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}{InterfaceFileExtension}");
 
-            // operations
-//            foreach (MethodGroupOc methodGroup in codeModel.AllOperations)
+            // root methods - to generate executors - backlog
+//            foreach (var method in codeModel.RootMethods)
 //            {
-//                // Operation
-//                var operationsTemplate = new MethodGroupTemplate { Model = methodGroup };
-//                await Write(operationsTemplate, $"{packagePath}/implementation/{methodGroup.TypeName.ToPascalCase()}Impl{ImplementationFileExtension}");
+//                // method interface
+//                var operationsInterfaceTemplate = new RootMethodInterfaceTemplate { Model = method };
+//                await Write(operationsInterfaceTemplate, $"{packagePath}/methods/{method.Name.ToPascalCase()}{InterfaceFileExtension}");
 //
-//                // Operation interface
-//                var operationsInterfaceTemplate = new MethodGroupInterfaceTemplate { Model = methodGroup };
-//                await Write(operationsInterfaceTemplate, $"{packagePath}/{methodGroup.TypeName.ToPascalCase()}{ImplementationFileExtension}");
 //            }
+
+            // operations
+            foreach (MethodGroupOc methodGroup in codeModel.AllOperations)
+            {
+                // Operation
+                var operationsTemplate = new MethodGroupTemplate { Model = methodGroup };
+                await Write(operationsTemplate, $"{packagePath}/Operations/{methodGroup.TypeName.ToPascalCase()}Impl{ImplementationFileExtension}");
+
+                // Operation interface
+                var operationsInterfaceTemplate = new MethodGroupInterfaceTemplate { Model = methodGroup };
+                await Write(operationsInterfaceTemplate, $"{packagePath}/Operations/{methodGroup.TypeName.ToPascalCase()}{InterfaceFileExtension}");
+            }
 
             //Models
             foreach (CompositeTypeOc modelType in cm.ModelTypes.Union(codeModel.HeaderTypes))
             {
                 //var cp = modelType.ComposedProperties; // combined whith base type props if any
                 var modelTemplate = new ModelTemplate { Model = modelType };
-                await Write(modelTemplate, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{InterfaceFileExtension}");
+                await Write(modelTemplate, $"{packagePath}/Models/{modelType.Name.ToPascalCase()}{InterfaceFileExtension}");
                 var modelTemplateImpl = new ModelTemplateImpl { Model = modelType };
-                await Write(modelTemplateImpl, $"{packagePath}/models/{modelType.Name.ToPascalCase()}{ImplementationFileExtension}");
+                await Write(modelTemplateImpl, $"{packagePath}/Models/{modelType.Name.ToPascalCase()}{ImplementationFileExtension}");
             }
 
             // Enums
             foreach (EnumTypeOc enumType in cm.EnumTypes)
             {
                 var enumTemplate = new EnumTemplate { Model = enumType };
-                await Write(enumTemplate, $"{packagePath}/models/{enumTemplate.Model.Name.ToPascalCase()}{InterfaceFileExtension}");
+                await Write(enumTemplate, $"{packagePath}/Models/{enumTemplate.Model.Name.ToPascalCase()}{InterfaceFileExtension}");
                 var enumTemplateImpl = new EnumTemplateImpl { Model = enumType };
-                await Write(enumTemplateImpl, $"{packagePath}/models/{enumTemplate.Model.Name.ToPascalCase()}{ImplementationFileExtension}");
+                await Write(enumTemplateImpl, $"{packagePath}/Models/{enumTemplate.Model.Name.ToPascalCase()}{ImplementationFileExtension}");
             }
 
             // Exceptions
