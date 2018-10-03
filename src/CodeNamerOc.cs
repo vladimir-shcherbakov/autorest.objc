@@ -33,7 +33,7 @@ namespace AutoRest.ObjectiveC
                 "if", "else", "switch", "case", "default", "break", "int", "float", "char", "double", "long", "for", "while", "do",
                 "void", "goto", "auto", "signed", "const", "extern", "register", "unsigned", "return", "continue", "enum", "sizeof",
                 "struct", "typedef", "union", "volatile",
-                "description"
+                "description", "id"
             });
 
             PrimaryTypes = new HashSet<string>

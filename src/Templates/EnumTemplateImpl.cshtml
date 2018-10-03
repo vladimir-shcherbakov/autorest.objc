@@ -10,26 +10,18 @@
 /**
  * Defines values for @(Model.Name).
  */
-@if (!Model.ModelAsString)
-{
+@*@if (!Model.ModelAsString)*@
+@{
     var serializedNames = Model.Values.Select(v => $"@\"{v.SerializedName}\"");
     var serializedNamesJoined = string.Join(",\n", serializedNames);
 
 @:@@implementation @(Model.Name)
 @EmptyLine
-    @:+ (NSArray<@(Model.Name)*>*) enumerate {
+    @:+ (NSArray<@(Model.Name)*>*) values {
         @:NSArray *array = @@[ 
             @:@serializedNamesJoined
         @:];
         @:return array;
-    @:}
-    @EmptyLine
-    @:+ (@(Model.Name) *) fromString: (NSString *) string {
-        @:return (@(Model.Name) *) string;
-    @:}
-    @EmptyLine
-    @:+ (NSString *) toStringValue: (@(Model.Name) *) value {
-        @:return (NSString *) value;
     @:}
     @EmptyLine
 
@@ -43,34 +35,42 @@
     @:}
     @EmptyLine
     }
+    @:+ (@(Model.Name) *) fromString: (NSString *) string {
+        @:return (@(Model.Name) *) string;
+    @:}
+    @EmptyLine
+    @:+ (NSString *) toStringValue: (@(Model.Name) *) value {
+        @:return (NSString *) value;
+    @:}
+    @EmptyLine
 @:@@end
 }
-else
-{
-<text>
-public final class @(Model.Name) extends ExpandableStringEnum<@(Model.Name)> {
-@for (int i = 0; i < Model.Values.Count; i++)
-{
-@:    /** Static value @(Model.Values[i].SerializedName) for @(Model.Name). */
-@:    public static final @(Model.Name) @(Model.Values[i].MemberName) = fromString("@(Model.Values[i].SerializedName)");
-@EmptyLine
-}
-    /**
-     * Creates or finds a @(Model.Name) from its string representation.
-     * @@param name a name to look for
-     * @@return the corresponding @(Model.Name)
-     */
-    @@JsonCreator
-    public static @(Model.Name) fromString(String name) {
-        return fromString(name, @(Model.Name).class);
-    }
-@EmptyLine
-    /**
-     * @@return known @(Model.Name) values
-     */
-    public static Collection<@(Model.Name)> values() {
-        return values(@(Model.Name).class);
-    }
-}
-</text>
-}
+@*else*@
+@*{*@
+@*<text>*@
+@*public final class @(Model.Name) extends ExpandableStringEnum<@(Model.Name)> {*@
+@*@for (int i = 0; i < Model.Values.Count; i++)*@
+@*{*@
+@*@:    /** Static value @(Model.Values[i].SerializedName) for @(Model.Name). */*@
+@*@:    public static final @(Model.Name) @(Model.Values[i].MemberName) = fromString("@(Model.Values[i].SerializedName)");*@
+@*@EmptyLine*@
+@*}*@
+@*    /***@
+@*     * Creates or finds a @(Model.Name) from its string representation.*@
+@*     * @@param name a name to look for*@
+@*     * @@return the corresponding @(Model.Name)*@
+@*     */*@
+@*    @@JsonCreator*@
+@*    public static @(Model.Name) fromString(String name) {*@
+@*        return fromString(name, @(Model.Name).class);*@
+@*    }*@
+@*@EmptyLine*@
+@*    /***@
+@*     * @@return known @(Model.Name) values*@
+@*     */*@
+@*    public static Collection<@(Model.Name)> values() {*@
+@*        return values(@(Model.Name).class);*@
+@*    }*@
+@*}*@
+@*</text>*@
+@*}*@

@@ -182,7 +182,7 @@ namespace AutoRest.ObjectiveC.Model
                 switch (KnownPrimaryType)
                 {
                     case KnownPrimaryType.None:
-                        return WantNullable ? "Any" : "void";
+                        return WantNullable ? "id" : "void";
                     case KnownPrimaryType.Base64Url:
                         return "NSURL*";
                     case KnownPrimaryType.Boolean:
@@ -208,7 +208,7 @@ namespace AutoRest.ObjectiveC.Model
                     case KnownPrimaryType.String:
                         return "NSString*";
                     case KnownPrimaryType.TimeSpan:
-                        return "NSTimeInterval*";
+                        return "NSNumber*";
                     case KnownPrimaryType.UnixTime:
                         return WantNullable ? "NSDate" : "long";
                     case KnownPrimaryType.Uuid:

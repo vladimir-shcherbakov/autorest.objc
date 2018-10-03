@@ -11,50 +11,51 @@
 /**
  * Defines values for @(Model.Name).
  */
-@if (!Model.ModelAsString)
-{
+@*@if (!Model.ModelAsString)*@
+@{
 @:@@interface @(Model.Name) : NSString
     @EmptyLine
-    @:+ (NSArray<@(Model.Name)*> *) enumerate;
+    @:+ (NSArray<@(Model.Name)*> *) values;
+    @EmptyLine
+    foreach (var value in Model.Values)
+    {
+    /** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
+    @:@@property (class, readonly) @Model.Name* @value.MemberName;
+    }
     @EmptyLine
     @:+ (@(Model.Name) *) fromString: (NSString *) string;
     @EmptyLine
     @:+ (NSString *) toStringValue: (@(Model.Name) *) value;
     @EmptyLine
-    foreach (var value in Model.Values)
-    {
-        /** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
-    @:@@property (class, readonly) @Model.Name* @value.MemberName;
-    @EmptyLine
-    }
+
 @:@@end
 }
-else
-{
-<text>
-public final class @(Model.Name) extends ExpandableStringEnum<@(Model.Name)> {
-@for (int i = 0; i < Model.Values.Count; i++)
-{
-@:    /** Static value @(Model.Values[i].SerializedName) for @(Model.Name). */
-@:    public static final @(Model.Name) @(Model.Values[i].MemberName) = fromString("@(Model.Values[i].SerializedName)");
-@EmptyLine
-}
-    /**
-     * Creates or finds a @(Model.Name) from its string representation.
-     * @@param name a name to look for
-     * @@return the corresponding @(Model.Name)
-     */
-    @@JsonCreator
-    public static @(Model.Name) fromString(String name) {
-        return fromString(name, @(Model.Name).class);
-    }
-@EmptyLine
-    /**
-     * @@return known @(Model.Name) values
-     */
-    public static Collection<@(Model.Name)> values() {
-        return values(@(Model.Name).class);
-    }
-}
-</text>
-}
+@*else*@
+@*{*@
+@*<text>*@
+@*public final class @(Model.Name) extends ExpandableStringEnum<@(Model.Name)> {*@
+@*@for (int i = 0; i < Model.Values.Count; i++)*@
+@*{*@
+@*@:    /** Static value @(Model.Values[i].SerializedName) for @(Model.Name). */*@
+@*@:    public static final @(Model.Name) @(Model.Values[i].MemberName) = fromString("@(Model.Values[i].SerializedName)");*@
+@*@EmptyLine*@
+@*}*@
+@*    /***@
+@*     * Creates or finds a @(Model.Name) from its string representation.*@
+@*     * @@param name a name to look for*@
+@*     * @@return the corresponding @(Model.Name)*@
+@*     */*@
+@*    @@JsonCreator*@
+@*    public static @(Model.Name) fromString(String name) {*@
+@*        return fromString(name, @(Model.Name).class);*@
+@*    }*@
+@*@EmptyLine*@
+@*    /***@
+@*     * @@return known @(Model.Name) values*@
+@*     */*@
+@*    public static Collection<@(Model.Name)> values() {*@
+@*        return values(@(Model.Name).class);*@
+@*    }*@
+@*}*@
+@*</text>*@
+@*}*@

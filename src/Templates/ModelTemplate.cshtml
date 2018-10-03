@@ -11,6 +11,10 @@
 */
 @EmptyLine
 #import <Foundation/Foundation.h>
+@if (Model.BaseModelType != null)
+{
+@:#import "@(Model.BaseModelType.DeclarationName.ToPascalCase()).h"
+}
 @foreach (var property in Model.Properties.OfType<PropertyOc>())
 {
     var imports = (property.ModelType as IModelTypeOc)?.Imports;
@@ -36,8 +40,8 @@ else
 */
 @if (Model.BaseIsPolymorphic)
 {
-    @:@@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@(Model.BasePolymorphicDiscriminator)")
-    @:@@JsonTypeName("@(Model.SerializedName)")
+    @://JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@(Model.BasePolymorphicDiscriminator)")
+    @://JsonTypeName("@(Model.SerializedName)")
     var subTypes = Model.SubTypes.ToList();
     if (subTypes.Any())
     {
