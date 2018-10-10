@@ -1,4 +1,5 @@
-﻿@using System.Linq;
+﻿@using System.Collections.Generic
+@using System.Linq;
 @using AutoRest.Core.Model
 @using AutoRest.Core.Utilities
 @using AutoRest.ObjectiveC
@@ -21,28 +22,34 @@
     @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
     }
     @: * @Model.CallbackParameterDescription
-    @: * @@throws IllegalArgumentException if a parameter fails the validation
+    @: * @@throws IllegalArgumentException if a required parameter is not provided
     @: */
     @:- (void) @(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
-    foreach (var param in Model.RequiredNullableParameters)
+@*     foreach (var param in Model.RequiredNullableParameters) *@
+@*     { *@
+@*         @:if (@param.Name == nil) { *@
+@*             @:NSException *e = [NSException *@
+@*                 @:exceptionWithName: @@"IllegalArgumentException" *@
+@*                 @:reason: @@"Parameter @param.Name is required and cannot be nil." *@
+@*                 @:userInfo: nil]; *@
+@*             @:@@throw e; *@
+@*         @:} *@
+@*     } *@
+    foreach (var param in Model.LocalParameters)
     {
-        @:if (@param.Name == nil) {
-            @:NSException *e = [NSException
-                @:exceptionWithName: @@"IllegalArgumentException"
-                @:reason: @@"Parameter @param.Name is required and cannot be nil."
-                @:userInfo: nil];
-            @:@@throw e;
-        @:}
+        if (!param.IsRequired)
+        {
+        @:@(param.ClientType.Name)* @(param.Name) = @(param.ClientType.GetDefaultValue(Model) ?? "nil");
+        }
+        if (param.IsConstant)
+        {
+        @:@(param.ClientType.Name) @(param.Name) = @(param.DefaultValue ?? "nil");
+
+        }
     }
 
-@*    if (@Model.ReturnTypeResponseName == "void")*@
-@*    {*@
-@*        @:@(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterInvocation).toBlocking().single().body();*@
-@*    }*@
-@*    else*@
-@*    {*@
-@*        @:return @(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterInvocation).toBlocking().single().body();*@
-@*    }*@
+        @:[@(Model.Name)@(Model.MethodParameterInvocation)];
+
     @:}
     @EmptyLine
 
@@ -93,26 +100,32 @@
 @*@EmptyLine*@
 @**@
 }
-
-    /**
-@if (!string.IsNullOrEmpty(Model.Summary))
+@if (Model.LocalParameters.Any(p => !p.IsConstant))
 {
+    @:/**
+    if (!string.IsNullOrEmpty(Model.Summary))
+    {
     @: * @Model.Summary.EscapeXmlComment().Period()
-}
-@if (!string.IsNullOrEmpty(Model.Description))
-{
+    }
+    if (!string.IsNullOrEmpty(Model.Description))
+    {
     @: * @Model.Description.EscapeXmlComment().Period()
-}
-    *
-@foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
-{
+    }
+    @:*
+    foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
+    {
     @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
-}
-     * @Model.CallbackParameterDescription
-     * @@throws IllegalArgumentException if a parameter fails the validation
-     */
-    - (void) @(Model.Name)@(Model.MethodParameterDeclaration) {
-    @foreach (var param in Model.RequiredNullableParameters)
+    }
+    @: * @Model.CallbackParameterDescription
+    if (Model.LocalParameters.Any(p => p.IsRequired))
+    {
+    @: * @@throws IllegalArgumentException if a requred parameter is not provided.
+    }
+    @: */
+    @:- (void) @(Model.Name)@(Model.MethodParameterDeclaration) {
+    @EmptyLine
+       
+    foreach (var param in Model.RequiredNullableParameters)
     {
         @:if (@param.Name == nil) {
             @:NSException *e = [NSException
@@ -121,15 +134,72 @@
                 @:userInfo: nil];
             @:@@throw e;
         @:}
+        @EmptyLine
     }
 
-@*@if (@Model.ReturnTypeResponseName == "void")*@
-@*{*@
-@*        @:@(Model.Name)WithServiceResponseAsync(@Model.MethodParameterInvocation).toBlocking().single().body();*@
-@*}*@
-@*else*@
-@*{*@
-@*        @:return @(Model.Name)WithServiceResponseAsync(@Model.MethodParameterInvocation).toBlocking().single().body();*@
-@*}*@
+        @:@Model.BuildInputMappings(true)
+
+    var pathParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Extensions.ContainsKey("hostParameter") || p.Location == ParameterLocation.Path)
+        .Select(param => $"@\"{{{param.SerializedName}}}\" : {param.Name}")
+        .ToList();
+
+    var pathParamsInitLine = string.Join(", ", pathParamsList);
+
+    var queryParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Location == ParameterLocation.Query)
+        .Select(param => $"@\"{param.SerializedName}\" : {param.Name}")
+        .ToList();
+
+    var queryParamsInitLine = string.Join(", ", queryParamsList);
+
+    var headersParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Location == ParameterLocation.Header)
+        .Select(param => $"@\"{param.SerializedName}\" : {param.Name}")
+        .ToList();
+
+    headersParamsList.Add($"@\"Content-Type\" : @\"{Model.RequestContentType}\"");
+
+    var headersInitLine = string.Join(", ", headersParamsList);
+
+    var bodyParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Location == ParameterLocation.Body)
+        .Select(param => $"[JsonCoder encodeObject:{param.Name}]")
+        .ToList();
+
+    var bodyInitLine = bodyParamsList.IsNullOrEmpty() ? "nil" : string.Join(", ", bodyParamsList);
+	    
+        @EmptyLine
+        @:NSString* __url = [RequestHelper buildUrl: self.service.DEFAULT_BASE_URL
+                                       @:withPath: @@"@(Model.Url)"
+                                 @:withPathParams: @@{@pathParamsInitLine}
+                                @:withQueryParams: @@{@queryParamsInitLine}];
+        @EmptyLine
+        @:RequestParameters* __rp = [RequestParameters createWithUrl: __url
+                                                        @:withMethod: @@"@(Model.HttpMethod.ToString().ToUpper())"
+                                                       @:withHeaders: @@{@headersInitLine}
+                                                          @:withBody: @bodyInitLine];
+        @EmptyLine
+
+    if (@Model.ReturnTypeResponseName == "void")
+    {
+         @:[RequestHelper executeRequest:__rp 
+                       @:withErrorClass:[@Model.OperationErrorTypeName class] 
+                         @:withCallback:^(OperationError* _Nullable error) {
+            @:callback(error);
+        @:}];
     }
-@EmptyLine
+    else
+    {
+        @:[RequestHelper executeRequest:__rp 
+                    @:withResponceClass:[@Model.ReturnTypeResponseName class] 
+                       @:withErrorClass:[@Model.OperationErrorTypeName class] 
+                         @:withCallback:^(id _Nullable result, OperationError* _Nullable error) {
+            @:callback(result, error);
+        @:}];
+    }
+
+    @EmptyLine
+    @:}
+    @EmptyLine
+}

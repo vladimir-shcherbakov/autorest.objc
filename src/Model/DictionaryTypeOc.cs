@@ -12,7 +12,7 @@ namespace AutoRest.ObjectiveC.Model
         public DictionaryTypeOc()
         {
             //Name.OnGet += value => $"Map<String, {ValueType.Name}>";
-            Name.OnGet += value => $"NSDictionary<NSString*, {ValueType.Name}> *";
+            Name.OnGet += value => $"NSDictionary<NSString*, {ValueType.Name}>";
         }
 
         [JsonIgnore]

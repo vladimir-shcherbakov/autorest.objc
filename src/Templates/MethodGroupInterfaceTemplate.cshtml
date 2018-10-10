@@ -32,6 +32,12 @@
 /**
 * The protocol implementation
 */
+@@class @(Model.Parent.CodeModel.Name);
+@EmptyLine
 @@interface @(Model.TypeName) : NSObject <@(Model.TypeName)Protocol>
+
+@@property (readonly) @(Model.Parent.CodeModel.Name)* service;
+
+- (instancetype) initWithService: (@(Model.Parent.CodeModel.Name) *) service;
 
 @@end

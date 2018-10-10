@@ -63,8 +63,10 @@ namespace AutoRest.ObjectiveC
                 return null;
             }
 
-            List<string> settings = new List<string>();
-            settings.Add(string.Format(CultureInfo.InvariantCulture, "value = \"{0}\"", property.SerializedName));
+            var settings = new List<string>
+            {
+                string.Format(CultureInfo.InvariantCulture, "\"{0}\"", property.SerializedName)
+            };
             if (property.IsRequired)
             {
                 settings.Add("required = true");

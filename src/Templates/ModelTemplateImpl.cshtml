@@ -1,5 +1,6 @@
 ﻿@using System.Linq
 @using System.Collections.Generic
+@using AutoRest.Core
 @using AutoRest.Core.Model
 @using AutoRest.Core.Utilities
 @using AutoRest.ObjectiveC
@@ -15,8 +16,10 @@
 @@implementation @(Model.Name)
 @EmptyLine
 
-@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties) {
-if (Model.GenerateConstructorForRequiredProperties) {
+@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties) 
+{
+    if (Model.GenerateConstructorForRequiredProperties) 
+    {
     @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration) {
         @:self = [super init];
         @:if (self) {
@@ -31,7 +34,48 @@ if (Model.GenerateConstructorForRequiredProperties) {
         @:}
         @:return self;
     @:}
+    }
+@EmptyLine
+}
+
+- (void)encodeWithCoder:(id<Coder>) encoder {
+    @EmptyLine
+@if (Model.BaseModelType != null)
+{
+    @:[super encodeWithCoder:encoder];
+}
+@foreach (PropertyOc property in Model.Properties)
+{
+    var propName = CodeNamer.Instance.GetPropertyName(property.Name);
+    @:[encoder encodeObject: self.@propName forKey: @@"@(property.SerializedName)"];
 }
 @EmptyLine
 }
+
+@EmptyLine
+
+- (nullable instancetype)initWithDecoder:(id<Coder>)decoder {
+    @EmptyLine
+@if (Model.BaseModelType != null)
+{
+    @:if (self = [super initWithDecoder:decoder]) {
+}
+else
+{
+    @:if (self = [super init]) {
+}
+    @EmptyLine
+@foreach (PropertyOc property in Model.Properties)
+{
+    var typeName = (property.ModelType as IModelTypeOc)?.Name;
+    var propName = CodeNamer.Instance.GetPropertyName(property.Name);
+        @:self.@propName = [decoder decodeObjectForKey:@@"@(property.SerializedName)" objectClass:[@typeName class]];
+}
+    }
+    @EmptyLine
+    return self;
+}
+
+@EmptyLine
+
 @@end

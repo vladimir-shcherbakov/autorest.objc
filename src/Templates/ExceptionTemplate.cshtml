@@ -18,25 +18,25 @@ import retrofit2.Response;
 /**
 @WrapComment(" * ", "Exception thrown for an invalid response with " + Model.Name + " information.")
  */
-public class @Model.ExceptionTypeDefinitionName extends RestException {
+public class @Model.ErrorTypeName extends RestException {
     /**
-     * Initializes a new instance of the @(Model.ExceptionTypeDefinitionName) class.
+     * Initializes a new instance of the @(Model.ErrorTypeName) class.
      *
      * @@param message the exception message or the response content if a message is not available
      * @@param response the HTTP response
      */
-    public @(Model.ExceptionTypeDefinitionName)(final String message, final Response<ResponseBody> response) {
+    public @(Model.ErrorTypeName)(final String message, final Response<ResponseBody> response) {
         super(message, response);
     }
 @EmptyLine
     /**
-     * Initializes a new instance of the @(Model.ExceptionTypeDefinitionName) class.
+     * Initializes a new instance of the @(Model.ErrorTypeName) class.
      *
      * @@param message the exception message or the response content if a message is not available
      * @@param response the HTTP response
      * @@param body the deserialized response body
      */
-    public @(Model.ExceptionTypeDefinitionName)(final String message, final Response<ResponseBody> response, final @Model.Name body) {
+    public @(Model.ErrorTypeName)(final String message, final Response<ResponseBody> response, final @Model.Name body) {
         super(message, response, body);
     }
 @EmptyLine

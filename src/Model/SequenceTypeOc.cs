@@ -16,7 +16,7 @@ namespace AutoRest.ObjectiveC.Model
             {
                 var et = (ElementType as IModelTypeOc);
                 var name = et?.Name;
-                return $"NSArray<{(ElementType as IModelTypeOc)?.NameForMethod}> *";
+                return $"NSArray<{(ElementType as IModelTypeOc)?.NameForMethod}>";
             };
             
         }

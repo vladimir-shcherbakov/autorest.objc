@@ -64,7 +64,7 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public virtual string ExceptionTypeDefinitionName
+        public virtual string ErrorTypeName
         {
             get
             {
@@ -76,7 +76,7 @@ namespace AutoRest.ObjectiveC.Model
                         return ext["name"].ToString();
                     }
                 }
-                return this.Name + "Exception";
+                return this.Name;
             }
         }
 

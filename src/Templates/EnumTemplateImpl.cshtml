@@ -17,11 +17,17 @@
 
 @:@@implementation @(Model.Name)
 @EmptyLine
-    @:+ (NSArray<@(Model.Name)*>*) values {
-        @:NSArray *array = @@[ 
-            @:@serializedNamesJoined
-        @:];
-        @:return array;
+    @:+ (NSArray*) values {
+        @EmptyLine
+        @:static NSArray *allValues;
+        @:static dispatch_once_t onceToken;
+        @:dispatch_once(&onceToken, ^{
+            @:allValues = @@[ 
+                @:@serializedNamesJoined
+            @:];
+        @:});
+        @EmptyLine
+        @:return allValues;
     @:}
     @EmptyLine
 
@@ -39,7 +45,14 @@
         @:return (@(Model.Name) *) string;
     @:}
     @EmptyLine
-    @:+ (NSString *) toStringValue: (@(Model.Name) *) value {
+    @:+ (NSString *) toStringValue: (id<StringEnum>) value {
+        if (!Model.ModelAsString)
+		{
+        @:if (![[@(Model.Name) values] containsObject:string]) {
+            @:@@throw [NSException exceptionWithName:@@"EnumCastException" reason:@@"Enum value doesn't exist" userInfo:nil];
+        @:}
+		}
+        @EmptyLine
         @:return (NSString *) value;
     @:}
     @EmptyLine

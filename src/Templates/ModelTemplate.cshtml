@@ -11,6 +11,7 @@
 */
 @EmptyLine
 #import <Foundation/Foundation.h>
+#import "Codable.h"
 @if (Model.BaseModelType != null)
 {
 @:#import "@(Model.BaseModelType.DeclarationName.ToPascalCase()).h"
@@ -59,7 +60,7 @@ else
 {
 @:// Skip parent validation
 }
-@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject")
+@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject") <Codable>
 @EmptyLine
 @foreach (PropertyOc property in Model.Properties)
 {
@@ -79,9 +80,9 @@ else
     {
     @:// json @(jsonSetting)
     }
-    var typeName = (property.ModelType as IModelTypeOc)?.NameForMethod;
+    var typeName = (property.ModelType as IModelTypeOc)?.Name;
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);
-    @:@@property @typeName @propName;
+    @:@@property @typeName* @propName;
     @EmptyLine
 }
 

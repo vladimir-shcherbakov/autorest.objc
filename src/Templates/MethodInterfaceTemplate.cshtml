@@ -3,7 +3,7 @@
 @using AutoRest.ObjectiveC
 @using AutoRest.ObjectiveC.Model
 @inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodOc>
-@if (Model.LocalParameters.Any(p => !p.IsConstant && !p.IsRequired))
+@if (Model.LocalParameters.Any(p => !p.IsConstant && p.IsRequired))
 {
 @:/**
     if (!string.IsNullOrEmpty(Model.Summary))
@@ -22,7 +22,7 @@
 @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment())
     }
 @: * @Model.CallbackParameterDescription
-@: * @@throws IllegalArgumentException thrown if parameters fail the validation
+@: * @@throws IllegalArgumentException if a required parameter is not provided.
 @: */
 @:- (void) @(Model.Name)@(Model.MethodRequiredParameterDeclaration);
 @EmptyLine
@@ -43,5 +43,9 @@
 @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment())
 }
  * @Model.CallbackParameterDescription
+@if (Model.LocalParameters.Any(p => p.IsRequired))
+{
+@: * @@throws IllegalArgumentException if a required parameter is not provided.
+}
  */
 - (void) @(Model.Name)@(Model.MethodParameterDeclaration);

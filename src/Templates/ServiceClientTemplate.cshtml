@@ -90,7 +90,7 @@
     @: * The @(operation.TypeName) object to access its operations.
     @: */
     @:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
-        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) init] alloc];
+        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) allc] initWithService: self];
         @: return op;
     @:}
     @EmptyLine

@@ -10,11 +10,12 @@
 @EmptyLine
 #import "@(Model.TypeName).h"
 @EmptyLine
+@@class OperationError;
 
 /**
  * The protocol @(Model.TypeName)Protocol implementation
  */
-@@implementation @(Model.TypeName) {
+@@implementation @(Model.TypeName)
     @* /** The Retrofit service to perform REST calls. */ *@
     @* private @Model.MethodGroupServiceType service; *@
     @* /** The service client containing this operation class. */ *@
@@ -34,9 +35,16 @@
     @* *@
     @* @Include(new MethodGroupRetrofitTemplate(), Model) *@
     @* *@
-    @* @EmptyLine *@
-
-    @foreach (MethodOc method in Model.Methods)
+    @EmptyLine
+    - (instancetype) initWithService: (@(Model.Parent.CodeModel.Name) *) service {
+        if (self = [super init]) {
+            _service = service;
+        }
+        @EmptyLine
+        return self;
+    }
+@EmptyLine
+@foreach (MethodOc method in Model.Methods)
     {
 @:@(Include(new MethodTemplate(), method))
 @EmptyLine

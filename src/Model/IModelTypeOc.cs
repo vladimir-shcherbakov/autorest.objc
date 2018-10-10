@@ -8,6 +8,7 @@ namespace AutoRest.ObjectiveC.Model
         IEnumerable<string> Imports { get; }
         
         IModelTypeOc ResponseVariant { get; }
+
         IModelTypeOc ParameterVariant { get; }
 
         IModelTypeOc NonNullableVariant { get; }
@@ -19,11 +20,12 @@ namespace AutoRest.ObjectiveC.Model
     {
         public static IModelTypeOc ServiceResponseVariant(this IModelType original, bool wantNullable = false)
         {
-            if (wantNullable)
-            {
-                return (IModelTypeOc)original; // the original is always nullable
-            }
-            return (IModelTypeOc) ((original as IModelTypeOc)?.ResponseVariant?.NonNullableVariant ?? original);
+            return (IModelTypeOc)original;
+//            if (wantNullable)
+//            {
+//                return (IModelTypeOc)original; // the original is always nullable
+//            }
+//            return (IModelTypeOc) ((original as IModelTypeOc)?.ResponseVariant?.NonNullableVariant ?? original);
         }
 
         public static string GetDefaultValue(this IModelType type, Method parent)

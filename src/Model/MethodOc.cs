@@ -117,13 +117,13 @@ namespace AutoRest.ObjectiveC.Model
                 var declarations = LocalParameters
                     .Where(p => !p.IsConstant)
                     .Select(parameter => 
-                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.ParameterVariant.NameForMethod}) {parameter.Name}")
+                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}")
                     .ToList();
 
                 var declaration = string.Join(" ", declarations);
                 var declarationWithCallback = string.IsNullOrEmpty(declaration)
-                    ? CallbackForMethod
-                    : $"{declaration} {CallbackForMethod}";
+                    ? CallbackParameterDeclaration
+                    : $"{declaration} {CallbackParameterDeclaration}";
                 return declarationWithCallback.StartWithUppercase();
             }
         }
@@ -136,13 +136,13 @@ namespace AutoRest.ObjectiveC.Model
                 var declarations = LocalParameters
                     .Where(p => !p.IsConstant && p.IsRequired)
                     .Select(parameter => 
-                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.ParameterVariant.NameForMethod}) {parameter.Name}")
+                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}")
                     .ToList();
 
                 var declaration = string.Join(" ", declarations);
                 var declarationWithCallback = string.IsNullOrEmpty(declaration)
-                    ? CallbackForMethod
-                    : $"{declaration} {CallbackForMethod}";
+                    ? CallbackParameterDeclaration
+                    : $"{declaration} {CallbackParameterDeclaration}";
 
                 return declarationWithCallback.StartWithUppercase();
             }
@@ -153,14 +153,18 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var invocations = new List<string>();
-                foreach (var parameter in LocalParameters.Where(p => !p.IsConstant))
-                {
-                    invocations.Add(parameter.Name);
-                }
+                var invocations = LocalParameters
+                    .Where(p => !p.IsConstant)
+                    .Select(parameter =>
+                        $"with{parameter.Name.ToPascalCase()}: {parameter.Name}")
+                    .ToList();
 
-                var declaration = string.Join(", ", invocations);
-                return declaration;
+                var invocation = string.Join(" ", invocations);
+                var invocationsWithCallback = string.IsNullOrEmpty(invocation)
+                    ? CallbackParameterInvocation
+                    : $"{invocation} {CallbackParameterInvocation}";
+
+                return invocationsWithCallback.StartWithUppercase();
             }
         }
 
@@ -287,24 +291,31 @@ namespace AutoRest.ObjectiveC.Model
                 {
                     outParamName += "1";
                 }
+
                 transformation.OutputParameter.Name = outParamName;
                 var nullCheck = BuildNullCheckExpression(transformation);
-                bool conditionalAssignment = !string.IsNullOrEmpty(nullCheck) && !transformation.OutputParameter.IsRequired && !filterRequired;
+                var conditionalAssignment = !string.IsNullOrEmpty(nullCheck) 
+                                            && !transformation.OutputParameter.IsRequired 
+                                            && !filterRequired;
                 if (conditionalAssignment)
                 {
-                    builder.AppendLine("{0} {1} = null;",
-                            ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name,
-                            outParamName);
+                    var inParamName = ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name;
+                    builder.AppendLine($"{inParamName} {outParamName} = null");
+//                    builder.AppendLine("{0} {1} = null;",
+//                            ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name,
+//                            outParamName);
                     builder.AppendLine("if ({0}) {{", nullCheck).Indent();
                 }
 
                 if (transformation.ParameterMappings.Any(m => !string.IsNullOrEmpty(m.OutputParameterProperty)) &&
                     transformation.OutputParameter.ModelType is CompositeType)
                 {
-                    builder.AppendLine("{0}{1} = new {2}();",
-                        !conditionalAssignment ? ((ParameterOc)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
-                        outParamName,
-                        transformation.OutputParameter.ModelType.Name);
+                    var cond = !conditionalAssignment
+                        ? ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name + ""
+                        : "";
+
+                    builder.AppendLine(
+                        $"{cond}* {outParamName} = [{transformation.OutputParameter.ModelType.Name} new];");
                 }
 
                 foreach (var mapping in transformation.ParameterMappings)
@@ -335,18 +346,18 @@ namespace AutoRest.ObjectiveC.Model
             }
             if (filterRequired && !mapping.InputParameter.IsRequired)
             {
-                inputPath = "null";
+                inputPath = "nil";
             }
 
-            string outputPath = "";
+            var outputPath = "";
             if (mapping.OutputParameterProperty != null)
             {
-                outputPath += ".with" + CodeNamer.Instance.PascalCase(mapping.OutputParameterProperty);
-                return string.Format(CultureInfo.InvariantCulture, "{0}({1})", outputPath, inputPath);
+                outputPath += "." + mapping.OutputParameterProperty;
+                return $"{outputPath} = {inputPath}";
             }
             else
             {
-                return string.Format(CultureInfo.InvariantCulture, "{0} = {1}", outputPath, inputPath);
+                return $"{outputPath} = {inputPath}";
             }
         }
 
@@ -354,7 +365,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             if (transformation == null)
             {
-                throw new ArgumentNullException("transformation");
+                throw new ArgumentNullException(nameof(transformation));
             }
 
             return string.Join(" || ",
@@ -369,13 +380,8 @@ namespace AutoRest.ObjectiveC.Model
             get
             {
                 return Parameters.Cast<ParameterOc>()
-                    .Where(param => 
-                        !param.ModelType.IsPrimaryType(KnownPrimaryType.Int) 
-                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.Double) 
-                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.Boolean) 
-                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.Long) 
-                        && !param.ModelType.IsPrimaryType(KnownPrimaryType.UnixTime) 
-                        && !param.IsConstant 
+                    .Where(param =>
+                        !param.IsConstant 
                         && param.IsRequired);
             }
         }
@@ -385,16 +391,11 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                foreach (ParameterOc param in Parameters)
-                {
-                    if (param.ModelType is PrimaryType ||
-                        param.ModelType is EnumType ||
-                        param.IsConstant)
-                    {
-                        continue;
-                    }
-                    yield return param;
-                }
+                return Parameters.Cast<ParameterOc>()
+                    .Where(param => 
+                        !(param.ModelType is PrimaryType) 
+                        && !(param.ModelType is EnumType) 
+                        && !param.IsConstant);
             }
         }
 
@@ -402,13 +403,7 @@ namespace AutoRest.ObjectiveC.Model
         /// Gets the expression for response body initialization
         /// </summary>
         [JsonIgnore]
-        public virtual string InitializeResponseBody
-        {
-            get
-            {
-                return string.Empty;
-            }
-        }
+        public virtual string InitializeResponseBody => string.Empty;
 
         [JsonIgnore]
         public virtual string MethodParameterDeclarationWithCallback
@@ -485,8 +480,7 @@ namespace AutoRest.ObjectiveC.Model
                 var par = Parameters
                     .OfType<ParameterOc>()
                     .Where(p => !p.IsClientProperty && !string.IsNullOrWhiteSpace(p.Name))
-                    .OrderBy(item => !item.IsRequired)
-                    .ToList();
+                    .OrderBy(item => !item.IsRequired);
                 return par;
             }
         }
@@ -509,18 +503,18 @@ namespace AutoRest.ObjectiveC.Model
         /// Get the type for operation exception
         /// </summary>
         [JsonIgnore]
-        public virtual string OperationExceptionTypeString
+        public virtual string OperationErrorTypeName
         {
             get
             {
                 if (this.DefaultResponse.Body is CompositeType)
                 {
                     var type = this.DefaultResponse.Body as CompositeTypeOc;
-                    return type?.ExceptionTypeDefinitionName;
+                    return type?.ErrorTypeName;
                 }
                 else
                 {
-                    return "RestException";
+                    return "ServerError";
                 }
             }
         }
@@ -530,7 +524,7 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                yield return OperationExceptionTypeString;
+                yield return OperationErrorTypeName;
                 yield return "IOException";
                 if (RequiredNullableParameters.Any())
                 {
@@ -549,7 +543,7 @@ namespace AutoRest.ObjectiveC.Model
             {
                 var exceptions = new List<string>
                 {
-                    OperationExceptionTypeString + " exception thrown from REST call",
+                    OperationErrorTypeName + " exception thrown from REST call",
                     "IOException exception thrown from serialization/deserialization"
                 };
 
@@ -575,15 +569,17 @@ namespace AutoRest.ObjectiveC.Model
         public ResponseOc ReturnTypeOc => ReturnType as ResponseOc;
 
         [JsonIgnore]
-        public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.NameForMethod;
+        public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.Name;
 
-        public virtual string CallbackForMethod => ReturnTypeResponseName == "void"
-            ? $"withCallback : (void(^)(NSError*)) callback"
-            : $"withCallback : (void(^)({ReturnTypeResponseName}, NSError*)) callback";
+        public virtual string CallbackParameterDeclaration => ReturnTypeResponseName == "void"
+            ? $"withCallback : (void(^)(OperationError*)) callback"
+            : $"withCallback : (void(^)({ReturnTypeResponseName}*, OperationError*)) callback";
+        
+        public virtual string CallbackParameterInvocation => $"withCallback: callback";
 
         public virtual string CallbackParameterDescription => ReturnTypeResponseName == "void"
-            ? $"@param callback A block where NSError* is nil if the operation is successful"
-            : $"@param callback A block where {ReturnTypeResponseName} is a result object and NSError* is nil if the operation is successful";
+            ? $"@param callback A block where OperationError* is nil if the operation is successful"
+            : $"@param callback A block where {ReturnTypeResponseName} is a result object and OperationError is nil, if the operation is successful";
 
         
 

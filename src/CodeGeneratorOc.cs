@@ -34,7 +34,7 @@ namespace AutoRest.ObjectiveC
         /// <returns></returns>
         public override async Task Generate(CodeModel cm)
         {
-            var packagePath = $"objc/{cm.Namespace.ToLower().Replace('.', '/')}";
+            var packagePath = $"./{cm.Namespace.ToLower().Replace('.', '/')}";
 
             // get ObjectiveC specific codeModel
             if (!(cm is CodeModelOc codeModel))

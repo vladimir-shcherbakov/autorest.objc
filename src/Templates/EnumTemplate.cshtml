@@ -7,15 +7,16 @@
  */
 @EmptyLine
 #import <Foundation/Foundation.h>
+#import "Codable.h"
 @EmptyLine
 /**
  * Defines values for @(Model.Name).
  */
 @*@if (!Model.ModelAsString)*@
 @{
-@:@@interface @(Model.Name) : NSString
+@:@@interface @(Model.Name) : NSString <StringEnum>
     @EmptyLine
-    @:+ (NSArray<@(Model.Name)*> *) values;
+    @:+ (NSArray*) values;
     @EmptyLine
     foreach (var value in Model.Values)
     {
@@ -23,11 +24,6 @@
     @:@@property (class, readonly) @Model.Name* @value.MemberName;
     }
     @EmptyLine
-    @:+ (@(Model.Name) *) fromString: (NSString *) string;
-    @EmptyLine
-    @:+ (NSString *) toStringValue: (@(Model.Name) *) value;
-    @EmptyLine
-
 @:@@end
 }
 @*else*@

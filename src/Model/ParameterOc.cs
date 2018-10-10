@@ -43,13 +43,7 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
-        public IModelTypeOc ClientType
-        {
-            get
-            {
-                return ((IModelTypeOc)ModelType).ParameterVariant;
-            }
-        }
+        public IModelTypeOc ClientType => ((IModelTypeOc)ModelType).ParameterVariant;
 
         [JsonIgnore]
         public IModelTypeOc WireType
@@ -58,8 +52,13 @@ namespace AutoRest.ObjectiveC.Model
             {
                 if (ModelType.IsPrimaryType(KnownPrimaryType.Stream))
                 {
-                    var res = new PrimaryTypeOc(KnownPrimaryType.Stream);
-                    res.Name.FixedValue = "RequestBody";
+                    var res = new PrimaryTypeOc(KnownPrimaryType.Stream)
+                    {
+                        Name =
+                        {
+                            FixedValue = "RequestBody"
+                        }
+                    };
                     return res;
                 }
                 else if (!ModelType.IsPrimaryType(KnownPrimaryType.Base64Url) &&
@@ -113,10 +112,10 @@ namespace AutoRest.ObjectiveC.Model
                 }
             }
 
-            return convertClientTypeToWireType(WireType, source, WireName, clientReference);
+            return ConvertClientTypeToWireType(WireType, source, WireName, clientReference);
         }
 
-        private string convertClientTypeToWireType(IModelTypeOc wireType, string source, string target, string clientReference, int level = 0)
+        private string ConvertClientTypeToWireType(IModelTypeOc wireType, string source, string target, string clientReference, int level = 0)
         {
             IndentedStringBuilder builder = new IndentedStringBuilder();
             if (wireType.IsPrimaryType(KnownPrimaryType.DateTimeRfc1123))
@@ -181,7 +180,7 @@ namespace AutoRest.ObjectiveC.Model
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0}{1} = new ArrayList<{2}>();", IsRequired ? wireType.Name + " " : "", target, elementType.Name)
                     .AppendLine("for ({0} {1} : {2}) {{", elementType.ParameterVariant.Name, itemName, source)
-                    .Indent().AppendLine(convertClientTypeToWireType(elementType, itemName, itemTarget, clientReference, level + 1))
+                    .Indent().AppendLine(ConvertClientTypeToWireType(elementType, itemName, itemTarget, clientReference, level + 1))
                         .AppendLine("{0}.add({1});", target, itemTarget)
                     .Outdent().Append("}");
                 _implImports.Add("java.util.ArrayList");
@@ -203,7 +202,7 @@ namespace AutoRest.ObjectiveC.Model
                 var itemTarget = string.Format(CultureInfo.InvariantCulture, "value{0}", level == 0 ? "" : level.ToString(CultureInfo.InvariantCulture));
                 builder.AppendLine("{0}{1} = new HashMap<String, {2}>();", IsRequired ? wireType.Name + " " : "", target, valueType.Name)
                     .AppendLine("for (Map.Entry<String, {0}> {1} : {2}.entrySet()) {{", valueType.ParameterVariant.Name, itemName, source)
-                    .Indent().AppendLine(convertClientTypeToWireType(valueType, itemName + ".getValue()", itemTarget, clientReference, level + 1))
+                    .Indent().AppendLine(ConvertClientTypeToWireType(valueType, itemName + ".getValue()", itemTarget, clientReference, level + 1))
                         .AppendLine("{0}.put({1}.getKey(), {2});", target, itemName, itemTarget)
                     .Outdent().Append("}");
                 _implImports.Add("java.util.HashMap");
