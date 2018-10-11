@@ -36,7 +36,7 @@
     if (notRoParams.Any())
     {
         var decl = notRoParams
-            .Select(p=>$"{p.Name}: ({p.ModelTypeName}) {p.Name}");
+            .Select(p=>$"{p.Name}: ({p.ModelTypeName}*) {p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
 
@@ -90,7 +90,7 @@
     @: * The @(operation.TypeName) object to access its operations.
     @: */
     @:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
-        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) allc] initWithService: self];
+        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc] initWithService: self];
         @: return op;
     @:}
     @EmptyLine

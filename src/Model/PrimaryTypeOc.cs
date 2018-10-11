@@ -31,15 +31,15 @@ namespace AutoRest.ObjectiveC.Model
             {
                 switch (Name)
                 {
-                    case "Integer":
+                    case "AZInteger":
                         return "@0";
-                    case "Boolean":
+                    case "AZBoolean":
                         return "@NO";
-                    case "Float":
+                    case "AZFloat":
                         return "@0.0F";
-                    case "Double":
+                    case "AZDouble":
                         return "@0.0";
-                    case "Long":
+                    case "AZLong":
                         return "@0L";
                     default:
                         return "nil";
@@ -123,11 +123,11 @@ namespace AutoRest.ObjectiveC.Model
                     case KnownPrimaryType.None:
                         return "void";
                     case KnownPrimaryType.Base64Url:
-                        return "Base64Url";
+                        return "AZBase64Url";
                     case KnownPrimaryType.Boolean:
-                        return "Boolean";
+                        return "AZBoolean";
                     case KnownPrimaryType.ByteArray:
-                        return "ByteArray";
+                        return "AZByteArray";
                     case KnownPrimaryType.Date:
                         return "Date";
                     case KnownPrimaryType.DateTime:
@@ -135,21 +135,21 @@ namespace AutoRest.ObjectiveC.Model
                     case KnownPrimaryType.DateTimeRfc1123:
                         return "DateTimeRfc1123";
                     case KnownPrimaryType.Double:
-                        return "Double";
+                        return "AZDouble";
                     case KnownPrimaryType.Decimal:
-                        return "Double";
+                        return "AZDecimal";
                     case KnownPrimaryType.Int:
-                        return "Integer";
+                        return "AZInteger";
                     case KnownPrimaryType.Long:
-                        return "Long";
+                        return "AZLong";
                     case KnownPrimaryType.Stream:
-                        return "Stream";
+                        return "AZStream";
                     case KnownPrimaryType.String:
                         return "NSString";
                     case KnownPrimaryType.TimeSpan:
-                        return "TimeSpan";
+                        return "AZTimeSpan";
                     case KnownPrimaryType.UnixTime:
-                        return "UnixTime";
+                        return "AZUnixTime";
                     case KnownPrimaryType.Uuid:
                         return "NSUUID";
                     case KnownPrimaryType.Object:

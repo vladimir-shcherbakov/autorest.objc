@@ -578,7 +578,7 @@ namespace AutoRest.ObjectiveC.Model
         public virtual string CallbackParameterInvocation => $"withCallback: callback";
 
         public virtual string CallbackParameterDescription => ReturnTypeResponseName == "void"
-            ? $"@param callback A block where OperationError* is nil if the operation is successful"
+            ? $"@param callback A block where OperationError is nil if the operation is successful"
             : $"@param callback A block where {ReturnTypeResponseName} is a result object and OperationError is nil, if the operation is successful";
 
         

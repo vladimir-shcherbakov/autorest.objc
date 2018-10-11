@@ -3,7 +3,7 @@
 @using AutoRest.ObjectiveC
 @using AutoRest.ObjectiveC.Model
 @inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodOc>
-@if (Model.LocalParameters.Any(p => !p.IsConstant && p.IsRequired))
+@if (Model.LocalParameters.Any(p => !p.IsConstant && !p.IsRequired))
 {
 @:/**
     if (!string.IsNullOrEmpty(Model.Summary))

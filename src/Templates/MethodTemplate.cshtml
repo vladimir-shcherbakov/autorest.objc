@@ -25,16 +25,6 @@
     @: * @@throws IllegalArgumentException if a required parameter is not provided
     @: */
     @:- (void) @(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
-@*     foreach (var param in Model.RequiredNullableParameters) *@
-@*     { *@
-@*         @:if (@param.Name == nil) { *@
-@*             @:NSException *e = [NSException *@
-@*                 @:exceptionWithName: @@"IllegalArgumentException" *@
-@*                 @:reason: @@"Parameter @param.Name is required and cannot be nil." *@
-@*                 @:userInfo: nil]; *@
-@*             @:@@throw e; *@
-@*         @:} *@
-@*     } *@
     foreach (var param in Model.LocalParameters)
     {
         if (!param.IsRequired)
@@ -52,56 +42,9 @@
 
     @:}
     @EmptyLine
-
-@*    @:public Observable<@Model.ReturnTypeOc.ClientResponseTypeString> @(Model.Name)WithServiceResponseAsync(@Model.MethodRequiredParameterDeclaration) {*@
-@*    foreach (var param in Model.RequiredNullableParameters)*@
-@*    {*@
-@*        @:if (@param.Name == null) {*@
-@*        @:    throw new IllegalArgumentException("Parameter @param.Name is required and cannot be null.");*@
-@*        @:}*@
-@*    }*@
-@*    foreach (var param in Model.ParametersToValidate.Where(p => p.IsRequired))*@
-@*    {*@
-@*        @:Validator.validate(@(param.Name));*@
-@*    }*@
-@*    foreach (ParameterOc parameter in Model.LocalParameters)*@
-@*    {*@
-@*        if (!parameter.IsRequired)*@
-@*        {*@
-@*        @:final @(parameter.ClientType.Name) @(parameter.Name) = @(parameter.ClientType.GetDefaultValue(Model) ?? "null");*@
-@*        }*@
-@*        if (parameter.IsConstant)*@
-@*        {*@
-@*        @:final @(parameter.ClientType.Name) @(parameter.Name) = @(parameter.DefaultValue ?? "null");*@
-@*        }*@
-@*    }*@
-@*        @Model.BuildInputMappings(true)*@
-@**@
-@*    if (Model.IsParameterizedHost)*@
-@*    {*@
-@*        @:String parameterizedHost = Joiner.on(", ").join(@Model.HostParameterReplacementArgs);*@
-@*    }*@
-@*        @Model.ParameterConversion*@
-@*        <text>*@
-@*        return service.@(Model.Name)(@Model.MethodRequiredParameterApiInvocation)*@
-@*            .flatMap(new Func1<Response<@Model.CallType>, Observable<@(Model.ReturnTypeOc.ClientResponseTypeString)>>() {*@
-@*                @@Override*@
-@*                public Observable<@(Model.ReturnTypeOc.ClientResponseTypeString)> call(Response<@Model.CallType> response) {*@
-@*                    try {*@
-@*                        @Model.ClientResponse()*@
-@*                        return Observable.just(clientResponse);*@
-@*                    } catch (Throwable t) {*@
-@*                        return Observable.error(t);*@
-@*                    }*@
-@*                }*@
-@*            });*@
-@*        </text>*@
-@*    @:}*@
-@*@EmptyLine*@
-@**@
 }
-@if (Model.LocalParameters.Any(p => !p.IsConstant))
-{
+@*@if (Model.LocalParameters.Any(p => !p.IsConstant))*@
+@{
     @:/**
     if (!string.IsNullOrEmpty(Model.Summary))
     {
@@ -171,9 +114,9 @@
 	    
         @EmptyLine
         @:NSString* __url = [RequestHelper buildUrl: self.service.DEFAULT_BASE_URL
-                                       @:withPath: @@"@(Model.Url)"
-                                 @:withPathParams: @@{@pathParamsInitLine}
-                                @:withQueryParams: @@{@queryParamsInitLine}];
+                                         @:withPath: @@"@(Model.Url)"
+                                   @:withPathParams: @@{@pathParamsInitLine}
+                                  @:withQueryParams: @@{@queryParamsInitLine}];
         @EmptyLine
         @:RequestParameters* __rp = [RequestParameters createWithUrl: __url
                                                         @:withMethod: @@"@(Model.HttpMethod.ToString().ToUpper())"
@@ -184,8 +127,8 @@
     if (@Model.ReturnTypeResponseName == "void")
     {
          @:[RequestHelper executeRequest:__rp 
-                       @:withErrorClass:[@Model.OperationErrorTypeName class] 
-                         @:withCallback:^(OperationError* _Nullable error) {
+                        @:withErrorClass:[@Model.OperationErrorTypeName class] 
+                          @:withCallback:^(OperationError* _Nullable error) {
             @:callback(error);
         @:}];
     }
