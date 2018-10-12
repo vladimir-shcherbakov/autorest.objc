@@ -160,19 +160,21 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                if (!GenerateConstructorForRequiredProperties)
-                {
-                    return "";
-                }
-                var requiredProps = Properties.Where(p => p.IsRequired && !p.IsConstant);
-                var declare = requiredProps.Select(p => $"{p.Name}: ({(p.ModelType as IModelTypeOc)?.NameForMethod}) {p.Name}");                
-                return string.Join(" ", declare).StartWithUppercase();
+                // if (!GenerateConstructorForRequiredProperties)
+                // {
+                //     return "";
+                // }
+                var parametersDelaraton = Properties
+                    .Where(p => !p.IsConstant)
+                    .Where(p => p.IsRequired || p.IsReadOnly)
+                    .Select(p => $"{p.Name}: ({(p.ModelType as IModelTypeOc)?.Name} *) {p.Name}");                
+                return string.Join(" ", parametersDelaraton).StartWithUppercase();
             }
         }
 
         [JsonIgnore]
-        //public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired) && true == AutoRest.Core.Settings.Instance.Host?.GetValue<bool?>("generate-constructor").Result;
-        public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired);
+        // //public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired) && true == AutoRest.Core.Settings.Instance.Host?.GetValue<bool?>("generate-constructor").Result;
+        public bool GenerateConstructorForRequiredProperties => Properties.Any(p => p.IsRequired || p.IsReadOnly);
 
         protected IEnumerable<IModelTypeOc> ParseGenericType()
         {

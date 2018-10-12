@@ -23,7 +23,7 @@
     @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration) {
         @:self = [super init];
         @:if (self) {
-        foreach (var property in Model.Properties.Where(p => p.IsRequired && !p.IsConstant)) {
+        foreach (var property in Model.Properties.Where(p => !p.IsConstant).Where(p => p.IsRequired || p.IsReadOnly)) {
             @:_@(property.Name) = @property.Name;
         }
         foreach (var property in Model.Properties.Where(p => p.IsConstant)) {
@@ -66,10 +66,18 @@ else
 }
     @EmptyLine
 @foreach (PropertyOc property in Model.Properties)
-{
-    var typeName = (property.ModelType as IModelTypeOc)?.Name;
-    var propName = CodeNamer.Instance.GetPropertyName(property.Name);
-        @:self.@propName = [decoder decodeObjectForKey:@@"@(property.SerializedName)" objectClass:[@typeName class]];
+{ 
+    var propName = CodeNamer.Instance.GetPropertyName(property.Name);    
+    if (property.ModelType is SequenceTypeOc) {
+        var typeName = (property.ModelType as SequenceTypeOc)?.ElementType.Name;
+        @:_@propName = [decoder decodeArrayForKey:@@"@(property.SerializedName)" elementClass:[@typeName class]];
+    } else if (property.ModelType is DictionaryTypeOc) {
+        var typeName = (property.ModelType as DictionaryTypeOc)?.ValueType.Name;
+        @:_@propName = [decoder decodeDictionaryForKey:@@"@(property.SerializedName)" elementClass:[@typeName class]];
+    } else {
+        var typeName = (property.ModelType as IModelTypeOc)?.Name;
+        @:_@propName = [decoder decodeObjectForKey:@@"@(property.SerializedName)" objectClass:[@typeName class]];
+    }
 }
     }
     @EmptyLine

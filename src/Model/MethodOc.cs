@@ -514,7 +514,7 @@ namespace AutoRest.ObjectiveC.Model
                 }
                 else
                 {
-                    return "ServerError";
+                    return "DefaultErrorModel";
                 }
             }
         }

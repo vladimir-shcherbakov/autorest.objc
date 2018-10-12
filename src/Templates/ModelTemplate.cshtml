@@ -82,11 +82,11 @@ else
     }
     var typeName = (property.ModelType as IModelTypeOc)?.Name;
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);
-    @:@@property @typeName* @propName;
+    @:@@property @(property.IsReadOnly ? "(readonly)" : "") @typeName* @propName;
     @EmptyLine
 }
 
-@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties)
+@if (Model.Properties.Any(p => p.IsConstant || p.IsReadOnly) || Model.GenerateConstructorForRequiredProperties)
 {
     @:/**
     @:* Creates an instance of @(Model.Name) class.
