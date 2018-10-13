@@ -44,7 +44,7 @@
 {
     @:[super encodeWithCoder:encoder];
 }
-@foreach (PropertyOc property in Model.Properties)
+@foreach (PropertyOc property in Model.Properties.Where(p=> !p.IsReadOnly))
 {
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);
     @:[encoder encodeObject: self.@propName forKey: @@"@(property.SerializedName)"];
