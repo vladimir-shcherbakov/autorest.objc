@@ -50,6 +50,10 @@ namespace AutoRest.ObjectiveC
             var serviceClientInterfaceTemplate = new ServiceClientInterfaceTemplate { Model = codeModel };
             await Write(serviceClientInterfaceTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}{InterfaceFileExtension}");
 
+            // UnitTests
+            var unitTestsTemplate = new UnitTestsTemplate { Model = codeModel };
+            await Write(unitTestsTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}Tests{ImplementationFileExtension}");
+
             // root methods - to generate executors - backlog
 //            foreach (var method in codeModel.RootMethods)
 //            {

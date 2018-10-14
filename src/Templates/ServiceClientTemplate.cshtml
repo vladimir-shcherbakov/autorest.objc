@@ -45,7 +45,7 @@
         var invocStr = string.Join(" ", invoc);
         var paramInvoc = char.ToUpper(invocStr[0]) + invocStr.Substring(1);
 
-    @:- (id) initWith@(paramDecl) {
+    @:- (instancetype) initWith@(paramDecl) {
         @:self = [super init];
         @:if (self) {
             @:@baseUrlIntit;
@@ -58,6 +58,7 @@
             @:_@(nro.Name.ToCamelCase()) = @(nro.Name.ToCamelCase());
         }
         @:}
+        @EmptyLine
         @:return self;
     @:}
     @EmptyLine
@@ -68,15 +69,20 @@
     }
     else
     {
-    @:- (id) init {
-        @:@baseUrlIntit;
+    @:- (instancetype) init {
+        @:self = [super init];
+        @:if (self) {
+            @:@baseUrlIntit;
         foreach (var ro in roParamsInit)
         {
-        @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
+            @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
         }
+        @:}
+        @EmptyLine
+        @:return self;
     @:}
     @EmptyLine
-    @:+ (id<I@(Model.Name)>) create {
+    @:+ (id<@(Model.Name)Protocol>) create {
         @:@(Model.Name)* client = [[@(Model.Name) alloc] init];
         @:return client;
     @:}

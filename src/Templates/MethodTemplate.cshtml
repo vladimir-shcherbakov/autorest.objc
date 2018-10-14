@@ -135,7 +135,7 @@
     else
     {
         @:[RequestHelper executeRequest:__rp 
-                    @:withResponceClass:[@Model.ReturnTypeResponseName class] 
+                    @:withResponseClass:[@Model.ReturnTypeResponseName class] 
                        @:withErrorClass:[@Model.OperationErrorTypeName class] 
                          @:withCallback:^(id _Nullable result, OperationError* _Nullable error) {
             @:callback(result, error);

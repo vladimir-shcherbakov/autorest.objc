@@ -48,7 +48,7 @@
     @:+ (NSString *) toStringValue: (id<StringEnum>) value {
         if (!Model.ModelAsString)
 		{
-        @:if (![[@(Model.Name) values] containsObject:string]) {
+        @:if (![[@(Model.Name) values] containsObject:value]) {
             @:@@throw [NSException exceptionWithName:@@"EnumCastException" reason:@@"Enum value doesn't exist" userInfo:nil];
         @:}
 		}
