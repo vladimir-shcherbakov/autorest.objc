@@ -42,7 +42,7 @@
 @:}
 
     @EmptyLine
-    @foreach (MethodOc method in operation.Methods)
+    foreach (var method in operation.Methods.Cast<MethodOc>())
     {
 @:@(Include(new UnitTestsMethodTemplate(), method))
 @EmptyLine

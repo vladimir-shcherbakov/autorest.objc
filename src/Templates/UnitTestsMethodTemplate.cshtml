@@ -18,6 +18,22 @@
 @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment())
 }
  */
-- (void) test_@(Model.Parent.CodeModel.Name)_@(Model.Name) {
-@*- (void) @(Model.Name)@(Model.MethodParameterDeclaration);*@
+- (void) test_@(Model.MethodGroup.Name)_@(Model.Name) {
+
+    XCTestExpectation *waitingLoading = [self expectationWithDescription:@@"Wait for HTTP request to complete"];
+    
+    id<@(Model.Group)Protocol> op =[self.service @(Model.MethodGroup.Name)];
+    
+    @(Model.MethodBodyParameterCreationTestCase)
+
+    [op @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
+        
+        [waitingLoading fulfill];
+        //XCTAssertNil(error, @@"%@@", error.reason);
+        
+    }];
+    
+    [self waitForExpectationsWithTimeout:100 handler:^(NSError *error) {
+        if (error) {XCTFail(@@"After block was not called.");}
+    }];
 }

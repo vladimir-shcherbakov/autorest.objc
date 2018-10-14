@@ -149,6 +149,49 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         [JsonIgnore]
+        public string MethodBodyParameterCreationTestCase
+        {
+            get
+            {
+                var declarations = LocalParameters
+                    .Where(p => !p.IsConstant)
+                    .Select(parameter =>
+                        //$"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}") 
+                        $"{parameter.ClientType.Name}* {parameter.Name} = [{parameter.ClientType.Name} new]")
+                    .ToList();
+
+                if (declarations.Count == 0) return null;
+
+                var declaration = string.Join(" ", declarations);
+                return declaration.StartWithUppercase() + ";";
+            }
+        }
+
+        public virtual string CallbackParameterInvokationTestcase => ReturnTypeResponseName == "void"
+            ? $"withCallback:^(OperationError* error)"
+            : $"withCallback:^({ReturnTypeResponseName}* result, OperationError* error)";
+
+        [JsonIgnore]
+        public string MethodParameterInvocationTestCase
+        {
+            get
+            {
+                var invocations = LocalParameters
+                    .Where(p => !p.IsConstant)
+                    .Select(parameter =>
+                        $"with{parameter.Name.ToPascalCase()}:{parameter.Name}")
+                    .ToList();
+
+                var invocation = string.Join(" ", invocations);
+                var invocationsWithCallback = string.IsNullOrEmpty(invocation)
+                    ? CallbackParameterInvokationTestcase
+                    : $"{invocation} {CallbackParameterInvokationTestcase}";
+
+                return invocationsWithCallback.StartWithUppercase();
+            }
+        }
+
+        [JsonIgnore]
         public string MethodParameterInvocation
         {
             get
