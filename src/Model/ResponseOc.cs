@@ -96,12 +96,12 @@ namespace AutoRest.ObjectiveC.Model
 
         public string ConvertBodyToClientType(string source, string target)
         {
-            return convertToClientType(BodyWireType, source, target);
+            return ConvertToClientType(BodyWireType, source, target);
         }
 
         public string ConvertHeaderToClientType(string source, string target)
         {
-            return convertToClientType(HeaderWireType, source, target);
+            return ConvertToClientType(HeaderWireType, source, target);
         }
 
         #endregion
@@ -320,14 +320,14 @@ namespace AutoRest.ObjectiveC.Model
             }
         }
 
-        private string convertToClientType(IModelTypeOc type, string source, string target, int level = 0)
+        private string ConvertToClientType(IModelTypeOc type, string source, string target, int level = 0)
         {
             if (type == null)
             {
                 return target + " = " + source + ";";
             }
             
-            IndentedStringBuilder builder = new IndentedStringBuilder();
+            var builder = new IndentedStringBuilder();
 
             var sequenceType = type as SequenceTypeOc;
             var dictionaryType = type as DictionaryTypeOc;
@@ -340,7 +340,7 @@ namespace AutoRest.ObjectiveC.Model
                 builder.AppendLine("{0} = new ArrayList<{1}>();", target, elementType.ResponseVariant.Name)
                     .AppendLine("for ({0} {1} : {2}) {{", elementType.Name, itemName, source)
                     .Indent().AppendLine("{0} {1};", elementType.ResponseVariant.Name, itemTarget)
-                        .AppendLine(convertToClientType(elementType, itemName, itemTarget, level + 1))
+                        .AppendLine(ConvertToClientType(elementType, itemName, itemTarget, level + 1))
                         .AppendLine("{0}.add({1});", target, itemTarget)
                     .Outdent().Append("}");
                 _implImports.Add("java.util.ArrayList");
@@ -354,7 +354,7 @@ namespace AutoRest.ObjectiveC.Model
                 builder.AppendLine("{0} = new HashMap<String, {1}>();", target, valueType.ResponseVariant.Name)
                     .AppendLine("for (Map.Entry<String, {0}> {1} : {2}.entrySet()) {{", valueType.Name, itemName, source)
                     .Indent().AppendLine("{0} {1};", valueType.ResponseVariant.Name, itemTarget)
-                        .AppendLine(convertToClientType(valueType, itemName + ".getValue()", itemTarget, level + 1))
+                        .AppendLine(ConvertToClientType(valueType, itemName + ".getValue()", itemTarget, level + 1))
                         .AppendLine("{0}.put({1}.getKey(), {2});", target, itemName, itemTarget)
                     .Outdent().Append("}");
                 _implImports.Add("java.util.HashMap");

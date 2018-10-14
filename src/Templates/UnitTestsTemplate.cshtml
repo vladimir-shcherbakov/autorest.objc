@@ -35,11 +35,9 @@
 
 @foreach (var operation in Model.AllOperations)
 {
-@:- (void)test_@(operation.TypeName)_@(operation.Name) {
     @EmptyLine
-    
+@://>>>> @(operation.TypeName) @(operation.Name) 
     @EmptyLine
-@:}
 
     @EmptyLine
     foreach (var method in operation.Methods.Cast<MethodOc>())

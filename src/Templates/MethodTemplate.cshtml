@@ -135,7 +135,18 @@
     else
     {
         @:[RequestHelper executeRequest:__rp 
+        if (Model.ReturnTypeOc.BodyClientType is SequenceTypeOc
+            || Model.ReturnTypeOc.BodyClientType is DictionaryTypeOc)
+        {
+                    var elementClassName = (Model.ReturnTypeOc.BodyClientType as SequenceTypeOc)?.ElementType.Name 
+                                   ?? (Model.ReturnTypeOc.BodyClientType as DictionaryTypeOc)?.ValueType.Name;
+                    @:withResponseClass:[@Model.ReturnTypeResponseName class]
+                     @:withElementClass:[@elementClassName class]
+        }
+        else
+        {
                     @:withResponseClass:[@Model.ReturnTypeResponseName class] 
+        }
                        @:withErrorClass:[@Model.OperationErrorTypeName class] 
                          @:withCallback:^(id _Nullable result, OperationError* _Nullable error) {
             @:callback(result, error);
