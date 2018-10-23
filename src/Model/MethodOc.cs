@@ -724,7 +724,10 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var imports = new HashSet<string>();
+                var imports = new HashSet<string>
+                {
+                    OperationErrorTypeName
+                };
                 // static imports
 //                imports.Add("rx.Observable");
 //                imports.Add("rx.functions.Func1");
@@ -760,6 +763,7 @@ namespace AutoRest.ObjectiveC.Model
 //                // parameters
 //                this.LocalParameters.Concat(this.LogicalParameters.OfType<ParameterOc>())
 //                    .ForEach(p => imports.AddRange(p.ClientImplImports));
+                InputParameterTransformation.ForEach(p => imports.Add(p.OutputParameter.ModelType.Name));
 //                this.RetrofitParameters.ForEach(p => imports.AddRange(p.WireImplImports));
 //                // return type
 //                imports.AddRange(this.ReturnTypeOc.ImplImports);

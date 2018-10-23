@@ -10,12 +10,11 @@
  */
 
 @EmptyLine
-@* @foreach (var importClass in Model.ImplImports) *@
-@* { *@
-@* @:import @importClass; *@
-@* } *@
-
 #import "@(Model.Name).h"
+@foreach (var import in Model.ImplImports)
+{
+@:#import "Models/@(import).h"
+}
 @EmptyLine
 
 /**
@@ -25,6 +24,8 @@
 @EmptyLine
 @{
     var baseUrlIntit = $"_DEFAULT_BASE_URL = @\"{Model.BaseUrl}\"";
+    const string keyInit = "_key = @\"UNDEFINED\"";
+    const string specialHeadersInit = "_specialHeaders = @{@\"ocp-apim-subscription-key\" : self.key}";
 
     var roParamsInit = Model.Properties
         .Where(p => p.IsReadOnly).ToList();
@@ -48,6 +49,8 @@
         @:self = [super init];
         @:if (self) {
             @:@baseUrlIntit;
+            @:@keyInit;
+            @:@specialHeadersInit;
         foreach (var ro in roParamsInit)
         {
             @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
@@ -72,6 +75,9 @@
         @:self = [super init];
         @:if (self) {
             @:@baseUrlIntit;
+            @:@keyInit;
+            @:@specialHeadersInit;
+
         foreach (var ro in roParamsInit)
         {
             @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);

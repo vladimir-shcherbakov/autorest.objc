@@ -10,7 +10,7 @@
 @Header(" * ").TrimMultilineHeader()
 */
 @EmptyLine
-#import <AzureClientRuntime/AzureClientRuntime.h>
+#include <AzureClientRuntime/AzureClientRuntime-umbrella.h>
 @if (Model.BaseModelType != null)
 {
 @:#import "@(Model.BaseModelType.DeclarationName.ToPascalCase()).h"
@@ -34,8 +34,8 @@
 }
 else
 {
-@:@WrapComment(" * ", Model.Summary.EscapeXmlComment().Period())
-@:@WrapComment(" * ", Model.Documentation.EscapeXmlComment().Period())
+@:@WrapComment(" * ", Model.Summary.Period())
+@:@WrapComment(" * ", Model.Documentation.Period())
 }
 */
 @if (Model.BaseIsPolymorphic)
@@ -70,7 +70,7 @@ else
     }
     else
     {
-    @:@WrapComment(" * ", property.Summary.EscapeXmlComment().Period())
+    @:@WrapComment(" * ", property.Summary.Period())
     @:@WrapComment(" * ", property.Documentation.EscapeXmlComment().Period())
     }
     @:*/

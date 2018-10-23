@@ -9,6 +9,7 @@
 @Header(" * ").TrimMultilineHeader()
  */
 @EmptyLine
+#include <AzureClientRuntime/AzureClientRuntime-umbrella.h>
 @foreach (var import in Model.InterfaceImports)
 {
 @:#import "Models/@(import).h"
@@ -52,6 +53,8 @@
         The default base URL. @Model.BaseUrl
     */
     @@property (readonly) NSString* DEFAULT_BASE_URL;
+    @@property (readonly) NSString* key;
+    @@property (readonly) NSDictionary* specialHeaders;
 
 @foreach (var property in Model.Properties)
 {

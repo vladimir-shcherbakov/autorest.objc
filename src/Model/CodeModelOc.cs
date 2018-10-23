@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -45,15 +46,15 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var imports = new HashSet<string> {FullyQualifiedDomainName};
-                foreach(var methodGroupFullType in this.AllOperations.Select(op => op.MethodGroupFullType).Distinct())
-                {
-                    imports.Add(methodGroupFullType);
-                }
-                if (this.Properties.Any(p => p.ModelType.IsPrimaryType(KnownPrimaryType.Credentials)))
-                {
-                    //imports.Add("com.microsoft.rest.credentials.ServiceClientCredentials");
-                }
+//                var imports = new HashSet<string> {FullyQualifiedDomainName};
+//                foreach(var methodGroupFullType in this.AllOperations.Select(op => op.MethodGroupFullType).Distinct())
+//                {
+//                    imports.Add(methodGroupFullType);
+//                }
+//                if (this.Properties.Any(p => p.ModelType.IsPrimaryType(KnownPrimaryType.Credentials)))
+//                {
+//                    //imports.Add("com.microsoft.rest.credentials.ServiceClientCredentials");
+//                }
 //                classes.AddRange(new[]{
 //                        "com.microsoft.rest.ServiceClient",
 //                        "com.microsoft.rest.RestClient",
@@ -61,11 +62,16 @@ namespace AutoRest.ObjectiveC.Model
 //                        "retrofit2.Retrofit"
 //                    });
 
-                imports.AddRange(RootMethods
-                    .SelectMany(m => m.ImplImports)
-                    .OrderBy(i => i));
-
-                return imports.AsEnumerable();
+//                imports.AddRange(RootMethods
+//                    .SelectMany(m => m.ImplImports)
+//                    .OrderBy(i => i));
+//
+//                return imports.AsEnumerable();
+                return RootMethods
+                    .SelectMany(m => m.ImplImports
+                        .Where(i=>!i.Equals("DefaultErrorModel", StringComparison.InvariantCultureIgnoreCase)))
+                    .Distinct()
+                    .OrderBy(i => i);
             }
         }
 

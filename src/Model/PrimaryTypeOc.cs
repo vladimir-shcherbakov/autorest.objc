@@ -34,7 +34,7 @@ namespace AutoRest.ObjectiveC.Model
                     case "AZInteger":
                         return "@0";
                     case "AZBoolean":
-                        return "@NO";
+                        return "AZ_NO";
                     case "AZFloat":
                         return "@0.0F";
                     case "AZDouble":
@@ -58,13 +58,7 @@ namespace AutoRest.ObjectiveC.Model
         public IModelTypeOc ParameterVariant => this;
 
         [JsonIgnore]
-        public IModelTypeOc ResponseVariant
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public IModelTypeOc ResponseVariant => this;
 
         [JsonIgnore]
         public IEnumerable<string> Imports
