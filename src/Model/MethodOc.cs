@@ -162,7 +162,7 @@ namespace AutoRest.ObjectiveC.Model
 
                 if (declarations.Count == 0) return null;
 
-                var declaration = string.Join(" ", declarations);
+                var declaration = string.Join("\n", declarations);
                 return declaration.StartWithUppercase() + ";";
             }
         }

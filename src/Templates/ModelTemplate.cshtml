@@ -10,8 +10,7 @@
 @Header(" * ").TrimMultilineHeader()
 */
 @EmptyLine
-#import <Foundation/Foundation.h>
-#import "Codable.h"
+#import <AzureClientRuntime/AzureClientRuntime.h>
 @if (Model.BaseModelType != null)
 {
 @:#import "@(Model.BaseModelType.DeclarationName.ToPascalCase()).h"

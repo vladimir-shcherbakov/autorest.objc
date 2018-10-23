@@ -8,6 +8,7 @@
 @Header(" * ").TrimMultilineHeader()
  */
 @EmptyLine
+#import <AzureClientRuntime/AzureClientRuntime.h>
 #import "@(Model.TypeName).h"
 #import "@(Model.Methods.Cast<MethodOc>().First().OperationErrorTypeName).h"
 #import "../@(Model.Parent.CodeModel.Name).h"
