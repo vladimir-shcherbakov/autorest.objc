@@ -323,7 +323,6 @@ namespace AutoRest.ObjectiveC
                             break;
                     }
 
-
                 switch (constraint)
                 {
                     case Constraint.ExclusiveMaximum:

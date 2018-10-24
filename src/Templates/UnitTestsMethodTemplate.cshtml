@@ -23,8 +23,13 @@
 @:- (void) test)_@(Model.Name) {
 
     @:XCTestExpectation *waitingLoading = [self expectationWithDescription:@@"Wait for HTTP request to complete"];
+
+    foreach (var param in Model.LocalParameters)
+    {
+    @:@(param.ClientType.Name)* @(param.Name) = @(param.ClientType.GetDefaultValue(Model) ?? "nil");
+    }
     
-    @:@(Model.MethodBodyParameterCreationTestCase)
+@*     @:@(Model.MethodBodyParameterCreationTestCase) *@
 
     @:[self.service @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
         
