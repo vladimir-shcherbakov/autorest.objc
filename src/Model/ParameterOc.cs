@@ -2,6 +2,7 @@
 using System.Globalization;
 using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
+using AutoRest.Extensions.Azure;
 using Newtonsoft.Json;
 
 namespace AutoRest.ObjectiveC.Model
@@ -26,6 +27,18 @@ namespace AutoRest.ObjectiveC.Model
 
         [JsonIgnore]
         public bool WantNullable => IsXNullable ?? !IsRequired;
+
+        /// <summary>
+        /// Gets True if parameter can call .Validate method
+        /// </summary>
+        [JsonIgnore]
+        public virtual bool CanBeValidated => !IsODataFilterExpression;
+
+        /// <summary>
+        /// Gets True if parameter is OData $filter, $top, $orderby, $expand, $skip expression
+        /// </summary>
+        [JsonIgnore]
+        public virtual bool IsODataFilterExpression => base.Extensions.ContainsKey(AzureExtensions.ODataExtension);
 
         public override IModelType ModelType
         {
@@ -237,13 +250,7 @@ namespace AutoRest.ObjectiveC.Model
         private List<string> _implImports;
 
         [JsonIgnore]
-        public IEnumerable<string> ClientImplImports
-        {
-            get
-            {
-                return ClientType.Imports;
-            }
-        }
+        public IEnumerable<string> ClientImplImports => ClientType.Imports;
 
         [JsonIgnore]
         public IEnumerable<string> WireImplImports
@@ -271,7 +278,7 @@ namespace AutoRest.ObjectiveC.Model
             }
         }
 
-        private string LocationImport(ParameterLocation parameterLocation)
+        private static string LocationImport(ParameterLocation parameterLocation)
         {
             if (parameterLocation == Core.Model.ParameterLocation.FormData)
             {
@@ -287,10 +294,9 @@ namespace AutoRest.ObjectiveC.Model
             }
         }
 
-        private bool NeedsSpecialSerialization(IModelType type)
+        private static bool NeedsSpecialSerialization(IModelType type)
         {
-            var known = type as PrimaryType;
-            return known != null &&
+            return type is PrimaryType known &&
                 type.IsPrimaryType(KnownPrimaryType.ByteArray) ||
                 type is SequenceType;
         }

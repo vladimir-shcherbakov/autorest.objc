@@ -91,7 +91,7 @@ else
     @:* Creates an instance of @(Model.Name) class.
     foreach (var property in Model.Properties.Where(p => p.IsRequired && !p.IsConstant))
     {
-    @:* @@param @property.Name @property.Javadoc()
+    @:* @@param @property.Name @property.Documentation()
     }
     @:*/
     @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration);

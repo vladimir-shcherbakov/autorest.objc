@@ -33,6 +33,8 @@ namespace AutoRest.ObjectiveC.Model
             }
         }
 
+        public override string DefaultValue => Name == "NSString" ? "nil" : $"[[{Name} values] firstObject];";
+
         [JsonIgnore]
         public IModelTypeOc ResponseVariant => this;
 
@@ -41,7 +43,5 @@ namespace AutoRest.ObjectiveC.Model
 
         [JsonIgnore]
         public IModelTypeOc NonNullableVariant => this;
-
-        public string NameForMethod => $"{Name}*";
     }
 }

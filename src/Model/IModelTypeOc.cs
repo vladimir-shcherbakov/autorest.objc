@@ -12,8 +12,6 @@ namespace AutoRest.ObjectiveC.Model
         IModelTypeOc ParameterVariant { get; }
 
         IModelTypeOc NonNullableVariant { get; }
-
-        string NameForMethod { get; }
     }
 
     public static class ModelTypeExtensions
@@ -30,9 +28,14 @@ namespace AutoRest.ObjectiveC.Model
 
         public static string GetDefaultValue(this IModelType type, Method parent)
         {
-            return type is PrimaryTypeOc && type.Name == "RequestBody"
-                ? "RequestBody.create(MediaType.parse(\"" + parent.RequestContentType + "\"), new byte[0])"
-                : type.DefaultValue;
+
+            if (type is PrimaryTypeOc && type.Name == "RequestBody")
+            {
+                return "RequestBody.create(MediaType.parse(\"" + parent.RequestContentType + "\"), new byte[0])";
+            }
+
+            return type.DefaultValue;
+
         }
     }
 }
