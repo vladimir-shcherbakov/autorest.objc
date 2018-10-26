@@ -312,7 +312,7 @@ namespace AutoRest.ObjectiveC.Model
                     if (ModelType is EnumTypeOc enumType)
                         return enumType.Name == "NSString" 
                             ? $"@\"{DefaultValue}\"" 
-                            : $"[[{Name} values] firstObject]";
+                            : $"[[{enumType.Name} values] firstObject]";
                     //return DefaultValue;
 
                 }
