@@ -355,7 +355,7 @@ namespace AutoRest.ObjectiveC
                         constraintCheck = $"{valueReference} % {constraintValue} != 0";
                         break;
                     case Constraint.Pattern:
-                        constraintValue = ToLiteral(constraintValue);
+                        //constraintValue = ToLiteral(constraintValue);
                         if (type is DictionaryType)
                         {
                             constraintCheck = $"!System.Linq.Enumerable.All({valueReference}.Values, value => System.Text.RegularExpressions.Regex.IsMatch(value, {constraintValue}))";
@@ -363,7 +363,7 @@ namespace AutoRest.ObjectiveC
                         else
                         {
                             //constraintCheck = $"!System.Text.RegularExpressions.Regex.IsMatch({valueReference}, {constraintValue})";
-                            constraintCheck = $"![[NSPredicate predicateWithFormat:@\"SELF MATCHES %@\", {constraintValue}]evaluateWithObject:{valueReference}])";
+                            constraintCheck = $"![[NSPredicate predicateWithFormat:@\"SELF MATCHES %@\", @\"{constraintValue}\"]evaluateWithObject:{valueReference}]";
                         }
                         break;
                     case Constraint.UniqueItems:
@@ -389,7 +389,7 @@ namespace AutoRest.ObjectiveC
                             .AppendLine("NSException *e = [NSException")
                             .Indent()
                                 .AppendLine("exceptionWithName: @\"IllegalArgumentException\"")
-                                .AppendLine($"reason: @\"Parameter '{valueReference}' failed rule validation, rule name: {constraint}, constrain value: {constraintValue}.\"")
+                                .AppendLine($"reason: @\"Parameter '{valueReference}' failed rule validation, rule name: '{constraint}', constrain value: {constraintValue}\"")
                                 .AppendLine("userInfo: nil];")
                             .Outdent()
                             .AppendLine("@throw e;")
