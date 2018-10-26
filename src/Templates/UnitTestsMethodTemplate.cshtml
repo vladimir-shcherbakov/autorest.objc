@@ -54,6 +54,7 @@ else
     foreach (var param in Model.LocalParameters)
     {
     @:@(param.ClientType.Name)* @(param.Name) = @(param.ClientType.GetDefaultValue(Model) ?? "nil");
+    @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
     }
 
     @:[op @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
