@@ -324,53 +324,45 @@ namespace AutoRest.ObjectiveC.Model
         /// Generates input mapping code block.
         /// </summary>
         /// <returns></returns>
-        public virtual string BuildInputMappings(bool filterRequired = false)
+        public virtual string BuildInputMappings()
         {
             var builder = new IndentedStringBuilder();
             foreach (var transformation in InputParameterTransformation)
             {
-                var outParamName = transformation.OutputParameter.Name;
-                while (Parameters.Any(p => p.Name == outParamName))
+                var compositeOutputParameter = transformation.OutputParameter.ModelType as CompositeType;
+                if (transformation.OutputParameter.IsRequired && compositeOutputParameter != null)
                 {
-                    outParamName += "1";
+                    builder.AppendLine("{0}* {1} = [{0} new];",
+                        transformation.OutputParameter.ModelTypeName,
+                        transformation.OutputParameter.Name);
                 }
-
-                transformation.OutputParameter.Name = outParamName;
-                var nullCheck = BuildNullCheckExpression(transformation);
-                var conditionalAssignment = !string.IsNullOrEmpty(nullCheck) 
-                                            && !transformation.OutputParameter.IsRequired 
-                                            && !filterRequired;
-                if (conditionalAssignment)
+                else
                 {
-                    var inParamName = ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name;
-                    builder.AppendLine($"{inParamName} {outParamName} = null");
-//                    builder.AppendLine("{0} {1} = null;",
-//                            ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name,
-//                            outParamName);
-                    builder.AppendLine("if ({0}) {{", nullCheck).Indent();
+                    builder.AppendLine("{0}* {1} = nil;",
+                        transformation.OutputParameter.ModelTypeName,
+                        transformation.OutputParameter.Name);
+                }
+                var nullCheck = BuildNullCheckExpression(transformation);
+                if (!string.IsNullOrEmpty(nullCheck))
+                {
+                    builder.AppendLine("if ({0}) {{", nullCheck)
+                       .Indent();
                 }
 
                 if (transformation.ParameterMappings.Any(m => !string.IsNullOrEmpty(m.OutputParameterProperty)) &&
-                    transformation.OutputParameter.ModelType is CompositeType)
+                    compositeOutputParameter != null && !transformation.OutputParameter.IsRequired)
                 {
-                    var cond = !conditionalAssignment
-                        ? ((ParameterOc) transformation.OutputParameter).ClientType.ParameterVariant.Name + ""
-                        : "";
-
-                    builder.AppendLine(
-                        $"{cond}* {outParamName} = [{transformation.OutputParameter.ModelType.Name} new];");
+                    builder.AppendLine("{0}* {1} = [{0} new];",
+                        transformation.OutputParameter.Name,
+                        transformation.OutputParameter.ModelType.Name);
                 }
 
                 foreach (var mapping in transformation.ParameterMappings)
                 {
-                    builder.AppendLine("{0}{1}{2};",
-                        !conditionalAssignment && !(transformation.OutputParameter.ModelType is CompositeType) ?
-                            ((ParameterOc)transformation.OutputParameter).ClientType.ParameterVariant.Name + " " : "",
-                        outParamName,
-                        GetMapping(mapping, filterRequired));
+                    builder.AppendLine("{0};", mapping.CreateCode(transformation.OutputParameter));
                 }
 
-                if (conditionalAssignment)
+                if (!string.IsNullOrEmpty(nullCheck))
                 {
                     builder.Outdent()
                        .AppendLine("}");

@@ -300,5 +300,24 @@ namespace AutoRest.ObjectiveC.Model
                 type.IsPrimaryType(KnownPrimaryType.ByteArray) ||
                 type is SequenceType;
         }
+
+        public string ActualDefaultValue
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(DefaultValue))
+                {
+                    if (ModelType is PrimaryTypeOc)
+                        return DefaultValue.Value;
+                    if (ModelType is EnumTypeOc enumType)
+                        return enumType.Name == "NSString" 
+                            ? $"@\"{DefaultValue}\"" 
+                            : $"[[{Name} values] firstObject]";
+                    //return DefaultValue;
+
+                }
+                return "nil";
+            }
+        }
     }
 }

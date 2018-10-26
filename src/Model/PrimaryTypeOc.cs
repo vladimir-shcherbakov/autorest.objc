@@ -23,7 +23,7 @@ namespace AutoRest.ObjectiveC.Model
 
         [JsonIgnore]
         public bool Nullable => true;
-
+/*
         [JsonIgnore]
         public override string DefaultValue
         {
@@ -53,7 +53,7 @@ namespace AutoRest.ObjectiveC.Model
 //                throw new NotSupportedException(this.Name + " does not have default value!");
             }
         }
-
+*/
         [JsonIgnore]
         public IModelTypeOc ParameterVariant => this;
 
