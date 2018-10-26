@@ -163,21 +163,22 @@ namespace AutoRest.ObjectiveC
 
             if (defaultValue != null && type is PrimaryType primaryType)
             {
-                if (primaryType.KnownPrimaryType == KnownPrimaryType.Double)
+                if (primaryType.KnownPrimaryType == KnownPrimaryType.Double
+                    || primaryType.KnownPrimaryType == KnownPrimaryType.Int)
                 {
-                    return double.Parse(defaultValue).ToString(CultureInfo.InvariantCulture);
+                    return "@" + defaultValue;
                 }
                 if (primaryType.KnownPrimaryType == KnownPrimaryType.String)
                 {
-                    return QuoteValue(defaultValue);
+                    return "@" + QuoteValue(defaultValue);
                 }
                 else if (primaryType.KnownPrimaryType == KnownPrimaryType.Boolean)
                 {
-                    return defaultValue.ToLowerInvariant();
+                    return defaultValue.ToLowerInvariant() == "true" ? "AZ_YES" : "AZ_NO" ;
                 }
                 else if (primaryType.KnownPrimaryType == KnownPrimaryType.Long)
                 {
-                    return defaultValue + "L";
+                    return "@" + defaultValue + "L";
                 }
                 else
                 {

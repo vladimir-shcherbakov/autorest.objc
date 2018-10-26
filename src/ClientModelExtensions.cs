@@ -185,8 +185,10 @@ namespace AutoRest.ObjectiveC
         {
             var sb = new IndentedStringBuilder();
             sb.AppendLine("if ({0} != nil) {{", valueReference)
-                .Indent().AppendLine(executionBlock)
-                .Outdent().AppendLine("}");
+                .Indent()
+                    .AppendLine(executionBlock)
+                .Outdent()
+                .AppendLine("}");
             return sb.ToString();
         }
 
@@ -360,7 +362,8 @@ namespace AutoRest.ObjectiveC
                         }
                         else
                         {
-                            constraintCheck = $"!System.Text.RegularExpressions.Regex.IsMatch({valueReference}, {constraintValue})";
+                            //constraintCheck = $"!System.Text.RegularExpressions.Regex.IsMatch({valueReference}, {constraintValue})";
+                            constraintCheck = $"![[NSPredicate predicateWithFormat:@\"SELF MATCHES %@\", {constraintValue}]evaluateWithObject:{valueReference}])";
                         }
                         break;
                     case Constraint.UniqueItems:
@@ -386,10 +389,10 @@ namespace AutoRest.ObjectiveC
                             .AppendLine("NSException *e = [NSException")
                             .Indent()
                                 .AppendLine("exceptionWithName: @\"IllegalArgumentException\"")
-                                .AppendLine($"reason: @\"Parameter {valueReference} failed rule validation, rule name: {constraint}, constrain value: {constraintValue}.\"")
+                                .AppendLine($"reason: @\"Parameter '{valueReference}' failed rule validation, rule name: {constraint}, constrain value: {constraintValue}.\"")
                                 .AppendLine("userInfo: nil];")
                             .Outdent()
-                            .AppendLine("@throw e;;")
+                            .AppendLine("@throw e;")
                         .Outdent()
                         .AppendLine("}");
                 }

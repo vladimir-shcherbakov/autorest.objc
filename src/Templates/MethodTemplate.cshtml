@@ -29,12 +29,12 @@
     {
         if (!param.IsRequired)
         {
-        @:@(param.ClientType.Name)* @(param.Name) = @(param.ClientType.GetDefaultValue(Model) ?? "nil");
+        @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
+
         }
         if (param.IsConstant)
         {
-        @:@(param.ClientType.Name) @(param.Name) = @(param.DefaultValue ?? "nil");
-
+        @:@(param.ClientType.Name) @(param.Name) = @(param.DefaultValue?.Value ?? "nil");
         }
     }
 
@@ -73,20 +73,23 @@
         @:if (@param.Name == nil) {
             @:NSException *e = [NSException
                 @:exceptionWithName: @@"IllegalArgumentException"
-                @:reason: @@"Parameter @param.Name is required and cannot be nil."
+                @:reason: @@"Parameter '@param.Name' is required and cannot be nil."
                 @:userInfo: nil];
             @:@@throw e;
         @:}
         @EmptyLine
+        
+    }
+    foreach (var param in Model.Parameters.Where(p => !p.IsConstant).Cast<ParameterOc>())
+    {
         if (param.CanBeValidated && (Model.HttpMethod != HttpMethod.Patch || param.Location != ParameterLocation.Body))
         {
         @:@(param.ModelType.ValidateType(Model, param.Name, param.Constraints))
         @EmptyLine
         }
     }
-   
 
-        @:@Model.BuildInputMappings(true)
+        @:@Model.BuildInputMappings()
 
     var pathParamsList = Model.LogicalParameters.OfType<ParameterOc>()
         .Where(p => p.Extensions.ContainsKey("hostParameter") || p.Location == ParameterLocation.Path)
@@ -137,6 +140,7 @@
         @EmptyLine
         @:[__rp withSpecialHeaders:self.specialHeaders];
         @EmptyLine
+
     if (@Model.ReturnTypeResponseName == "void")
     {
          @:[RequestHelper executeRequest:__rp 

@@ -33,7 +33,7 @@ namespace AutoRest.ObjectiveC.Model
             }
         }
 
-        public override string DefaultValue => Name == "NSString" ? "nil" : $"[[{Name} values] firstObject];";
+        //public override string DefaultValue => Name == "NSString" ? string.IsNullOrEmpty(base.DefaultValue) ? "nil" : $"@\"{base.DefaultValue}\"" : $"[[{Name} values] firstObject]";
 
         [JsonIgnore]
         public IModelTypeOc ResponseVariant => this;
