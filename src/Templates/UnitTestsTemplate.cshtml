@@ -11,22 +11,22 @@
 @EmptyLine
 
 #import <XCTest/XCTest.h>
-#include <AzureClientRuntime/AzureClientRuntime-umbrella.h>
-#import "@(Model.Name).h"
+#include <AzureClientRuntime/AzureClientRuntime.h>
+#import "@(Model.ServiceClientServiceType).h"
 
-@@interface @(Model.Name)Tests : XCTestCase
+@@interface @(Model.ServiceClientServiceType)Tests : XCTestCase
 
-    @@property id<@(Model.Name)Protocol> service;
+    @@property id<@(Model.ServiceClientServiceType)Protocol> service;
 
 @@end
 
-@@implementation @(Model.Name)Tests
+@@implementation @(Model.ServiceClientServiceType)Tests
 
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.
     self.continueAfterFailure = NO;
     
-    self.service = [@(Model.Name) create];
+    self.service = [@(Model.ServiceClientServiceType) create];
 }
 
 - (void)tearDown {

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using AutoRest.Core;
 using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
 using Newtonsoft.Json;
@@ -15,29 +16,30 @@ namespace AutoRest.ObjectiveC.Model
         public MethodGroupOc()
         {
             Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
+            TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");;
         }
-        public MethodGroupOc(string name) : base(name)
-        {
-            Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
-        }
+//        public MethodGroupOc(string name) : base(name)
+//        {
+//            Name.OnGet += name1 => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");;
+//        }
 
         [JsonIgnore]
         public string MethodGroupFullType => (CodeModel.Namespace.ToLowerInvariant()) + "." + TypeName;
 
-        [JsonIgnore]
-        public virtual string MethodGroupDeclarationType => TypeName;
-
-        [JsonIgnore]
-        public string MethodGroupImplType => TypeName + ImplClassSuffix;
-
-        [JsonIgnore]
-        public virtual string ImplClassSuffix => "Impl";
-
-        [JsonIgnore]
-        public virtual string ParentDeclaration => " implements " + MethodGroupTypeString;
-
-        [JsonIgnore]
-        public virtual string ImplPackage => "implementation";
+//        [JsonIgnore]
+//        public virtual string MethodGroupDeclarationType => TypeName;
+//
+//        [JsonIgnore]
+//        public string MethodGroupImplType => TypeName + ImplClassSuffix;
+//
+//        [JsonIgnore]
+//        public virtual string ImplClassSuffix => "Impl";
+//
+//        [JsonIgnore]
+//        public virtual string ParentDeclaration => " implements " + MethodGroupTypeString;
+//
+//        [JsonIgnore]
+//        public virtual string ImplPackage => "implementation";
 
         [JsonIgnore]
         public string MethodGroupTypeString

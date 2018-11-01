@@ -9,7 +9,7 @@
 @Header(" * ").TrimMultilineHeader()
  */
 @EmptyLine
-#include <AzureClientRuntime/AzureClientRuntime-umbrella.h>
+#include @("<AzureClientRuntime/AzureClientRuntime.h>")
 @foreach (var import in Model.InterfaceImports)
 {
 @:#import "Models/@(import).h"
@@ -23,7 +23,7 @@
 /**
  * The interface for @Model.Name class.
  */
-@@protocol @(Model.Name)Protocol
+@@protocol @(Model.ServiceClientServiceType)Protocol
 
 
 @foreach (var operation in Model.AllOperations)
@@ -47,11 +47,11 @@
 @@end
 
 @EmptyLine
-@@interface @Model.Name : NSObject <@(Model.Name)Protocol>
+@@interface @Model.ServiceClientServiceType : NSObject <@(Model.ServiceClientServiceType)Protocol>
 @EmptyLine
     /**
         The default base URL. @Model.BaseUrl
-    */
+     */
     @@property (readonly) NSString* DEFAULT_BASE_URL;
     @@property (readonly) NSString* key;
     @@property (readonly) NSDictionary* specialHeaders;
@@ -75,11 +75,11 @@
             .Select(p=>$"{p.Name}: ({p.ModelTypeName}*) {p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
-    @:+ (id<@(Model.Name)Protocol>) createWith@(paramDecl);
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) createWith@(paramDecl);
     }
     else
     {
-    @:+ (id<@(Model.Name)Protocol>) create;
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) create;
     }
 }
 @EmptyLine

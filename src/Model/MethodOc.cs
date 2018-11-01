@@ -117,7 +117,7 @@ namespace AutoRest.ObjectiveC.Model
                 var declarations = LocalParameters
                     .Where(p => !p.IsConstant)
                     .Select(parameter => 
-                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}")
+                        $"with{parameter.Name.ToPascalCase()}:({parameter.ClientType.Name} *){parameter.Name}")
                     .ToList();
 
                 var declaration = string.Join(" ", declarations);
@@ -136,7 +136,7 @@ namespace AutoRest.ObjectiveC.Model
                 var declarations = LocalParameters
                     .Where(p => !p.IsConstant && p.IsRequired)
                     .Select(parameter => 
-                        $"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}")
+                        $"with{parameter.Name.ToPascalCase()}:({parameter.ClientType.Name} *){parameter.Name}")
                     .ToList();
 
                 var declaration = string.Join(" ", declarations);
@@ -157,7 +157,7 @@ namespace AutoRest.ObjectiveC.Model
                     .Where(p => !p.IsConstant)
                     .Select(parameter =>
                         //$"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}") 
-                        $"{parameter.ClientType.Name}* {parameter.Name} = [{parameter.ClientType.Name} new]")
+                        $"{parameter.ClientType.Name} *{parameter.Name} = [{parameter.ClientType.Name} new]")
                     .ToList();
 
                 if (declarations.Count == 0) return null;
@@ -199,7 +199,7 @@ namespace AutoRest.ObjectiveC.Model
                 var invocations = LocalParameters
                     .Where(p => !p.IsConstant)
                     .Select(parameter =>
-                        $"with{parameter.Name.ToPascalCase()}: {parameter.Name}")
+                        $"with{parameter.Name.ToPascalCase()}:{parameter.Name}")
                     .ToList();
 
                 var invocation = string.Join(" ", invocations);
@@ -284,7 +284,7 @@ namespace AutoRest.ObjectiveC.Model
         /// Generate a reference to the ServiceClient
         /// </summary>
         [JsonIgnore]
-        public string ClientReference => Group.IsNullOrEmpty() ? "this" : "this.client";
+        public string ClientReference => Group.IsNullOrEmpty() ? "self" : "self.service";
 
         [JsonIgnore]
         public string ParameterConversion
@@ -607,10 +607,10 @@ namespace AutoRest.ObjectiveC.Model
         public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.Name;
 
         public virtual string CallbackParameterDeclaration => ReturnTypeResponseName == "void"
-            ? $"withCallback : (void(^)(OperationError*)) callback"
-            : $"withCallback : (void(^)({ReturnTypeResponseName}*, OperationError*)) callback";
+            ? $"withCallback:(void(^)(OperationError*))callback"
+            : $"withCallback:(void(^)({ReturnTypeResponseName}*, OperationError*))callback";
         
-        public virtual string CallbackParameterInvocation => $"withCallback: callback";
+        public virtual string CallbackParameterInvocation => $"withCallback:callback";
 
         public virtual string CallbackParameterDescription => ReturnTypeResponseName == "void"
             ? $"@param callback A block where OperationError is nil if the operation is successful"

@@ -10,20 +10,24 @@
 @Header(" * ").TrimMultilineHeader()
 */
 @EmptyLine
-#include <AzureClientRuntime/AzureClientRuntime-umbrella.h>
+#include <AzureClientRuntime/AzureClientRuntime.h>
 @if (Model.BaseModelType != null)
 {
 @:#import "@(Model.BaseModelType.DeclarationName.ToPascalCase()).h"
 }
-@foreach (var property in Model.Properties.OfType<PropertyOc>())
-{
-    var imports = (property.ModelType as IModelTypeOc)?.Imports;
-    if (imports != null)
+@{
+    var imports = new List<string>();
+    foreach (var property in Model.Properties.OfType<PropertyOc>())
     {
-        foreach (var import in imports)
+        var i = (property.ModelType as IModelTypeOc)?.Imports.ToList();
+        if (i != null && i.Count>0)
         {
-@:#import "@(import).h"
+		    imports.AddRange(i);
         }
+    }
+    foreach (var import in imports.Distinct())
+    {
+@:#import "@(import).h"
     }
 }
 @EmptyLine
@@ -37,7 +41,7 @@ else
 @:@WrapComment(" * ", Model.Summary.Period())
 @:@WrapComment(" * ", Model.Documentation.Period())
 }
-*/
+ */
 @if (Model.BaseIsPolymorphic)
 {
     @://JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@(Model.BasePolymorphicDiscriminator)")
@@ -59,7 +63,7 @@ else
 {
 @:// Skip parent validation
 }
-@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject") <Codable>
+@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject") <AZCodable>
 @EmptyLine
 @foreach (PropertyOc property in Model.Properties)
 {
@@ -73,7 +77,7 @@ else
     @:@WrapComment(" * ", property.Summary.Period())
     @:@WrapComment(" * ", property.Documentation.EscapeXmlComment().Period())
     }
-    @:*/
+    @: */
     var jsonSetting = property.GetJsonProperty();
     if (!jsonSetting.IsNullOrEmpty())
     {
@@ -81,7 +85,7 @@ else
     }
     var typeName = (property.ModelType as IModelTypeOc)?.Name;
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);
-    @:@@property @(property.IsReadOnly ? "(readonly)" : "") @typeName* @propName;
+    @:@@property @(property.IsReadOnly ? "(readonly) " : "")@typeName* @propName;
     @EmptyLine
 }
 

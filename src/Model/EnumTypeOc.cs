@@ -10,12 +10,13 @@ namespace AutoRest.ObjectiveC.Model
     {
         public EnumTypeOc()
         {
-            //Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" ? "String" : CodeNamer.Instance.GetTypeName(name);
-            Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" ? "NSString" : CodeNamer.Instance.GetTypeName(name);
+            Name.OnGet += name => string.IsNullOrEmpty(name) || name == "enum" 
+                ? "NSString" 
+                : Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
         }
 
         [JsonIgnore]
-        public virtual string ModelsPackage => (this.CodeModel as CodeModelOc).ModelsPackage;
+        public virtual string ModelsPackage => (this.CodeModel as CodeModelOc)?.ModelsPackage;
 
         [JsonIgnore]
         public virtual IEnumerable<string> Imports
@@ -32,8 +33,6 @@ namespace AutoRest.ObjectiveC.Model
                     yield return $"{Name}";
             }
         }
-
-        //public override string DefaultValue => Name == "NSString" ? string.IsNullOrEmpty(base.DefaultValue) ? "nil" : $"@\"{base.DefaultValue}\"" : $"[[{Name} values] firstObject]";
 
         [JsonIgnore]
         public IModelTypeOc ResponseVariant => this;

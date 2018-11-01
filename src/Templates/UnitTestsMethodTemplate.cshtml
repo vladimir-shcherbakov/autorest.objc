@@ -1,6 +1,7 @@
 ﻿@using System.Linq;
 @using AutoRest.Core.Utilities
 @using AutoRest.ObjectiveC
+@using AutoRest.Core
 @using AutoRest.ObjectiveC.Model
 @inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodOc>
 /**
@@ -17,7 +18,7 @@
 {
 @: * body parameter: @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value"))
 }
-*/
+ */
 @if (string.IsNullOrEmpty(Model.Group))
 {
 @:- (void) test_@(Model.Name) {
@@ -49,7 +50,7 @@ else
 
     @:XCTestExpectation *waitingLoading = [self expectationWithDescription:@@"Wait for HTTP request to complete"];
     
-    @:id<@(Model.Group)Protocol> op =[self.service @(Model.MethodGroup.Name)];
+    @:id<@(Settings.Instance?.Namespace)@(Model.Group)Protocol> op =[self.service @(Model.MethodGroup.Name)];
     
     foreach (var param in Model.LocalParameters)
     {

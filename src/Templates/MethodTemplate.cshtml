@@ -24,7 +24,7 @@
     @: * @Model.CallbackParameterDescription
     @: * @@throws IllegalArgumentException if a required parameter is not provided
     @: */
-    @:- (void) @(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
+    @:- (void)@(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
     foreach (var param in Model.LocalParameters)
     {
         if (!param.IsRequired)
@@ -64,7 +64,7 @@
     @: * @@throws IllegalArgumentException if a requred parameter is not provided.
     }
     @: */
-    @:- (void) @(Model.Name)@(Model.MethodParameterDeclaration) {
+    @:- (void)@(Model.Name)@(Model.MethodParameterDeclaration) {
     @EmptyLine
        
     foreach (var param in Model.RequiredNullableParameters)

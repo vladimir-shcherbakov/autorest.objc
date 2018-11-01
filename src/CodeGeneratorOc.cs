@@ -44,15 +44,15 @@ namespace AutoRest.ObjectiveC
 
             // Service client
             var serviceClientTemplate = new ServiceClientTemplate { Model = codeModel };
-            await Write(serviceClientTemplate, $"{packagePath}/{codeModel.Name.ToPascalCase()}{ImplementationFileExtension}");
+            await Write(serviceClientTemplate, $"{packagePath}/{codeModel.ServiceClientServiceType/*.ToPascalCase()*/}{ImplementationFileExtension}");
 
             // Service client interface
             var serviceClientInterfaceTemplate = new ServiceClientInterfaceTemplate { Model = codeModel };
-            await Write(serviceClientInterfaceTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}{InterfaceFileExtension}");
+            await Write(serviceClientInterfaceTemplate, $"{packagePath}/{codeModel.ServiceClientServiceType/*.ToPascalCase()*/}{InterfaceFileExtension}");
 
             // UnitTests
             var unitTestsTemplate = new UnitTestsTemplate { Model = codeModel };
-            await Write(unitTestsTemplate, $"{packagePath}/{cm.Name.ToPascalCase()}Tests{ImplementationFileExtension}");
+            await Write(unitTestsTemplate, $"{packagePath}/{codeModel.ServiceClientServiceType/*.ToPascalCase()*/}Tests{ImplementationFileExtension}");
 
             // root methods - to generate executors - backlog
 //            foreach (var method in codeModel.RootMethods)
@@ -68,11 +68,11 @@ namespace AutoRest.ObjectiveC
             {
                 // Operation
                 var operationsTemplate = new MethodGroupTemplate { Model = methodGroup };
-                await Write(operationsTemplate, $"{packagePath}/Operations/{methodGroup.TypeName.ToPascalCase()}{ImplementationFileExtension}");
+                await Write(operationsTemplate, $"{packagePath}/Operations/{methodGroup.TypeName/*.ToPascalCase()*/}{ImplementationFileExtension}");
 
                 // Operation interface
                 var operationsInterfaceTemplate = new MethodGroupInterfaceTemplate { Model = methodGroup };
-                await Write(operationsInterfaceTemplate, $"{packagePath}/Operations/{methodGroup.TypeName.ToPascalCase()}{InterfaceFileExtension}");
+                await Write(operationsInterfaceTemplate, $"{packagePath}/Operations/{methodGroup.TypeName/*.ToPascalCase()*/}{InterfaceFileExtension}");
             }
 
             //Models
@@ -80,18 +80,18 @@ namespace AutoRest.ObjectiveC
             {
                 //var cp = modelType.ComposedProperties; // combined whith base type props if any
                 var modelTemplate = new ModelTemplate { Model = modelType };
-                await Write(modelTemplate, $"{packagePath}/Models/{modelType.Name.ToPascalCase()}{InterfaceFileExtension}");
+                await Write(modelTemplate, $"{packagePath}/Models/{modelType.Name}{InterfaceFileExtension}");
                 var modelTemplateImpl = new ModelTemplateImpl { Model = modelType };
-                await Write(modelTemplateImpl, $"{packagePath}/Models/{modelType.Name.ToPascalCase()}{ImplementationFileExtension}");
+                await Write(modelTemplateImpl, $"{packagePath}/Models/{modelType.Name}{ImplementationFileExtension}");
             }
 
             // Enums
             foreach (EnumTypeOc enumType in cm.EnumTypes)
             {
                 var enumTemplate = new EnumTemplate { Model = enumType };
-                await Write(enumTemplate, $"{packagePath}/Models/{enumTemplate.Model.Name.ToPascalCase()}{InterfaceFileExtension}");
+                await Write(enumTemplate, $"{packagePath}/Models/{enumTemplate.Model.Name}{InterfaceFileExtension}");
                 var enumTemplateImpl = new EnumTemplateImpl { Model = enumType };
-                await Write(enumTemplateImpl, $"{packagePath}/Models/{enumTemplate.Model.Name.ToPascalCase()}{ImplementationFileExtension}");
+                await Write(enumTemplateImpl, $"{packagePath}/Models/{enumTemplate.Model.Name}{ImplementationFileExtension}");
             }
 
             // Exceptions

@@ -38,7 +38,7 @@
 @EmptyLine
 }
 
-- (void)encodeWithCoder:(id<Coder>) encoder {
+- (void)encodeWithCoder:(id<AZCoder>)encoder {
     @EmptyLine
 @if (Model.BaseModelType != null)
 {
@@ -47,14 +47,14 @@
 @foreach (PropertyOc property in Model.Properties.Where(p=> !p.IsReadOnly))
 {
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);
-    @:[encoder encodeObject: self.@propName forKey: @@"@(property.SerializedName)"];
+    @:[encoder encodeObject:self.@propName forKey:@@"@(property.SerializedName)"];
 }
 @EmptyLine
 }
 
 @EmptyLine
 
-- (nullable instancetype)initWithDecoder:(id<Coder>)decoder {
+- (nullable instancetype)initWithDecoder:(id<AZCoder>)decoder {
     @EmptyLine
 @if (Model.BaseModelType != null)
 {

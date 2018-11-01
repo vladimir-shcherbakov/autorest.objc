@@ -10,7 +10,7 @@
  */
 
 @EmptyLine
-#import "@(Model.Name).h"
+#import "@(Model.ServiceClientServiceType).h"
 @foreach (var import in Model.ImplImports)
 {
 @:#import "Models/@(import).h"
@@ -18,9 +18,9 @@
 @EmptyLine
 
 /**
- * Initializes a new instance of the @Model.Name class.
+ * Initializes a new instance of the @Model.ServiceClientServiceType class.
  */
-@@implementation @(Model.Name)
+@@implementation @(Model.ServiceClientServiceType)
 @EmptyLine
 @{
     var baseUrlIntit = $"_DEFAULT_BASE_URL = @\"{Model.BaseUrl}\"";
@@ -64,8 +64,8 @@
         @:return self;
     @:}
     @EmptyLine
-    @:+ (id<@(Model.Name)Protocol>) createWith@(paramDecl) {
-        @:@(Model.Name)* client = [[@(Model.Name) alloc] initWith@(paramInvoc)];
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) createWith@(paramDecl) {
+        @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] initWith@(paramInvoc)];
         @:return client;
     @:}
     }
@@ -87,8 +87,8 @@
         @:return self;
     @:}
     @EmptyLine
-    @:+ (id<@(Model.Name)Protocol>) create {
-        @:@(Model.Name)* client = [[@(Model.Name) alloc] init];
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) create {
+        @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] init];
         @:return client;
     @:}
     }

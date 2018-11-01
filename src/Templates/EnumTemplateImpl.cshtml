@@ -17,7 +17,7 @@
 
 @:@@implementation @(Model.Name)
 @EmptyLine
-    @:+ (NSArray*) values {
+    @:+ (NSArray*)values {
         @EmptyLine
         @:static NSArray *allValues;
         @:static dispatch_once_t onceToken;
@@ -34,18 +34,18 @@
     for (var i = 0; i < Model.Values.Count; i++)
     {
     @:/** @((Model.Values[i].Description != null ? Model.Values[i].Description.TrimEnd(new char[] {'.'}) : "Enum value " + Model.Values[i].SerializedName) + ".") */
-    @:static @(Model.Name)* _@(Model.Values[i].MemberName) = (@(Model.Name)*)@@"@(Model.Values[i].SerializedName)";
+    @:static @(Model.Name) *_@(Model.Values[i].MemberName) = (@(Model.Name)*)@@"@(Model.Values[i].SerializedName)";
     @EmptyLine
-    @:+ (@(Model.Name)*) @(Model.Values[i].MemberName) {
+    @:+ (@(Model.Name)*)@(Model.Values[i].MemberName) {
     @:    return _@(Model.Values[i].MemberName);
     @:}
     @EmptyLine
     }
-    @:+ (@(Model.Name) *) fromString: (NSString *) string {
+    @:+ (@(Model.Name) *)fromString:(NSString *)string {
         @:return (@(Model.Name) *) string;
     @:}
     @EmptyLine
-    @:+ (NSString *) toStringValue: (id<StringEnum>) value {
+    @:+ (NSString *)toStringValue:(id<StringEnum>)value {
         if (!Model.ModelAsString)
 		{
         @:if (![[@(Model.Name) values] containsObject:value]) {
@@ -58,32 +58,3 @@
     @EmptyLine
 @:@@end
 }
-@*else*@
-@*{*@
-@*<text>*@
-@*public final class @(Model.Name) extends ExpandableStringEnum<@(Model.Name)> {*@
-@*@for (int i = 0; i < Model.Values.Count; i++)*@
-@*{*@
-@*@:    /** Static value @(Model.Values[i].SerializedName) for @(Model.Name). */*@
-@*@:    public static final @(Model.Name) @(Model.Values[i].MemberName) = fromString("@(Model.Values[i].SerializedName)");*@
-@*@EmptyLine*@
-@*}*@
-@*    /***@
-@*     * Creates or finds a @(Model.Name) from its string representation.*@
-@*     * @@param name a name to look for*@
-@*     * @@return the corresponding @(Model.Name)*@
-@*     */*@
-@*    @@JsonCreator*@
-@*    public static @(Model.Name) fromString(String name) {*@
-@*        return fromString(name, @(Model.Name).class);*@
-@*    }*@
-@*@EmptyLine*@
-@*    /***@
-@*     * @@return known @(Model.Name) values*@
-@*     */*@
-@*    public static Collection<@(Model.Name)> values() {*@
-@*        return values(@(Model.Name).class);*@
-@*    }*@
-@*}*@
-@*</text>*@
-@*}*@

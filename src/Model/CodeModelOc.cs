@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using AutoRest.Core;
 using AutoRest.Core.Utilities;
 using AutoRest.Extensions;
 using AutoRest.Core.Model;
@@ -27,7 +28,7 @@ namespace AutoRest.ObjectiveC.Model
         public bool IsCustomBaseUri => Extensions.ContainsKey(SwaggerExtensions.ParameterizedHostExtension);
 
         [JsonIgnore]
-        public string ServiceClientServiceType => CodeNamerOc.GetServiceName(Name.ToPascalCase());
+        public string ServiceClientServiceType =>Settings.Instance?.Namespace + CodeNamerOc.GetServiceName(Name.ToPascalCase());
 
         [JsonIgnore]
         public virtual string ImplPackage => "implementation";

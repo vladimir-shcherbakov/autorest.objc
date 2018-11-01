@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using AutoRest.Core;
 using AutoRest.Core.Utilities;
 using AutoRest.Core.Model;
 using AutoRest.Extensions;
@@ -16,11 +17,12 @@ namespace AutoRest.ObjectiveC.Model
 
         public CompositeTypeOc()
         {
+            Name.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
         }
 
-        public CompositeTypeOc(string name) : base(name)
-        {
-        }
+//        public CompositeTypeOc(string name) : base(name)
+//        {
+//        }
 
         [JsonIgnore]
         public virtual string ModelsPackage => (this.CodeModel as CodeModelOc).ModelsPackage;
