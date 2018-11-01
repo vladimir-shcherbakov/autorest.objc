@@ -13,7 +13,7 @@
  */
 @*@if (!Model.ModelAsString)*@
 @{
-@:@@interface @(Model.Name) : NSString <AZStringEnum>
+@:@@interface @(Model.Name) : NSObject <AZStringEnum>
     @EmptyLine
     @:+ (NSArray*)values;
     @EmptyLine

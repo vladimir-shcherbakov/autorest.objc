@@ -34,10 +34,8 @@
     for (var i = 0; i < Model.Values.Count; i++)
     {
     @:/** @((Model.Values[i].Description != null ? Model.Values[i].Description.TrimEnd(new char[] {'.'}) : "Enum value " + Model.Values[i].SerializedName) + ".") */
-    @:static @(Model.Name) *_@(Model.Values[i].MemberName) = (@(Model.Name)*)@@"@(Model.Values[i].SerializedName)";
-    @EmptyLine
     @:+ (@(Model.Name)*)@(Model.Values[i].MemberName) {
-    @:    return _@(Model.Values[i].MemberName);
+    @:    return [@(Model.Name) values][@i];
     @:}
     @EmptyLine
     }
