@@ -22,7 +22,10 @@
     @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").Trim())
     }
     @: * @Model.CallbackParameterDescription
-    @: * @@throws IllegalArgumentException if a required parameter is not provided
+    if (Model.LocalParameters.Any(p => p.IsRequired))
+    {
+    @: * @@throws IllegalArgumentException if a requred parameter is not provided
+    }
     @: */
     @:- (void)@(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
     foreach (var param in Model.LocalParameters)
@@ -59,9 +62,9 @@
     @: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
     }
     @: * @Model.CallbackParameterDescription
-    if (Model.LocalParameters.Any(p => p.IsRequired))
+    if (Model.LocalParameters.Any(p => p.IsRequired || p.CanBeValidated))
     {
-    @: * @@throws IllegalArgumentException if a requred parameter is not provided.
+    @: * @@throws IllegalArgumentException if a requred parameter is not provided or a rule validation has failed
     }
     @: */
     @:- (void)@(Model.Name)@(Model.MethodParameterDeclaration) {
@@ -70,21 +73,17 @@
     foreach (var param in Model.RequiredNullableParameters)
     {
         @:if (@param.Name == nil) {
-            @:NSException *e = [NSException
+            @:@@throw [NSException
                 @:exceptionWithName: @@"IllegalArgumentException"
                 @:reason: @@"Parameter '@param.Name' is required and cannot be nil."
                 @:userInfo: nil];
-            @:@@throw e;
         @:}
-        @EmptyLine
-        
     }
     foreach (var param in Model.Parameters.Where(p => !p.IsConstant).Cast<ParameterOc>())
     {
         if (param.CanBeValidated && (Model.HttpMethod != HttpMethod.Patch || param.Location != ParameterLocation.Body))
         {
         @:@(param.ModelType.ValidateType(Model, param.Name, param.Constraints))
-        @EmptyLine
         }
     }
 
@@ -92,65 +91,61 @@
 
     var pathParamsList = Model.LogicalParameters.OfType<ParameterOc>()
         .Where(p => p.Extensions.ContainsKey("hostParameter") || p.Location == ParameterLocation.Path)
-        .Select(param => $"@\"{{{param.SerializedName}}}\" : {param.Name}")
+        .Select(param => $"@\"{{{param.SerializedName}}}\":{param.Name}")
         .ToList();
 
-    var pathParamsInitLine = string.Join(", ", pathParamsList);
+    var pathParamsInitLine = string.Join(",", pathParamsList);
 
     var queryParamsList = Model.LogicalParameters.OfType<ParameterOc>()
         .Where(p => p.Location == ParameterLocation.Query)
         .Select(param => param.IsRequired 
-            ? $"@\"{param.SerializedName}\" : {param.Name}" 
-            : $"@\"{param.SerializedName}\" : AZ_NULLABLE({param.Name})")
+            ? $"@\"{param.SerializedName}\":{param.Name}" 
+            : $"@\"{param.SerializedName}\":AZ_NULLABLE({param.Name})")
         .ToList();
 
-    var queryParamsInitLine = string.Join(", ", queryParamsList);
+    var queryParamsInitLine = string.Join(",", queryParamsList);
 
     var headersParamsList = Model.LogicalParameters.OfType<ParameterOc>()
         .Where(p => p.Location == ParameterLocation.Header)
-        .Select(param => $"@\"{param.SerializedName}\" : {param.Name}")
+        .Select(param => $"@\"{param.SerializedName}\":{param.Name}")
         .ToList();
 
-    headersParamsList.Add($"@\"Content-Type\" : @\"{Model.RequestContentType}\"");
+    headersParamsList.Add($"@\"Content-Type\":@\"{Model.RequestContentType}\"");
 
-    var headersInitLine = string.Join(", ", headersParamsList);
+    var headersInitLine = string.Join(",", headersParamsList);
 
     var bodyParamsList = Model.LogicalParameters.OfType<ParameterOc>()
         .Where(p => p.Location == ParameterLocation.Body)
         .Select(param => Model.RequestContentType.ToLower().Contains("json") 
-            ? $"[JsonCoder encodeObject:{param.Name}]" 
+            ? $"[AZJsonCoder encodeObject:{param.Name}]" 
             : $"{param.Name}")
         .ToList();
 
-    var bodyInitLine = bodyParamsList.IsNullOrEmpty() ? "nil" : string.Join(", ", bodyParamsList);
+    var bodyInitLine = bodyParamsList.IsNullOrEmpty() ? "nil" : string.Join(",", bodyParamsList);
 
-    var urlInitLine = string.IsNullOrEmpty(Model.Group) ? "self.DEFAULT_BASE_URL" : "self.service.DEFAULT_BASE_URL";
+    var urlInitLine = string.IsNullOrEmpty(Model.Group) ? "self.DEFAULT_BASE_URL":"self.service.DEFAULT_BASE_URL";
 	    
-        @EmptyLine
-        @:NSString* __url = [RequestHelper buildUrl: @urlInitLine
-                                         @:withPath: @@"@(Model.Url)"
-                                   @:withPathParams: @@{@pathParamsInitLine}
-                                  @:withQueryParams: @@{@queryParamsInitLine}];
-        @EmptyLine
-        @:RequestParameters* __rp = [RequestParameters createWithUrl: __url
-                                                        @:withMethod: @@"@(Model.HttpMethod.ToString().ToUpper())"
-                                                       @:withHeaders: @@{@headersInitLine}
-                                                          @:withBody: @bodyInitLine];
-        @EmptyLine
+        @:NSString* __url = [AZRequestHelper buildUrl:@urlInitLine
+                                           @:withPath:@@"@(Model.Url)"
+                                     @:withPathParams:@@{@pathParamsInitLine}
+                                    @:withQueryParams:@@{@queryParamsInitLine}];
+        @:AZRequestParameters* __rp = [AZRequestParameters createWithUrl:__url
+                                                            @:withMethod:@@"@(Model.HttpMethod.ToString().ToUpper())"
+                                                           @:withHeaders:@@{@headersInitLine}
+                                                              @:withBody:@bodyInitLine];
         @:[__rp withSpecialHeaders:self.specialHeaders];
-        @EmptyLine
 
     if (@Model.ReturnTypeResponseName == "void")
     {
-         @:[RequestHelper executeRequest:__rp 
-                        @:withErrorClass:[@Model.OperationErrorTypeName class] 
-                          @:withCallback:^(OperationError* _Nullable error) {
+         @:[AZRequestHelper executeRequest:__rp 
+                          @:withErrorClass:[@Model.OperationErrorTypeName class] 
+                            @:withCallback:^(AZOperationError* _Nullable error) {
             @:callback(error);
         @:}];
     }
     else
     {
-        @:[RequestHelper executeRequest:__rp 
+        @:[AZRequestHelper executeRequest:__rp 
         if (Model.ReturnTypeOc.BodyClientType is SequenceTypeOc
             || Model.ReturnTypeOc.BodyClientType is DictionaryTypeOc)
         {
@@ -164,12 +159,9 @@
                     @:withResponseClass:[@Model.ReturnTypeResponseName class] 
         }
                        @:withErrorClass:[@Model.OperationErrorTypeName class] 
-                         @:withCallback:^(id _Nullable result, OperationError* _Nullable error) {
+                         @:withCallback:^(id _Nullable result, AZOperationError* _Nullable error) {
             @:callback(result, error);
         @:}];
     }
-
-    @EmptyLine
     @:}
-    @EmptyLine
 }

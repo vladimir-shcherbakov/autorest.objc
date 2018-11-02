@@ -72,14 +72,14 @@
     if (notRoParams.Any())
     {
         var decl = notRoParams
-            .Select(p=>$"{p.Name}: ({p.ModelTypeName}*) {p.Name}");
+            .Select(p=>$"{p.Name}:({p.ModelTypeName}*){p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) createWith@(paramDecl);
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl);
     }
     else
     {
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) create;
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)create;
     }
 }
 @EmptyLine

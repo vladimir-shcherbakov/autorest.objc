@@ -27,7 +27,7 @@
 
     foreach (var param in Model.LocalParameters)
     {
-    @:@(param.ClientType.Name)* @(param.Name) = @(param.ClientType.GetDefaultValue(Model) ?? "nil");
+    @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
     }
     
 @*     @:@(Model.MethodBodyParameterCreationTestCase) *@
@@ -35,7 +35,8 @@
     @:[self.service @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
         
         @:[waitingLoading fulfill];
-        @://XCTAssertNil(error, @@"%@@", error.reason);
+        @:XCTAssertNil(error, @@"%@@", error.reason);
+        @:XCTAssertNotNil(result);
         
     @:}];
     
@@ -60,7 +61,8 @@ else
     @:[op @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
         
         @:[waitingLoading fulfill];
-        @://XCTAssertNil(error, @@"%@@", error.reason);
+        @:XCTAssertNil(error, @@"%@@", error.reason);
+        @:XCTAssertNotNil(result);
         
     @:}];
     

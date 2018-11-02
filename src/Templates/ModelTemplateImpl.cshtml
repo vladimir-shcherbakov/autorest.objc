@@ -14,7 +14,6 @@
 @EmptyLine
 
 @@implementation @(Model.Name)
-@EmptyLine
 
 @if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties) 
 {
@@ -35,7 +34,6 @@
         @:return self;
     @:}
     }
-@EmptyLine
 }
 
 - (void)encodeWithCoder:(id<AZCoder>)encoder {
@@ -49,10 +47,7 @@
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);
     @:[encoder encodeObject:self.@propName forKey:@@"@(property.SerializedName)"];
 }
-@EmptyLine
 }
-
-@EmptyLine
 
 - (nullable instancetype)initWithDecoder:(id<AZCoder>)decoder {
     @EmptyLine
@@ -64,7 +59,6 @@ else
 {
     @:if (self = [super init]) {
 }
-    @EmptyLine
 @foreach (PropertyOc property in Model.Properties)
 { 
     var propName = CodeNamer.Instance.GetPropertyName(property.Name);    
@@ -80,10 +74,7 @@ else
     }
 }
     }
-    @EmptyLine
     return self;
 }
-
-@EmptyLine
 
 @@end

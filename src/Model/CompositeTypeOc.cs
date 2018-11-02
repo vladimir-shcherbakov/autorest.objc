@@ -169,7 +169,7 @@ namespace AutoRest.ObjectiveC.Model
                 var parametersDelaraton = Properties
                     .Where(p => !p.IsConstant)
                     .Where(p => p.IsRequired || p.IsReadOnly)
-                    .Select(p => $"{p.Name}: ({(p.ModelType as IModelTypeOc)?.Name} *) {p.Name}");                
+                    .Select(p => $"with{p.Name}:({(p.ModelType as IModelTypeOc)?.Name} *){p.Name}");                
                 return string.Join(" ", parametersDelaraton).StartWithUppercase();
             }
         }

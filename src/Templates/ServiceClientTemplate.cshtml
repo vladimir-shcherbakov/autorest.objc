@@ -36,16 +36,16 @@
     if (notRoParams.Any())
     {
         var decl = notRoParams
-            .Select(p=>$"{p.Name}: ({p.ModelTypeName}*) {p.Name}");
+            .Select(p=>$"{p.Name}:({p.ModelTypeName}*){p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
 
         var invoc = notRoParams
-            .Select(p=>$"{p.Name}: {p.Name}");
+            .Select(p=>$"{p.Name}:{p.Name}");
         var invocStr = string.Join(" ", invoc);
         var paramInvoc = char.ToUpper(invocStr[0]) + invocStr.Substring(1);
 
-    @:- (instancetype) initWith@(paramDecl) {
+    @:- (instancetype)initWith@(paramDecl) {
         @:self = [super init];
         @:if (self) {
             @:@baseUrlIntit;
@@ -64,14 +64,14 @@
         @:return self;
     @:}
     @EmptyLine
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) createWith@(paramDecl) {
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl) {
         @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] initWith@(paramInvoc)];
         @:return client;
     @:}
     }
     else
     {
-    @:- (instancetype) init {
+    @:- (instancetype)init {
         @:self = [super init];
         @:if (self) {
             @:@baseUrlIntit;
@@ -87,7 +87,7 @@
         @:return self;
     @:}
     @EmptyLine
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>) create {
+    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)create {
         @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] init];
         @:return client;
     @:}
@@ -101,7 +101,7 @@
     @: * The @(operation.TypeName) object to access its operations.
     @: */
     @:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
-        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc] initWithService: self];
+        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc] initWithService:self];
         @: return op;
     @:}
     @EmptyLine

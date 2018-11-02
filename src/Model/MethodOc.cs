@@ -168,8 +168,8 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         public virtual string CallbackParameterInvokationTestcase => ReturnTypeResponseName == "void"
-            ? $"withCallback:^(OperationError* error)"
-            : $"withCallback:^({ReturnTypeResponseName}* result, OperationError* error)";
+            ? $"withCallback:^(AZOperationError* error)"
+            : $"withCallback:^({ReturnTypeResponseName}* result, AZOperationError* error)";
 
         [JsonIgnore]
         public string MethodParameterInvocationTestCase
@@ -549,7 +549,7 @@ namespace AutoRest.ObjectiveC.Model
                 }
                 else
                 {
-                    return "DefaultErrorModel";
+                    return "AZDefaultErrorModel";
                 }
             }
         }
@@ -571,28 +571,28 @@ namespace AutoRest.ObjectiveC.Model
         [JsonIgnore]
         public virtual string ExceptionString => string.Join(", ", Exceptions);
 
+        // [JsonIgnore]
+        // public virtual List<string> ExceptionStatements
+        // {
+        //     get
+        //     {
+        //         var exceptions = new List<string>
+        //         {
+        //             OperationErrorTypeName + " exception thrown from REST call",
+        //             "IOException exception thrown from serialization/deserialization"
+        //         };
+
+        //         if (RequiredNullableParameters.Any())
+        //         {
+        //             exceptions.Add("IllegalArgumentException exception thrown from invalid parameters");
+        //         }
+
+        //         return exceptions;
+        //     }
+        // }
+
         [JsonIgnore]
-        public virtual List<string> ExceptionStatements
-        {
-            get
-            {
-                var exceptions = new List<string>
-                {
-                    OperationErrorTypeName + " exception thrown from REST call",
-                    "IOException exception thrown from serialization/deserialization"
-                };
-
-                if (RequiredNullableParameters.Any())
-                {
-                    exceptions.Add("IllegalArgumentException exception thrown from invalid parameters");
-                }
-
-                return exceptions;
-            }
-        }
-
-        [JsonIgnore]
-        public string CallType => this.HttpMethod == HttpMethod.Head ? "Any" : "ResponseBody";
+        public string CallType => this.HttpMethod == HttpMethod.Head ? "id" : "ResponseBody";
 
         [JsonIgnore]
         public virtual string ResponseBuilder => "ServiceResponseBuilder";
@@ -607,14 +607,14 @@ namespace AutoRest.ObjectiveC.Model
         public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.Name;
 
         public virtual string CallbackParameterDeclaration => ReturnTypeResponseName == "void"
-            ? $"withCallback:(void(^)(OperationError*))callback"
-            : $"withCallback:(void(^)({ReturnTypeResponseName}*, OperationError*))callback";
+            ? $"withCallback:(void(^)(AZOperationError*))callback"
+            : $"withCallback:(void(^)({ReturnTypeResponseName}*, AZOperationError*))callback";
         
         public virtual string CallbackParameterInvocation => $"withCallback:callback";
 
         public virtual string CallbackParameterDescription => ReturnTypeResponseName == "void"
-            ? $"@param callback A block where OperationError is nil if the operation is successful"
-            : $"@param callback A block where {ReturnTypeResponseName} is a result object and OperationError is nil, if the operation is successful";
+            ? $"@param callback A block where AZOperationError is nil if the operation is successful"
+            : $"@param callback A block where {ReturnTypeResponseName} is a result object and AZOperationError is nil, if the operation is successful";
 
         
 

@@ -386,13 +386,12 @@ namespace AutoRest.ObjectiveC
                 {
                     sb.AppendLine("if ({0}) {{", constraintCheck)
                         .Indent()
-                            .AppendLine("NSException *e = [NSException")
+                            .AppendLine("@throw [NSException")
                             .Indent()
                                 .AppendLine("exceptionWithName: @\"IllegalArgumentException\"")
                                 .AppendLine($"reason: @\"Parameter '{valueReference}' failed rule validation, rule name: '{constraint}', constrain value: {constraintValue}\"")
                                 .AppendLine("userInfo: nil];")
                             .Outdent()
-                            .AppendLine("@throw e;")
                         .Outdent()
                         .AppendLine("}");
                 }

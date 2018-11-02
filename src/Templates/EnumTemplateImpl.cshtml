@@ -43,7 +43,7 @@
         @:return (@(Model.Name) *) string;
     @:}
     @EmptyLine
-    @:+ (NSString *)toStringValue:(id<StringEnum>)value {
+    @:+ (NSString *)toStringValue:(id<AZStringEnum>)value {
         if (!Model.ModelAsString)
 		{
         @:if (![[@(Model.Name) values] containsObject:value]) {
