@@ -14,14 +14,12 @@
 @*@if (!Model.ModelAsString)*@
 @{
 @:@@interface @(Model.Name) : NSObject <AZStringEnum>
-    @EmptyLine
-    @:+ (NSArray*)values;
-    @EmptyLine
+@:+ (NSArray*)values;
+@:+ (NSString *)toStringValue:(@(Model.Name) *)value;
     foreach (var value in Model.Values)
     {
-    /** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
-    @:@@property (class, readonly) @Model.Name *@value.MemberName;
+/** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
+@:@@property (class, readonly) @Model.Name *@value.MemberName;
     }
-    @EmptyLine
 @:@@end
 }

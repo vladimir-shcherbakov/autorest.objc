@@ -21,7 +21,6 @@
  * Initializes a new instance of the @Model.ServiceClientServiceType class.
  */
 @@implementation @(Model.ServiceClientServiceType)
-@EmptyLine
 @{
     var baseUrlIntit = $"_DEFAULT_BASE_URL = @\"{Model.BaseUrl}\"";
     const string keyInit = "_key = @\"UNDEFINED\"";
@@ -45,76 +44,68 @@
         var invocStr = string.Join(" ", invoc);
         var paramInvoc = char.ToUpper(invocStr[0]) + invocStr.Substring(1);
 
-    @:- (instancetype)initWith@(paramDecl) {
-        @:self = [super init];
-        @:if (self) {
-            @:@baseUrlIntit;
-            @:@keyInit;
-            @:@specialHeadersInit;
+@:- (instancetype)initWith@(paramDecl) {
+    @:self = [super init];
+    @:if (self) {
+        @:@baseUrlIntit;
+        @:@keyInit;
+        @:@specialHeadersInit;
         foreach (var ro in roParamsInit)
         {
-            @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
+        @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
         }
         foreach (var nro in notRoParams)
         {
-            @:_@(nro.Name.ToCamelCase()) = @(nro.Name.ToCamelCase());
+        @:_@(nro.Name.ToCamelCase()) = @(nro.Name.ToCamelCase());
         }
-        @:}
-        @EmptyLine
-        @:return self;
     @:}
-    @EmptyLine
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl) {
-        @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] initWith@(paramInvoc)];
-        @:return client;
-    @:}
+    @:return self;
+@:}
+@EmptyLine
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl) {
+    @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] initWith@(paramInvoc)];
+    @:return client;
+@:}
     }
     else
     {
-    @:- (instancetype)init {
-        @:self = [super init];
-        @:if (self) {
-            @:@baseUrlIntit;
-            @:@keyInit;
-            @:@specialHeadersInit;
+@:- (instancetype)init {
+    @:self = [super init];
+    @:if (self) {
+        @:@baseUrlIntit;
+        @:@keyInit;
+        @:@specialHeadersInit;
 
         foreach (var ro in roParamsInit)
         {
-            @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
+        @:_@(ro.Name.ToCamelCase()) = @(ro.DefaultValue);
         }
-        @:}
-        @EmptyLine
-        @:return self;
     @:}
-    @EmptyLine
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)create {
-        @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] init];
-        @:return client;
-    @:}
+    @:return self;
+@:}
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)create {
+    @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] init];
+    @:return client;
+@:}
     }
 }
-@EmptyLine
 @foreach (var operation in Model.AllOperations)
 {
-    @EmptyLine
-    @:/**
-    @: * The @(operation.TypeName) object to access its operations.
-    @: */
-    @:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
-        @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc] initWithService:self];
-        @: return op;
-    @:}
-    @EmptyLine
-}
 @EmptyLine
+@:/**
+@: * The @(operation.TypeName) object to access its operations.
+@: */
+@:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
+    @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc] initWithService:self];
+    @: return op;
+@:}
+}
 
 @if (Model.RootMethods.Any())
 {
     foreach (MethodOc method in Model.RootMethods)
     {
 @:@(Include(new MethodTemplate(), method))
-@EmptyLine
     }
 }
-@EmptyLine
 @@end

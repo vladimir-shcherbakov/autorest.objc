@@ -51,7 +51,7 @@ else
 
     @:XCTestExpectation *waitingLoading = [self expectationWithDescription:@@"Wait for HTTP request to complete"];
     
-    @:id<@(Settings.Instance?.Namespace)@(Model.Group)Protocol> op =[self.service @(Model.MethodGroup.Name)];
+    @:id<@(Settings.Instance?.Namespace)@(Model.Group)Protocol> op = [self.service @(Model.MethodGroup.Name)];
     
     foreach (var param in Model.LocalParameters)
     {
@@ -62,7 +62,6 @@ else
         
         @:[waitingLoading fulfill];
         @:XCTAssertNil(error, @@"%@@", error.reason);
-        @:XCTAssertNotNil(result);
         
     @:}];
     

@@ -29,40 +29,39 @@
 @foreach (var operation in Model.AllOperations)
 {
 @EmptyLine
-    @:/**
-    @: * Gets the @(operation.TypeName)Protocol object to access its operations.
-    @: * @@return the @(operation.TypeName) object.
-    @: */
-    @:- (id<@(operation.TypeName)Protocol>) @(operation.Name);
+@:/**
+@: * Gets the @(operation.TypeName)Protocol object to access its operations.
+@: * @@return the @(operation.TypeName) object.
+@: */
+@:- (id<@(operation.TypeName)Protocol>) @(operation.Name);
 }
 @EmptyLine
 @if (Model.RootMethods.Any())
 {
     foreach (MethodOc method in Model.RootMethods)
     {
-    @:@Include(new MethodInterfaceTemplate(), method)
-    @EmptyLine
+@:@Include(new MethodInterfaceTemplate(), method)
+@EmptyLine
     }
 }
 @@end
 
 @EmptyLine
 @@interface @Model.ServiceClientServiceType : NSObject <@(Model.ServiceClientServiceType)Protocol>
-@EmptyLine
-    /**
-        The default base URL. @Model.BaseUrl
-     */
-    @@property (readonly) NSString* DEFAULT_BASE_URL;
-    @@property (readonly) NSString* key;
-    @@property (readonly) NSDictionary* specialHeaders;
+/**
+The default base URL. @Model.BaseUrl
+*/
+@@property (readonly) NSString* DEFAULT_BASE_URL;
+@@property (readonly) NSString* key;
+@@property (readonly) NSDictionary* specialHeaders;
 
 @foreach (var property in Model.Properties)
 {
-    @EmptyLine
-    @:/**
-    @: * @(property.Documentation).
-    @: */
-    @:@@property @(property.IsReadOnly ? " (readonly) " : "") @(property.ModelType.ServiceResponseVariant().Name)* @(property.Name.ToCamelCase());
+@EmptyLine
+@:/**
+@: * @(property.Documentation).
+@: */
+@:@@property @(property.IsReadOnly ? " (readonly) " : "") @(property.ModelType.ServiceResponseVariant().Name)* @(property.Name.ToCamelCase());
 }
 @EmptyLine
 @{
@@ -75,12 +74,11 @@
             .Select(p=>$"{p.Name}:({p.ModelTypeName}*){p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl);
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl);
     }
     else
     {
-    @:+ (id<@(Model.ServiceClientServiceType)Protocol>)create;
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)create;
     }
 }
-@EmptyLine
 @@end

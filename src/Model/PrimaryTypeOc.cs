@@ -123,11 +123,11 @@ namespace AutoRest.ObjectiveC.Model
                     case KnownPrimaryType.ByteArray:
                         return "AZByteArray";
                     case KnownPrimaryType.Date:
-                        return "Date";
+                        return "AZDate";
                     case KnownPrimaryType.DateTime:
-                        return "DateTime";
+                        return "AZDateTime";
                     case KnownPrimaryType.DateTimeRfc1123:
-                        return "DateTimeRfc1123";
+                        return "AZDateTimeRfc1123";
                     case KnownPrimaryType.Double:
                         return "AZDouble";
                     case KnownPrimaryType.Decimal:
@@ -149,7 +149,7 @@ namespace AutoRest.ObjectiveC.Model
                     case KnownPrimaryType.Object:
                         return "NSObject";
                     case KnownPrimaryType.Credentials:
-                        return "ServiceClientCredentials";
+                        return "AZServiceClientCredentials";
                 }
                 throw new NotImplementedException($"Primary type {KnownPrimaryType} is not implemented in {GetType().Name}");
             }
