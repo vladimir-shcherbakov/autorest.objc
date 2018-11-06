@@ -16,7 +16,7 @@
 }
 @foreach (var operation in Model.AllOperations)
 {
-@:#import "Operations/@(operation.TypeName).h"
+@:#import "@(operation.TypeName).h"
 }
 @EmptyLine
 

@@ -12,7 +12,7 @@
 #import <AzureClientRuntime/AzureClientRuntime.h>
 @foreach (var import in Model.InterfaceImports)
 {
-@:#import "../Models/@(import).h"
+@:#import "@(import).h"
 }
 @@class AZOperationError;
 @EmptyLine

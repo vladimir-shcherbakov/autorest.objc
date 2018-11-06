@@ -13,7 +13,7 @@
 #import "@(Model.ServiceClientServiceType).h"
 @foreach (var import in Model.ImplImports)
 {
-@:#import "Models/@(import).h"
+@:#import "@(import).h"
 }
 @EmptyLine
 
