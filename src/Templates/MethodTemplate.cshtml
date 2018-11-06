@@ -1,0 +1,165 @@
+﻿@using System.Collections.Generic
+@using System.Linq;
+@using AutoRest.Core.Model
+@using AutoRest.Core.Utilities
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodOc>
+@if (Model.LocalParameters.Any(p => !p.IsConstant && !p.IsRequired))
+{
+@:/**
+if (!string.IsNullOrEmpty(Model.Summary))
+{
+@: * @Model.Summary.Period()
+}
+if (!string.IsNullOrEmpty(Model.Description))
+{
+@: * @Model.Description.Period()
+}
+@: *
+foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
+{
+@: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").Trim())
+}
+@: * @Model.CallbackParameterDescription
+if (Model.LocalParameters.Any(p => p.IsRequired))
+{
+@: * @@throws IllegalArgumentException if a requred parameter is not provided
+}
+@: */
+@:- (void)@(Model.Name)@(Model.MethodRequiredParameterDeclaration) {
+    foreach (var param in Model.LocalParameters)
+    {
+        if (!param.IsRequired)
+        {
+    @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
+        }
+        if (param.IsConstant)
+        {
+    @:@(param.ClientType.Name) @(param.Name) = @(param.DefaultValue?.Value ?? "nil");
+        }
+    }
+
+    @:[self @(Model.Name)@(Model.MethodParameterInvocation)];
+
+@:}
+    @EmptyLine
+}
+@*@if (Model.LocalParameters.Any(p => !p.IsConstant))*@
+@{
+@:/**
+if (!string.IsNullOrEmpty(Model.Summary))
+{
+@: * @Model.Summary.Period()
+}
+if (!string.IsNullOrEmpty(Model.Description))
+{
+@: * @Model.Description.Period()
+}
+@: *
+foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
+{
+@: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value").EscapeXmlComment().Trim())
+}
+@: * @Model.CallbackParameterDescription
+if (Model.LocalParameters.Any(p => p.IsRequired || p.CanBeValidated))
+{
+@: * @@throws IllegalArgumentException if a requred parameter is not provided or a rule validation has failed
+}
+@: */
+@:- (void)@(Model.Name)@(Model.MethodParameterDeclaration) {
+@EmptyLine
+       
+    foreach (var param in Model.RequiredNullableParameters)
+    {
+    @:if (@param.Name == nil) {
+        @:@@throw [NSException
+            @:exceptionWithName: @@"IllegalArgumentException"
+            @:reason: @@"Parameter '@param.Name' is required and cannot be nil."
+            @:userInfo: nil];
+    @:}
+    }
+    foreach (var param in Model.Parameters.Where(p => !p.IsConstant).Cast<ParameterOc>())
+    {
+        if (param.CanBeValidated && (Model.HttpMethod != HttpMethod.Patch || param.Location != ParameterLocation.Body))
+        {
+    @:@(param.ModelType.ValidateType(Model, param.Name, param.Constraints))
+        }
+    }
+
+    @:@Model.BuildInputMappings()
+
+    var pathParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Extensions.ContainsKey("hostParameter") || p.Location == ParameterLocation.Path)
+        .Select(param => $"@\"{{{param.SerializedName}}}\":{param.Name}")
+        .ToList();
+
+    var pathParamsInitLine = string.Join(",", pathParamsList);
+
+    var queryParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Location == ParameterLocation.Query)
+        .Select(param => param.IsRequired 
+            ? $"@\"{param.SerializedName}\":{param.Name}" 
+            : $"@\"{param.SerializedName}\":AZ_NULLABLE({param.Name})")
+        .ToList();
+
+    var queryParamsInitLine = string.Join(",", queryParamsList);
+
+    var headersParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Location == ParameterLocation.Header)
+        .Select(param => $"@\"{param.SerializedName}\":{param.Name}")
+        .ToList();
+
+    headersParamsList.Add($"@\"Content-Type\":@\"{Model.RequestContentType}\"");
+
+    var headersInitLine = string.Join(",", headersParamsList);
+
+    var bodyParamsList = Model.LogicalParameters.OfType<ParameterOc>()
+        .Where(p => p.Location == ParameterLocation.Body)
+        .Select(param => Model.RequestContentType.ToLower().Contains("json") 
+            ? $"[AZJsonCoder encodeObject:{param.Name}]" 
+            : $"{param.Name}")
+        .ToList();
+
+    var bodyInitLine = bodyParamsList.IsNullOrEmpty() ? "nil" : string.Join(",", bodyParamsList);
+	    
+    @:NSString* __url = [AZRequestHelper buildUrl:@(Model.ClientReference).DEFAULT_BASE_URL
+                                       @:withPath:@@"@(Model.Url)"
+                                 @:withPathParams:@@{@pathParamsInitLine}
+                                @:withQueryParams:@@{@queryParamsInitLine}];
+    @:AZRequestParameters* __rp = [AZRequestParameters createWithUrl:__url
+                                                        @:withMethod:@@"@(Model.HttpMethod.ToString().ToUpper())"
+                                                       @:withHeaders:@@{@headersInitLine}
+                                                          @:withBody:@bodyInitLine];
+    @:[__rp withSpecialHeaders:@(Model.ClientReference).specialHeaders];
+
+    if (@Model.ReturnTypeResponseName == "void")
+    {
+    @:[AZRequestHelper executeRequest:__rp 
+                     @:withErrorClass:[@Model.OperationErrorTypeName class] 
+                       @:withCallback:^(AZOperationError* _Nullable error) {
+        @:callback(error);
+    @:}];
+    }
+    else
+    {
+    @:[AZRequestHelper executeRequest:__rp 
+        if (Model.ReturnTypeOc.BodyClientType is SequenceTypeOc
+            || Model.ReturnTypeOc.BodyClientType is DictionaryTypeOc)
+        {
+                    var elementClassName = (Model.ReturnTypeOc.BodyClientType as SequenceTypeOc)?.ElementType.Name 
+                                   ?? (Model.ReturnTypeOc.BodyClientType as DictionaryTypeOc)?.ValueType.Name;
+                  @:withResponseClass:[@Model.ReturnTypeResponseName class]
+                   @:withElementClass:[@elementClassName class]
+        }
+        else
+        {
+                  @:withResponseClass:[@Model.ReturnTypeResponseName class] 
+        }
+                     @:withErrorClass:[@Model.OperationErrorTypeName class] 
+                       @:withCallback:^(id _Nullable result, AZOperationError* _Nullable error) {
+        @:callback(result, error);
+    @:}];
+    }
+@:}
+}

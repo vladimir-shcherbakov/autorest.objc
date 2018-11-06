@@ -1,0 +1,56 @@
+﻿@using System.Linq
+@using AutoRest.ObjectiveC
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.EnumTypeOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+#import "@(Model.Name).h"
+@EmptyLine
+/**
+ * Defines values for @(Model.Name).
+ */
+@*@if (!Model.ModelAsString)*@
+@{
+    var serializedNames = Model.Values.Select(v => $"@\"{v.SerializedName}\"");
+    var serializedNamesJoined = string.Join(",\n", serializedNames);
+
+@:@@implementation @(Model.Name)
+@:+ (NSArray*)values {
+    @:static NSArray *allValues;
+    @:static dispatch_once_t onceToken;
+    @:dispatch_once(&onceToken, ^{
+        @:allValues = @@[ 
+            @:@serializedNamesJoined
+        @:];
+    @:});
+    @:return allValues;
+@:}
+
+for (var i = 0; i < Model.Values.Count; i++)
+{
+@:/** @((Model.Values[i].Description != null ? Model.Values[i].Description.TrimEnd(new char[] {'.'}) : "Enum value " + Model.Values[i].SerializedName) + ".") */
+@:+ (@(Model.Name)*)@(Model.Values[i].MemberName) {
+@:    return [@(Model.Name) values][@i];
+@:}
+}
+@:+ (@(Model.Name) *)fromString:(NSString *)string {
+    if (!Model.ModelAsString)
+    {
+    @:if (![[@(Model.Name) values]containsObject:string]) {
+        @:@@throw [NSException exceptionWithName:@@"EnumCastException" reason:@@"The string is not the enum member" userInfo:nil];
+    @:}
+    }
+    @:return (@(Model.Name) *)string;
+@:}
+@:+ (NSString *)toStringValue:(@(Model.Name) *)value {
+    if (!Model.ModelAsString)
+    {
+    @:if (![[@(Model.Name) values]containsObject:value]) {
+        @:@@throw [NSException exceptionWithName:@@"EnumCastException" reason:@@"Enum value doesn't exist" userInfo:nil];
+    @:}
+    }
+    @:return (NSString *)value;
+@:}
+@:@@end
+}

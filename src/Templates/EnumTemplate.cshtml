@@ -1,0 +1,25 @@
+﻿@using System.Linq
+@using AutoRest.Core.Model
+@using AutoRest.ObjectiveC
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.EnumTypeOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+#import <AzureClientRuntime/AzureClientRuntime.h>
+@EmptyLine
+/**
+ * Defines values for @(Model.Name).
+ */
+@*@if (!Model.ModelAsString)*@
+@{
+@:@@interface @(Model.Name) : NSObject <AZStringEnum>
+@:+ (NSArray*)values;
+@:+ (NSString *)toStringValue:(@(Model.Name) *)value;
+    foreach (var value in Model.Values)
+    {
+/** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
+@:@@property (class, readonly) @Model.Name *@value.MemberName;
+    }
+@:@@end
+}

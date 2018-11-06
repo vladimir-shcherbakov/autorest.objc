@@ -1,0 +1,51 @@
+﻿@using System.Linq;
+@using AutoRest.Core.Utilities
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodOc>
+@if (Model.LocalParameters.Any(p => !p.IsConstant && !p.IsRequired))
+{
+@:/**
+    if (!string.IsNullOrEmpty(Model.Summary))
+    {
+@: * @Model.Summary.Period()
+    }
+
+    if (!string.IsNullOrEmpty(Model.Description))
+    {
+@: * @Model.Description.Period()
+    }
+
+@: *
+    foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant && p.IsRequired))
+    {
+@: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value"))
+    }
+@: * @Model.CallbackParameterDescription
+@: * @@throws IllegalArgumentException if a required parameter is not provided.
+@: */
+@:- (void)@(Model.Name)@(Model.MethodRequiredParameterDeclaration);
+@EmptyLine
+}
+
+/**
+@if (!string.IsNullOrEmpty(Model.Summary))
+{
+@: * @Model.Summary.Period()
+}
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+@: * @Model.Description.Period()
+}
+ *
+@foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
+{
+@: * @@param @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value"))
+}
+ * @Model.CallbackParameterDescription
+@if (Model.LocalParameters.Any(p => p.IsRequired))
+{
+@: * @@throws IllegalArgumentException if a required parameter is not provided.
+}
+ */
+- (void)@(Model.Name)@(Model.MethodParameterDeclaration);

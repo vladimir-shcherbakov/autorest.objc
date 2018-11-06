@@ -1,0 +1,44 @@
+@using System
+@using AutoRest.ObjectiveC.Templates
+@using System.Linq;
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.MethodGroupOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+
+#import <AzureClientRuntime/AzureClientRuntime.h>
+@foreach (var import in Model.InterfaceImports)
+{
+@:#import "@(import).h"
+}
+@@class AZOperationError;
+@EmptyLine
+
+/**
+ * An protocol provides access to all @(Model.TypeName) operations
+ */
+@@protocol @(Model.TypeName)Protocol
+    @EmptyLine
+    @foreach (MethodOc method in Model.Methods)
+    {
+@:@Include(new MethodInterfaceTemplate(), method)
+    @EmptyLine
+    }
+@@end
+
+@EmptyLine
+/**
+* The protocol implementation
+*/
+@@class @((Model.Parent.CodeModel as CodeModelOc)?.ServiceClientServiceType);
+@EmptyLine
+@@interface @(Model.TypeName) : NSObject <@(Model.TypeName)Protocol>
+
+@@property (readonly) @((Model.Parent.CodeModel as CodeModelOc)?.ServiceClientServiceType) *service;
+
+- (instancetype)initWithService:(@((Model.Parent.CodeModel as CodeModelOc)?.ServiceClientServiceType) *)service;
+
+@@end

@@ -1,0 +1,84 @@
+@using System
+@using AutoRest.ObjectiveC.Templates
+@using System.Linq
+@using AutoRest.Core.Utilities
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.CodeModelOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+#import @("<AzureClientRuntime/AzureClientRuntime.h>")
+@foreach (var import in Model.InterfaceImports)
+{
+@:#import "@(import).h"
+}
+@foreach (var operation in Model.AllOperations)
+{
+@:#import "@(operation.TypeName).h"
+}
+@EmptyLine
+
+/**
+ * The interface for @Model.Name class.
+ */
+@@protocol @(Model.ServiceClientServiceType)Protocol
+
+
+@foreach (var operation in Model.AllOperations)
+{
+@EmptyLine
+@:/**
+@: * Gets the @(operation.TypeName)Protocol object to access its operations.
+@: * @@return the @(operation.TypeName) object.
+@: */
+@:- (id<@(operation.TypeName)Protocol>) @(operation.Name);
+}
+@EmptyLine
+@if (Model.RootMethods.Any())
+{
+    foreach (MethodOc method in Model.RootMethods)
+    {
+@:@Include(new MethodInterfaceTemplate(), method)
+@EmptyLine
+    }
+}
+@@end
+
+@EmptyLine
+@@interface @Model.ServiceClientServiceType : NSObject <@(Model.ServiceClientServiceType)Protocol>
+/**
+The default base URL. @Model.BaseUrl
+*/
+@@property (readonly) NSString* DEFAULT_BASE_URL;
+@@property (readonly) NSString* key;
+@@property (readonly) NSDictionary* specialHeaders;
+
+@foreach (var property in Model.Properties)
+{
+@EmptyLine
+@:/**
+@: * @(property.Documentation).
+@: */
+@:@@property @(property.IsReadOnly ? " (readonly) " : "") @(property.ModelType.ServiceResponseVariant().Name)* @(property.Name.ToCamelCase());
+}
+@EmptyLine
+@{
+    var notRoParams = Model.Properties
+        .Where(p => !p.IsReadOnly).ToList();
+
+    if (notRoParams.Any())
+    {
+        var decl = notRoParams
+            .Select(p=>$"{p.Name}:({p.ModelTypeName}*){p.Name}");
+        var declStr = string.Join(" ", decl);
+        var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl);
+    }
+    else
+    {
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)create;
+    }
+}
+@@end

@@ -1,0 +1,80 @@
+﻿@using System.Linq
+@using System.Collections.Generic
+@using AutoRest.Core
+@using AutoRest.Core.Model
+@using AutoRest.Core.Utilities
+@using AutoRest.ObjectiveC
+@using AutoRest.ObjectiveC.Model
+@inherits AutoRest.Core.Template<AutoRest.ObjectiveC.Model.CompositeTypeOc>
+/**
+@Header(" * ").TrimMultilineHeader()
+ */
+@EmptyLine
+#import "@(Model.Name).h"
+@EmptyLine
+
+@@implementation @(Model.Name)
+
+@if (Model.Properties.Any(p => p.IsConstant) || Model.GenerateConstructorForRequiredProperties) 
+{
+    if (Model.GenerateConstructorForRequiredProperties) 
+    {
+    @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration) {
+        @:self = [super init];
+        @:if (self) {
+        foreach (var property in Model.Properties.Where(p => !p.IsConstant).Where(p => p.IsRequired || p.IsReadOnly)) {
+            @:_@(property.Name) = @property.Name;
+        }
+        foreach (var property in Model.Properties.Where(p => p.IsConstant)) {
+            @: // constants initialization
+            @:@(property.Name) = @(property.DefaultValue);
+        }
+
+        @:}
+        @:return self;
+    @:}
+    }
+}
+
+- (void)encodeWithCoder:(id<AZCoder>)encoder {
+    @EmptyLine
+@if (Model.BaseModelType != null)
+{
+    @:[super encodeWithCoder:encoder];
+}
+@foreach (PropertyOc property in Model.Properties.Where(p=> !p.IsReadOnly))
+{
+    var propName = CodeNamer.Instance.GetPropertyName(property.Name);
+    @:[encoder encodeObject:self.@propName forKey:@@"@(property.SerializedName)"];
+}
+}
+
+- (nullable instancetype)initWithDecoder:(id<AZCoder>)decoder {
+    @EmptyLine
+@if (Model.BaseModelType != null)
+{
+    @:if (self = [super initWithDecoder:decoder]) {
+}
+else
+{
+    @:if (self = [super init]) {
+}
+@foreach (PropertyOc property in Model.Properties)
+{ 
+    var propName = CodeNamer.Instance.GetPropertyName(property.Name);    
+    if (property.ModelType is SequenceTypeOc) {
+        var typeName = (property.ModelType as SequenceTypeOc)?.ElementType.Name;
+        @:_@propName = [decoder decodeArrayForKey:@@"@(property.SerializedName)" elementClass:[@typeName class]];
+    } else if (property.ModelType is DictionaryTypeOc) {
+        var typeName = (property.ModelType as DictionaryTypeOc)?.ValueType.Name;
+        @:_@propName = [decoder decodeDictionaryForKey:@@"@(property.SerializedName)" elementClass:[@typeName class]];
+    } else {
+        var typeName = (property.ModelType as IModelTypeOc)?.Name;
+        @:_@propName = [decoder decodeObjectForKey:@@"@(property.SerializedName)" objectClass:[@typeName class]];
+    }
+}
+    }
+    return self;
+}
+
+@@end

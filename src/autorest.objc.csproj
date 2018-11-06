@@ -58,4 +58,71 @@
     <ProjectReference Include="../autorest.common/src/autorest.common.csproj" />
   </ItemGroup>
 
+   <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-Perks.CodeGen" Version="2.0.1" />
+    <PackageReference Include="dotnet-Perks.CodeGen" Version="2.0.1">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\EnumTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ExceptionTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupRetrofitTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodGroupTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\MethodTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ModelTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\PackageInfoTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientRetrofitTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ServiceClientTemplate.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\EnumTemplateImpl.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\ModelTemplateImpl.cshtml" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <DotnetRazor Remove="Templates\RootMethodInterfaceTemplate.cshtml" />
+   </ItemGroup>
+
 </Project>
