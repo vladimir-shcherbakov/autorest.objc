@@ -15,11 +15,11 @@ namespace AutoRest.ObjectiveC.Model
             _implImports = new List<string>();
             Name.OnGet += name => !IsClientProperty
                 ? name
-                : $"self.{name}"
-//                : string.Format(CultureInfo.InvariantCulture,
-//                        "{0}.{1}()",
-//                        Method != null && true == Method.Group.IsNullOrEmpty() ? "this" : "this.client",
-//                        ClientProperty.Name.ToCamelCase())
+                //: $"self.{name}"
+                : string.Format(CultureInfo.InvariantCulture,
+                       "{0}.{1}",
+                       Method != null && true == Method.Group.IsNullOrEmpty() ? "self" : "self.service",
+                       ClientProperty.Name.ToCamelCase())
                 ;
 
             DefaultValue.OnGet += defaultValue => defaultValue;

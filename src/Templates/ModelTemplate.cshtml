@@ -10,10 +10,10 @@
 @Header(" * ").TrimMultilineHeader()
 */
 @EmptyLine
-#include <AzureClientRuntime/AzureClientRuntime.h>
+#import <AzureClientRuntime/AzureClientRuntime.h>
 @if (Model.BaseModelType != null)
 {
-@:#import "@(Model.BaseModelType.DeclarationName.ToPascalCase()).h"
+@:#import "@(Model.BaseModelType.Name).h"
 }
 @{
     var imports = new List<string>();
@@ -63,7 +63,7 @@ else
 {
 @:// Skip parent validation
 }
-@@interface @(Model.Name) : @(Model.BaseModelType != null ? Model.BaseModelType.DeclarationName.ToPascalCase() : "NSObject") <AZCodable>
+@@interface @(Model.Name) : @(Model.BaseModelType != null ? $"{Model.BaseModelType.Name}" : "NSObject") <AZCodable>
 
 @foreach (PropertyOc property in Model.Properties)
 {

@@ -126,7 +126,7 @@ namespace AutoRest.ObjectiveC
 
             if (model != null && model.ShouldValidateChain())
             {
-                sb.AppendLine("{0}.Validate();", valueReference);
+                sb.AppendLine("//TODO: [{0} validate];", valueReference);
             }
 
             if (constraints != null && constraints.Any())

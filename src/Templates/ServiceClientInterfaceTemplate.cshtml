@@ -9,10 +9,10 @@
 @Header(" * ").TrimMultilineHeader()
  */
 @EmptyLine
-#include @("<AzureClientRuntime/AzureClientRuntime.h>")
+#import @("<AzureClientRuntime/AzureClientRuntime.h>")
 @foreach (var import in Model.InterfaceImports)
 {
-@:#import "Models/@(import).h"
+@:#import "@(import).h"
 }
 @foreach (var operation in Model.AllOperations)
 {
