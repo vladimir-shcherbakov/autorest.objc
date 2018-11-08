@@ -15,11 +15,11 @@
 @{
 @:@@interface @(Model.Name) : NSObject <AZStringEnum>
 @:+ (NSArray*)values;
-@:+ (NSString *)toStringValue:(@(Model.Name) *)value;
+@:+ (NSString*)toStringValue:(@(Model.Name)*)value;
     foreach (var value in Model.Values)
     {
 /** @((value.Description != null ? value.Description.TrimEnd(new char[] {'.'}) : "Enum value " + value.SerializedName) + ".") */
-@:@@property (class, readonly) @Model.Name *@value.MemberName;
+@:@@property(class,readonly)@Model.Name *@value.MemberName;
     }
 @:@@end
 }

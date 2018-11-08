@@ -34,16 +34,16 @@ for (var i = 0; i < Model.Values.Count; i++)
 @:    return [@(Model.Name) values][@i];
 @:}
 }
-@:+ (@(Model.Name) *)fromString:(NSString *)string {
+@:+ (@(Model.Name)*)fromString:(NSString*)string {
     if (!Model.ModelAsString)
     {
     @:if (![[@(Model.Name) values]containsObject:string]) {
         @:@@throw [NSException exceptionWithName:@@"EnumCastException" reason:@@"The string is not the enum member" userInfo:nil];
     @:}
     }
-    @:return (@(Model.Name) *)string;
+    @:return (@(Model.Name)*)string;
 @:}
-@:+ (NSString *)toStringValue:(@(Model.Name) *)value {
+@:+ (NSString*)toStringValue:(@(Model.Name)*)value {
     if (!Model.ModelAsString)
     {
     @:if (![[@(Model.Name) values]containsObject:value]) {

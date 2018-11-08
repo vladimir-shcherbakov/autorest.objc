@@ -33,7 +33,7 @@
 @: * Gets the @(operation.TypeName)Protocol object to access its operations.
 @: * @@return the @(operation.TypeName) object.
 @: */
-@:- (id<@(operation.TypeName)Protocol>) @(operation.Name);
+@:- (id<@(operation.TypeName)Protocol>)@(operation.Name);
 }
 @EmptyLine
 @if (Model.RootMethods.Any())
@@ -51,9 +51,9 @@
 /**
 The default base URL. @Model.BaseUrl
 */
-@@property (readonly) NSString* DEFAULT_BASE_URL;
-@@property (readonly) NSString* key;
-@@property (readonly) NSDictionary* specialHeaders;
+@@property (readonly) NSString *DEFAULT_BASE_URL;
+@@property (readonly) NSString *key;
+@@property (readonly) NSDictionary *specialHeaders;
 
 @foreach (var property in Model.Properties)
 {
@@ -61,7 +61,7 @@ The default base URL. @Model.BaseUrl
 @:/**
 @: * @(property.Documentation).
 @: */
-@:@@property @(property.IsReadOnly ? " (readonly) " : "") @(property.ModelType.ServiceResponseVariant().Name)* @(property.Name.ToCamelCase());
+@:@@property@(property.IsReadOnly ? " (readonly) " : "")@(property.ModelType.ServiceResponseVariant().Name)* @(property.Name.ToCamelCase());
 }
 @EmptyLine
 @{
