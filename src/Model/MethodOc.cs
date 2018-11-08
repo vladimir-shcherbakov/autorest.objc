@@ -168,8 +168,8 @@ namespace AutoRest.ObjectiveC.Model
         }
 
         public virtual string CallbackParameterInvokationTestcase => ReturnTypeResponseName == "void"
-            ? $"withCallback:^(AZOperationError* error)"
-            : $"withCallback:^({ReturnTypeResponseName}* result, AZOperationError* error)";
+            ? $"withCallback:^(AZOperationError *error)"
+            : $"withCallback:^({ReturnTypeResponseName} *result, AZOperationError *error)";
 
         [JsonIgnore]
         public string MethodParameterInvocationTestCase
