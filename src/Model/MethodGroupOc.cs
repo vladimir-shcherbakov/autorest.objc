@@ -16,12 +16,13 @@ namespace AutoRest.ObjectiveC.Model
         public MethodGroupOc()
         {
             Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
-            TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");;
+            TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
         }
-//        public MethodGroupOc(string name) : base(name)
-//        {
-//            Name.OnGet += name1 => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");;
-//        }
+    //    public MethodGroupOc(string name) : base(name)
+    //    {
+    //        Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
+    //         TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
+    //    }
 
         [JsonIgnore]
         public string MethodGroupFullType => (CodeModel.Namespace.ToLowerInvariant()) + "." + TypeName;

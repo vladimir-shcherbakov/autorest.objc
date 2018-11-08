@@ -20,9 +20,10 @@ namespace AutoRest.ObjectiveC.Model
             Name.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
         }
 
-//        public CompositeTypeOc(string name) : base(name)
-//        {
-//        }
+    //    public CompositeTypeOc(string name1) : base(name1)
+    //    {
+    //        Name.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
+    //    }
 
         [JsonIgnore]
         public virtual string ModelsPackage => (this.CodeModel as CodeModelOc).ModelsPackage;
@@ -169,7 +170,7 @@ namespace AutoRest.ObjectiveC.Model
                 var parametersDelaraton = Properties
                     .Where(p => !p.IsConstant)
                     .Where(p => p.IsRequired || p.IsReadOnly)
-                    .Select(p => $"with{p.Name}:({(p.ModelType as IModelTypeOc)?.Name} *){p.Name}");                
+                    .Select(p => $"with{p.Name.ToPascalCase()}:({(p.ModelType as IModelTypeOc)?.Name} *){p.Name}");                
                 return string.Join(" ", parametersDelaraton).StartWithUppercase();
             }
         }

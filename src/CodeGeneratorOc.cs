@@ -54,15 +54,6 @@ namespace AutoRest.ObjectiveC
             var unitTestsTemplate = new UnitTestsTemplate { Model = codeModel };
             await Write(unitTestsTemplate, $"{packagePath}/{codeModel.ServiceClientServiceType/*.ToPascalCase()*/}Tests{ImplementationFileExtension}");
 
-            // root methods - to generate executors - backlog
-//            foreach (var method in codeModel.RootMethods)
-//            {
-//                // method interface
-//                var operationsInterfaceTemplate = new RootMethodInterfaceTemplate { Model = method };
-//                await Write(operationsInterfaceTemplate, $"{packagePath}/methods/{method.Name.ToPascalCase()}{InterfaceFileExtension}");
-//
-//            }
-
             // operations
             foreach (var methodGroup in codeModel.AllOperations)
             {
@@ -93,13 +84,6 @@ namespace AutoRest.ObjectiveC
                 var enumTemplateImpl = new EnumTemplateImpl { Model = enumType };
                 await Write(enumTemplateImpl, $"{packagePath}/Models/{enumTemplate.Model.Name}{ImplementationFileExtension}");
             }
-
-            // Exceptions
-//            foreach (CompositeTypeOc exceptionType in codeModel.ErrorTypes)
-//            {
-//                var exceptionTemplate = new ExceptionTemplate { Model = exceptionType };
-//                await Write(exceptionTemplate, $"{packagePath}/models/{exceptionTemplate.Model.ExceptionTypeDefinitionName}{enumTemplateImpl}");
-//            }
 
             // package-info
 //            await Write(new PackageInfoTemplate
