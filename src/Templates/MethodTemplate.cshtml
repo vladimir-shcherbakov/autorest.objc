@@ -32,7 +32,7 @@ if (Model.LocalParameters.Any(p => p.IsRequired))
     {
         if (!param.IsRequired)
         {
-    @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
+    @:@(param.ClientType.Name) *@(param.Name) = @(param.ActualDefaultValue);
         }
         if (param.IsConstant)
         {
@@ -137,7 +137,7 @@ if (Model.LocalParameters.Any(p => p.IsRequired || p.CanBeValidated))
     {
     @:[AZRequestHelper executeRequest:__rp 
                      @:withErrorClass:[@Model.OperationErrorTypeName class] 
-                       @:withCallback:^(AZOperationError* _Nullable error) {
+                       @:withCallback:^(AZOperationError *_Nullable error) {
         @:callback(error);
     @:}];
     }
@@ -157,7 +157,7 @@ if (Model.LocalParameters.Any(p => p.IsRequired || p.CanBeValidated))
                   @:withResponseClass:[@Model.ReturnTypeResponseName class] 
         }
                      @:withErrorClass:[@Model.OperationErrorTypeName class] 
-                       @:withCallback:^(id _Nullable result, AZOperationError* _Nullable error) {
+                       @:withCallback:^(id _Nullable result, AZOperationError *_Nullable error) {
         @:callback(result, error);
     @:}];
     }
