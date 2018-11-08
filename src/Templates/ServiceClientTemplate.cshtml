@@ -24,7 +24,7 @@
 @{
     var baseUrlIntit = $"_DEFAULT_BASE_URL = @\"{Model.BaseUrl}\"";
     const string keyInit = "_key = @\"UNDEFINED\"";
-    const string specialHeadersInit = "_specialHeaders = @{@\"ocp-apim-subscription-key\" : self.key}";
+    const string specialHeadersInit = "_specialHeaders = @{@\"ocp-apim-subscription-key\":self.key}";
 
     var roParamsInit = Model.Properties
         .Where(p => p.IsReadOnly).ToList();
@@ -63,7 +63,7 @@
 @:}
 @EmptyLine
 @:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl) {
-    @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] initWith@(paramInvoc)];
+    @:@(Model.ServiceClientServiceType) *client = [[@(Model.ServiceClientServiceType) alloc]initWith@(paramInvoc)];
     @:return client;
 @:}
     }
@@ -84,7 +84,7 @@
     @:return self;
 @:}
 @:+ (id<@(Model.ServiceClientServiceType)Protocol>)create {
-    @:@(Model.ServiceClientServiceType)* client = [[@(Model.ServiceClientServiceType) alloc] init];
+    @:@(Model.ServiceClientServiceType) *client = [[@(Model.ServiceClientServiceType) alloc]init];
     @:return client;
 @:}
     }
@@ -95,9 +95,9 @@
 @:/**
 @: * The @(operation.TypeName) object to access its operations.
 @: */
-@:- (id<@(operation.TypeName)Protocol>) @(operation.Name) {
-    @: id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc] initWithService:self];
-    @: return op;
+@:- (id<@(operation.TypeName)Protocol>)@(operation.Name) {
+    @:id<@(operation.TypeName)Protocol> op = [[@(operation.TypeName) alloc]initWithService:self];
+    @:return op;
 @:}
 }
 

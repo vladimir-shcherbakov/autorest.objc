@@ -156,7 +156,6 @@ namespace AutoRest.ObjectiveC.Model
                 var declarations = LocalParameters
                     .Where(p => !p.IsConstant)
                     .Select(parameter =>
-                        //$"with{parameter.Name.ToPascalCase()} : ({parameter.ClientType.Name} *) {parameter.Name}") 
                         $"{parameter.ClientType.Name} *{parameter.Name} = [{parameter.ClientType.Name} new]")
                     .ToList();
 
@@ -607,8 +606,8 @@ namespace AutoRest.ObjectiveC.Model
         public virtual string ReturnTypeResponseName => ReturnTypeOc?.BodyClientType?.ServiceResponseVariant()?.Name;
 
         public virtual string CallbackParameterDeclaration => ReturnTypeResponseName == "void"
-            ? $"withCallback:(void(^)(AZOperationError*))callback"
-            : $"withCallback:(void(^)({ReturnTypeResponseName}*, AZOperationError*))callback";
+            ? $"withCallback:(void(^)(AZOperationError *))callback"
+            : $"withCallback:(void(^)({ReturnTypeResponseName} *, AZOperationError *))callback";
         
         public virtual string CallbackParameterInvocation => $"withCallback:callback";
 
