@@ -19,20 +19,20 @@
 {
     if (Model.GenerateConstructorForRequiredProperties) 
     {
-    @:- (id) init@(Model.RequiredPropertiesConstructorDeclaration) {
-        @:self = [super init];
-        @:if (self) {
-        foreach (var property in Model.Properties.Where(p => !p.IsConstant).Where(p => p.IsRequired || p.IsReadOnly)) {
-            @:_@(property.Name) = @property.Name;
-        }
-        foreach (var property in Model.Properties.Where(p => p.IsConstant)) {
-            @: // constants initialization
-            @:@(property.Name) = @(property.DefaultValue);
-        }
+@:- (id) init@(Model.RequiredPropertiesConstructorDeclaration) {
+    @:self = [super init];
+    @:if (self) {
+    foreach (var property in Model.Properties.Where(p => !p.IsConstant).Where(p => p.IsRequired || p.IsReadOnly)) {
+        @:_@(property.Name) = @property.Name;
+    }
+    foreach (var property in Model.Properties.Where(p => p.IsConstant)) {
+        @: // constants initialization
+        @:@(property.Name) = @(property.DefaultValue);
+    }
 
-        @:}
-        @:return self;
     @:}
+    @:return self;
+@:}
     }
 }
 

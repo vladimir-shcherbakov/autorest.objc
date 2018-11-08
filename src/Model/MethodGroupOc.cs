@@ -16,12 +16,13 @@ namespace AutoRest.ObjectiveC.Model
         public MethodGroupOc()
         {
             Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
-            TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");;
+            TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
         }
-//        public MethodGroupOc(string name) : base(name)
-//        {
-//            Name.OnGet += name1 => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");;
-//        }
+    //    public MethodGroupOc(string name) : base(name)
+    //    {
+    //        Name.OnGet += Core.Utilities.Extensions.ToCamelCase;
+    //         TypeName.OnGet += name => Settings.Instance?.Namespace + CodeNamer.Instance.GetTypeName($"{name}");
+    //    }
 
         [JsonIgnore]
         public string MethodGroupFullType => (CodeModel.Namespace.ToLowerInvariant()) + "." + TypeName;
@@ -68,11 +69,11 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var imports = new List<string> {"retrofit2.Retrofit"};
-                if (MethodGroupTypeString == TypeName)
-                {
-                    imports.Add(MethodGroupFullType);
-                }
+                var imports = new List<string> ();
+                // if (MethodGroupTypeString == TypeName)
+                // {
+                //     imports.Add(MethodGroupFullType);
+                // }
                 imports.AddRange(this.Methods
                     .OfType<MethodOc>()
                     .SelectMany(m => m.ImplImports)

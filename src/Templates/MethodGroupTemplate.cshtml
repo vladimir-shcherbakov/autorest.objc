@@ -12,6 +12,10 @@
 #import "@(Model.TypeName).h"
 #import "@(Model.Methods.Cast<MethodOc>().First().OperationErrorTypeName).h"
 #import "@((Model.Parent.CodeModel as CodeModelOc)?.ServiceClientServiceType).h"
+@foreach (var import in Model.ImplImports)
+{
+@:#import "@(import).h"
+}
 @EmptyLine
 
 /**

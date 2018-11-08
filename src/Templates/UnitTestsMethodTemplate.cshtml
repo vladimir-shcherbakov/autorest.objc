@@ -16,7 +16,7 @@
  *
 @foreach (var param in Model.LocalParameters.Where(p => !p.IsConstant))
 {
-@: * body parameter: @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value"))
+@: * parameter: @param.Name @(param.Documentation.Else("the " + param.ModelType.Name + " value"))
 }
  */
 @if (string.IsNullOrEmpty(Model.Group))
@@ -27,10 +27,8 @@
 
     foreach (var param in Model.LocalParameters)
     {
-    @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
+    @:@(param.ClientType.Name) *@(param.Name) = @(param.ActualDefaultValue);
     }
-    
-@*     @:@(Model.MethodBodyParameterCreationTestCase) *@
 
     @:[self.service @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
         
@@ -55,7 +53,7 @@ else
     
     foreach (var param in Model.LocalParameters)
     {
-    @:@(param.ClientType.Name)* @(param.Name) = @(param.ActualDefaultValue);
+    @:@(param.ClientType.Name) *@(param.Name) = @(param.ActualDefaultValue);
     }
 
     @:[op @(Model.Name)@(Model.MethodParameterInvocationTestCase) {
