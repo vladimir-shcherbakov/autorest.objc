@@ -35,16 +35,16 @@
     if (notRoParams.Any())
     {
         var decl = notRoParams
-            .Select(p=>$"{p.Name}:({p.ModelTypeName}*){p.Name}");
+            .Select(p=>$"with{p.Name.ToPascalCase()}:({p.ModelTypeName}*){p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
 
         var invoc = notRoParams
-            .Select(p=>$"{p.Name}:{p.Name}");
+            .Select(p=>$"with{p.Name.ToPascalCase()}:{p.Name}");
         var invocStr = string.Join(" ", invoc);
         var paramInvoc = char.ToUpper(invocStr[0]) + invocStr.Substring(1);
 
-@:- (instancetype)initWith@(paramDecl) {
+@:- (instancetype)init@(paramDecl) {
     @:self = [super init];
     @:if (self) {
         @:@baseUrlIntit;
@@ -62,8 +62,8 @@
     @:return self;
 @:}
 @EmptyLine
-@:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl) {
-    @:@(Model.ServiceClientServiceType) *client = [[@(Model.ServiceClientServiceType) alloc]initWith@(paramInvoc)];
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)create@(paramDecl) {
+    @:@(Model.ServiceClientServiceType) *client = [[@(Model.ServiceClientServiceType) alloc]init@(paramInvoc)];
     @:return client;
 @:}
     }

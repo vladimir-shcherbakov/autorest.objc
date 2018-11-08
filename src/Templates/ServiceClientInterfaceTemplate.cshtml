@@ -51,9 +51,9 @@
 /**
 The default base URL. @Model.BaseUrl
 */
-@@property (readonly) NSString *DEFAULT_BASE_URL;
-@@property (readonly) NSString *key;
-@@property (readonly) NSDictionary *specialHeaders;
+@@property(readonly)NSString *DEFAULT_BASE_URL;
+@@property(readonly)NSString *key;
+@@property(readonly)NSDictionary *specialHeaders;
 
 @foreach (var property in Model.Properties)
 {
@@ -71,10 +71,10 @@ The default base URL. @Model.BaseUrl
     if (notRoParams.Any())
     {
         var decl = notRoParams
-            .Select(p=>$"{p.Name}:({p.ModelTypeName}*){p.Name}");
+            .Select(p=>$"with{p.Name.ToPascalCase()}:({p.ModelTypeName}*){p.Name}");
         var declStr = string.Join(" ", decl);
         var paramDecl = char.ToUpper(declStr[0]) + declStr.Substring(1);
-@:+ (id<@(Model.ServiceClientServiceType)Protocol>)createWith@(paramDecl);
+@:+ (id<@(Model.ServiceClientServiceType)Protocol>)create@(paramDecl);
     }
     else
     {
