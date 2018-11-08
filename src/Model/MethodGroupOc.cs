@@ -69,11 +69,11 @@ namespace AutoRest.ObjectiveC.Model
         {
             get
             {
-                var imports = new List<string> {"retrofit2.Retrofit"};
-                if (MethodGroupTypeString == TypeName)
-                {
-                    imports.Add(MethodGroupFullType);
-                }
+                var imports = new List<string> ();
+                // if (MethodGroupTypeString == TypeName)
+                // {
+                //     imports.Add(MethodGroupFullType);
+                // }
                 imports.AddRange(this.Methods
                     .OfType<MethodOc>()
                     .SelectMany(m => m.ImplImports)

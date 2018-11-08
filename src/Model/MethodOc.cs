@@ -332,13 +332,13 @@ namespace AutoRest.ObjectiveC.Model
                 var compositeOutputParameter = transformation.OutputParameter.ModelType as CompositeType;
                 if (transformation.OutputParameter.IsRequired && compositeOutputParameter != null)
                 {
-                    builder.AppendLine("{0}* {1} = [{0} new];",
+                    builder.AppendLine("{0} *{1} = [{0} new];",
                         transformation.OutputParameter.ModelTypeName,
                         transformation.OutputParameter.Name);
                 }
                 else
                 {
-                    builder.AppendLine("{0}* {1} = nil;",
+                    builder.AppendLine("{0} *{1} = nil;",
                         transformation.OutputParameter.ModelTypeName,
                         transformation.OutputParameter.Name);
                 }
@@ -352,7 +352,7 @@ namespace AutoRest.ObjectiveC.Model
                 if (transformation.ParameterMappings.Any(m => !string.IsNullOrEmpty(m.OutputParameterProperty)) &&
                     compositeOutputParameter != null && !transformation.OutputParameter.IsRequired)
                 {
-                    builder.AppendLine("{0}* {1} = [{0} new];",
+                    builder.AppendLine("{0} *{1} = [{0} new];",
                         transformation.OutputParameter.Name,
                         transformation.OutputParameter.ModelType.Name);
                 }
@@ -406,7 +406,7 @@ namespace AutoRest.ObjectiveC.Model
             return string.Join(" || ",
                 transformation.ParameterMappings
                     .Where(m => !m.InputParameter.IsRequired)
-                    .Select(m => m.InputParameter.Name + " != null"));
+                    .Select(m => m.InputParameter.Name + " != nil"));
         }
 
         [JsonIgnore]
